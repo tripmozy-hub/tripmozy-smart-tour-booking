@@ -1,0 +1,16 @@
+{
+  "name": "tripmozy-smart-tour-booking",
+  "version": "1.0.0",
+  "description": "TripMozy Smart Tour & Holiday Package Marketplace",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.x"
+  },
+  "dependencies": {
+    "nodemailer": "^6.10.0"
+  }
+}

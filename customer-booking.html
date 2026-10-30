@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tour Offers &amp; Booking | TripMozy - Memories Begin With a Tour</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --navy: #0f172a;
+      --navy-light: #1e293b;
+      --accent: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 14px;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
+    .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-logo span { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .nav-btn {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    /* Live pulse badge */
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* Container */
+    .container { max-width: 1060px; margin: 0 auto; padding: 24px 20px; }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 40px;
+      right: 40px;
+      height: 2px;
+      background: var(--border);
+      z-index: 1;
+    }
+    .step-item {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      padding: 0 10px;
+    }
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .step-item.active .step-circle { background: var(--primary); color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.2); }
+    .step-item.completed .step-circle { background: var(--success); color: #fff; }
+    .step-label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    .step-item.active .step-label { color: var(--primary); }
+    .step-item.completed .step-label { color: var(--success); }
+
+    /* Summary Card */
+    .summary-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    .summary-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .ref-badge {
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #bfdbfe;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-offers  { background: #d1fae5; color: #065f46; }
+    .status-booked  { background: #eff6ff; color: #1e40af; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .sum-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .sum-val { font-size: 15px; font-weight: 700; margin-top: 2px; }
+    .sum-val.budget { color: var(--primary); font-size: 18px; }
+
+    /* Live Banner */
+    .live-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .live-banner-left { display: flex; align-items: center; gap: 12px; }
+    .live-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #bfdbfe;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .live-title { font-size: 14px; font-weight: 700; color: #1e3a8a; }
+    .live-sub { font-size: 12px; color: #3b82f6; }
+    .refresh-now-btn {
+      background: #fff;
+      border: 1px solid #bfdbfe;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .refresh-now-btn:hover { background: #dbeafe; }
+
+    /* Section Title */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .section-head h2 { font-size: 20px; font-weight: 800; color: var(--navy); }
+    .offer-count-chip {
+      background: var(--navy);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+
+    /* Offers Grid */
+    .offers-list { display: flex; flex-direction: column; gap: 18px; }
+
+    .offer-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 2px solid var(--border);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .offer-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .offer-card.highlight { border-color: var(--success); }
+
+    .offer-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #fafafa;
+    }
+    .hotel-name { font-size: 18px; font-weight: 800; color: var(--navy); }
+    .hotel-meta { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .stars { color: var(--accent); letter-spacing: 1px; }
+
+    .savings-badge {
+      background: #d1fae5;
+      color: #065f46;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .offer-body {
+      padding: 20px 22px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) { .offer-body { grid-template-columns: 1fr; } }
+
+    .offer-details { display: flex; flex-direction: column; gap: 10px; }
+    .room-name { font-size: 15px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 6px; }
+    .feature-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f1f5f9;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .policy-tag { font-size: 12px; color: #059669; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+    .offer-pricing-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    @media (max-width: 768px) { .offer-pricing-box { text-align: left; } }
+
+    .price-total { font-size: 26px; font-weight: 800; color: var(--navy); }
+    .price-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .price-gst { font-size: 12px; color: #64748b; margin-bottom: 12px; }
+
+    .book-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-family: inherit;
+      width: 100%;
+    }
+    .book-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    /* Empty state */
+    .empty-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 50px 24px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .empty-icon { font-size: 54px; margin-bottom: 12px; }
+    .empty-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .empty-desc { font-size: 14px; color: var(--text-muted); max-width: 440px; margin: 0 auto; }
+
+    /* Lookup form (if visited without ID) */
+    .lookup-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      max-width: 480px;
+      margin: 40px auto;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .lookup-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      margin: 14px 0;
+    }
+    .lookup-input:focus { outline: none; border-color: var(--primary); }
+
+    /* Checkout Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .checkout-modal {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+    .hold-banner {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #92400e;
+    }
+    .hold-timer { font-size: 16px; font-weight: 800; color: #b45309; }
+
+    .bill-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; }
+    .bill-row.total { font-size: 18px; font-weight: 800; color: var(--navy); border-top: 1.5px solid var(--border); margin-top: 8px; padding-top: 12px; }
+
+    .payment-option {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .payment-option:hover { border-color: var(--primary); background: #f8fafc; }
+    .payment-option.selected { border-color: var(--primary); background: #eff6ff; }
+
+    .split-option {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      background: #fff;
+    }
+    .split-option:hover { border-color: var(--primary); background: #f8fafc; }
+    .split-option.selected { border-color: var(--primary); background: #eff6ff; }
+
+    .confirm-btn {
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 16px;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .confirm-btn:hover { background: #059669; }
+
+    /* Confirmed Voucher Card */
+    .voucher-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      border: 2px solid #a7f3d0;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .voucher-header {
+      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+      color: #fff;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .voucher-body { padding: 28px 24px; }
+    .voucher-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+      background: #f8fafc;
+      padding: 18px;
+      border-radius: 12px;
+    }
+    .v-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .v-val { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+
+    /* ── Mobile Phone Browser Responsiveness ── */
+    @media (max-width: 768px) {
+      header { padding: 10px 14px; }
+      .header-inner { flex-wrap: wrap; gap: 8px; }
+      .brand-logo { font-size: 20px; }
+      .header-right { gap: 6px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
+      .live-badge { display: none; }
+      .nav-btn { padding: 6px 10px; font-size: 11px; }
+
+      .container { padding: 14px 10px 70px; margin: 10px auto; }
+      .request-summary-card { padding: 16px 14px; }
+      .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .offer-card { padding: 16px 14px; }
+      .offer-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .offer-body { grid-template-columns: 1fr; gap: 14px; }
+      .offer-pricing-box { text-align: left; }
+      .price-total { font-size: 24px; }
+
+      .modal-overlay { padding: 10px; }
+      .checkout-modal {
+        padding: 18px 14px;
+        border-radius: 14px;
+        max-width: 100%;
+        max-height: 92vh;
+      }
+      .bill-row { font-size: 13px; }
+      .bill-row.total { font-size: 16px; }
+      .payment-option, .split-option {
+        padding: 10px 12px;
+        font-size: 12px;
+        gap: 8px;
+      }
+      .confirm-btn {
+        padding: 13px;
+        font-size: 15px;
+      }
+      .voucher-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+      .voucher-body { padding: 18px 14px; }
+      input, select, textarea { font-size: 16px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <a href="/" class="brand">
+      <div class="brand-logo">Trip<span>Mozy</span></div>
+      <span style="font-size:12px; color:#94a3b8; border-left:1px solid #334155; padding-left:10px; margin-left:10px; font-weight:600;">Tour Offers</span>
+    </a>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>Live Tour Marketplace</span>
+      </div>
+      <a href="/smart-tour-booking" class="nav-btn">+ New Tour Request</a>
+      <span id="custAuthHeader">
+        <a href="/login" class="nav-btn" style="border-color:#fbbf24;color:#fbbf24;">Sign In</a>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="app">
+  <!-- Content injected via JavaScript -->
+  <div style="text-align:center; padding: 60px;">
+    <div class="live-spinner" style="margin: 0 auto 16px;"></div>
+    <div>Loading your stay request...</div>
+  </div>
+</div>
+
+<!-- Checkout / 15-Minute Hold Modal -->
+<div class="modal-overlay hidden" id="checkoutModal">
+  <div class="checkout-modal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="font-size:18px; font-weight:800; color:var(--navy);" id="modalHotelName">Confirm Tour Booking</h3>
+      <button onclick="closeCheckoutModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">&times;</button>
+    </div>
+
+    <!-- 15-minute countdown banner -->
+    <div class="hold-banner">
+      <span>🔒 Guaranteed 15-Minute Tour Package Hold</span>
+      <span class="hold-timer" id="holdCountdown">15:00</span>
+    </div>
+
+    <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px;">
+      <div style="font-size:13px; font-weight:700; color:var(--navy);" id="modalRoomType">Tour Package</div>
+      <div style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="modalStayDates">4 Days / 3 Nights</div>
+      <div style="font-size:12px; color:#059669; font-weight:600; margin-top:4px;" id="modalMealPlan">🍳 Meals &amp; Sightseeing Included · Free Cancellation</div>
+    </div>
+
+    <!-- Bill breakdown with 30% Advance + 5% GST & 70% Balance Split -->
+    <div style="background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px;">
+      <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Payment Breakdown &amp; Advance Terms</div>
+      <div class="bill-row">
+        <span style="color:var(--text-muted)">Total Tour Package Price:</span>
+        <span style="font-weight:700; font-size:15px; color:var(--navy);" id="billTourTotal">₹0</span>
+      </div>
+      <div class="bill-row">
+        <span style="color:var(--text-muted)">30% Tour Advance Deposit:</span>
+        <span style="font-weight:600;" id="billAdvanceBase">₹0</span>
+      </div>
+      <div class="bill-row">
+        <span style="color:var(--text-muted)">5% GST on Advance (Govt. of India):</span>
+        <span style="font-weight:600;" id="billAdvanceGst">₹0</span>
+      </div>
+      <div class="bill-row total" style="border-top:1.5px dashed #cbd5e1; padding-top:10px; margin-top:6px;">
+        <span style="font-weight:800; color:#065f46;">Payable Now to TripMozy Account:</span>
+        <span style="color:#059669; font-size:18px; font-weight:800;" id="billPayableNow">₹0</span>
+      </div>
+      <div class="bill-row" style="margin-top:6px; font-size:13px;">
+        <span style="color:#64748b;">Remaining 70% Balance Due:</span>
+        <span style="font-weight:700; color:var(--navy);" id="billRemainingBalance">₹0</span>
+      </div>
+    </div>
+
+    <!-- Escrow Protection Info Banner -->
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; font-size:12px; color:#1e40af; margin-bottom:16px; line-height:1.45;">
+      🛡️ <strong>TripMozy Safe Escrow Account:</strong> Your 30% advance (+ 5% GST) is securely collected into the <strong>TripMozy Account</strong> and protected until your tour commences.
+    </div>
+
+    <!-- Remaining 70% Balance Payment Preference -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--navy);">
+        How would you like to pay the remaining 70% balance (<span id="balanceAmountLabel" style="color:var(--primary)">₹0</span>)?
+      </div>
+      <div class="split-option selected" id="optPayHotel" onclick="selectRemainingOption('hotel_arrival')">
+        <input type="radio" name="remOption" id="radioHotel" checked style="accent-color:var(--primary); margin:0; cursor:pointer;">
+        <div>
+          <div style="font-weight:700; font-size:13px; color:var(--navy);">🏨 Option 1: Pay to Hotel / Driver upon Arrival (Recommended)</div>
+          <div style="font-size:11px; color:var(--text-muted);">Pay by Cash, UPI, or Card directly when you reach destination / tour check-in</div>
+        </div>
+      </div>
+      <div class="split-option" id="optPayTripmozy" onclick="selectRemainingOption('tripmozy_online')" style="margin-top:8px;">
+        <input type="radio" name="remOption" id="radioTripmozy" style="accent-color:var(--primary); margin:0; cursor:pointer;">
+        <div>
+          <div style="font-weight:700; font-size:13px; color:var(--navy);">🌐 Option 2: Pay Remaining 70% Online via TripMozy</div>
+          <div style="font-size:11px; color:var(--text-muted);">Pay securely online anytime before departure via your traveler portal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Simulation for Advance to TripMozy -->
+    <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--navy);">Select Advance Payment Method (Pay to TripMozy Account):</div>
+    <div class="payment-option selected" onclick="selectPayment(this, 'UPI_VERIFIED')">
+      <span>📱</span>
+      <div>
+        <div>UPI (Google Pay, PhonePe, Paytm, Any UPI)</div>
+        <div style="font-size:11px; color:var(--text-muted)">Instant confirmation directly to TripMozy Account</div>
+      </div>
+    </div>
+    <div class="payment-option" onclick="selectPayment(this, 'CARD_VERIFIED')">
+      <span>💳</span>
+      <div>
+        <div>Credit / Debit Card</div>
+        <div style="font-size:11px; color:var(--text-muted)">Visa, Mastercard, RuPay (Zero convenience fees)</div>
+      </div>
+    </div>
+    <div class="payment-option" onclick="selectPayment(this, 'NETBANKING')">
+      <span>🏛️</span>
+      <div>
+        <div>Net Banking</div>
+        <div style="font-size:11px; color:var(--text-muted)">All Major Indian Banks</div>
+      </div>
+    </div>
+
+    <button class="confirm-btn" id="confirmPayBtn" onclick="executeBookingConfirmation()">
+      <span>🔒 Pay Advance &amp; Confirm Tour Booking</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// =============================================================================
+// TripMozy Customer Booking & Live Offers Engine
+// =============================================================================
+
+let requestId = null;
+let requestData = null;
+let pollTimer = null;
+let countdownSec = 6;
+let tickerTimer = null;
+let activeHoldId = null;
+let activeHoldTimer = null;
+let selectedPaymentMethod = 'UPI_VERIFIED';
+
+// Initialize
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  requestId = params.get('id') || params.get('req') || window.location.pathname.split('/')[2];
+
+  if (!requestId || requestId === 'booking' || requestId === 'booking.html') {
+    requestId = localStorage.getItem('tm_latest_request_id');
+  }
+
+  if (!requestId) {
+    renderLookupScreen();
+    return;
+  }
+
+  await loadRequest();
+  startPolling();
+}
+
+// Fetch request + offers
+async function loadRequest() {
+  try {
+    const res = await fetch(`/api/requests/${requestId}`);
+    if (!res.ok) {
+      renderErrorScreen('Stay request not found. Please check your request reference.');
+      return;
+    }
+    const data = await res.json();
+    requestData = data;
+    renderPortal(data);
+  } catch (err) {
+    renderErrorScreen('Cannot connect to TripMozy servers: ' + err.message);
+  }
+}
+
+// Polling for live partner offers
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  if (tickerTimer) clearInterval(tickerTimer);
+
+  // Poll every 6s if not booked
+  pollTimer = setInterval(async () => {
+    if (requestData && requestData.request.status === 'booked') {
+      clearInterval(pollTimer);
+      return;
+    }
+    await loadRequest();
+    countdownSec = 6;
+  }, 6000);
+
+  // 1-second countdown ticker
+  countdownSec = 6;
+  tickerTimer = setInterval(() => {
+    countdownSec--;
+    const el = document.getElementById('tickerText');
+    if (el) {
+      el.textContent = countdownSec > 0 ? `Auto-checking in ${countdownSec}s...` : 'Checking now...';
+    }
+    if (countdownSec <= 0) countdownSec = 6;
+  }, 1000);
+}
+
+// Render the entire Customer Portal
+function renderPortal(data) {
+  const req = data.request;
+  const offers = data.offers || [];
+  const recips = data.recipients || [];
+  const isBooked = req.status === 'booked';
+  const hasOffers = offers.length > 0;
+
+  // Update Stepper
+  let step1 = 'completed', step2 = 'active', step3 = '', step4 = '';
+  if (hasOffers && !isBooked) { step2 = 'completed'; step3 = 'active'; }
+  if (isBooked) { step2 = 'completed'; step3 = 'completed'; step4 = 'completed'; }
+
+  const statusLabel = isBooked
+    ? '🎉 Tour Confirmed'
+    : hasOffers
+    ? `✅ ${offers.length} Tour Quote${offers.length > 1 ? 's' : ''} Received`
+    : '⏳ Awaiting Tour Operator Quotes';
+
+  const statusClass = isBooked ? 'status-booked' : hasOffers ? 'status-offers' : 'status-pending';
+
+  let html = `
+    <!-- Stepper -->
+    <div class="stepper">
+      <div class="step-item ${step1}">
+        <div class="step-circle">1</div>
+        <div class="step-label">Tour Requested</div>
+      </div>
+      <div class="step-item ${step2}">
+        <div class="step-circle">2</div>
+        <div class="step-label">Operators Quoting</div>
+      </div>
+      <div class="step-item ${step3}">
+        <div class="step-circle">3</div>
+        <div class="step-label">Compare &amp; Hold</div>
+      </div>
+      <div class="step-item ${step4}">
+        <div class="step-circle">4</div>
+        <div class="step-label">Confirmed</div>
+      </div>
+    </div>
+
+    <!-- Request Overview Card -->
+    <div class="summary-card">
+      <div class="summary-top">
+        <div>
+          <span class="ref-badge">${esc(req.request_reference)}</span>
+          <h1 style="font-size:22px; font-weight:800; margin-top:8px; color:var(--navy);">
+            Tour in ${esc(req.destination)}
+          </h1>
+        </div>
+        <div class="status-pill ${statusClass}">${statusLabel}</div>
+      </div>
+
+      <div class="summary-grid">
+        <div>
+          <div class="sum-label">Tour Dates</div>
+          <div class="sum-val">${fmtDate(req.check_in_date)} → ${fmtDate(req.check_out_date)}</div>
+          <div style="font-size:12px; color:var(--text-muted);">${req.nights + 1} Days / ${req.nights} Night${req.nights > 1 ? 's' : ''}</div>
+        </div>
+        <div>
+          <div class="sum-label">Travelers &amp; Setup</div>
+          <div class="sum-val">${req.num_adults} Adult${req.num_adults > 1 ? 's' : ''}${req.num_children > 0 ? ` · ${req.num_children} Child` : ''} · ${req.num_rooms} Vehicle / Room</div>
+        </div>
+        <div>
+          <div class="sum-label">Your Budget Target</div>
+          <div class="sum-val budget">₹${(req.total_budget_paise / 100).toLocaleString('en-IN')}</div>
+          <div style="font-size:11px; color:var(--text-muted);">Max total budget incl. GST</div>
+        </div>
+        <div>
+          <div class="sum-label">Operators Contacted</div>
+          <div class="sum-val">${recips.length} Verified Partners</div>
+          <div style="font-size:11px; color:#059669; font-weight:600;">Alerted via WhatsApp</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // If already booked, show confirmation voucher directly!
+  if (isBooked) {
+    html += renderConfirmedVoucher(req, offers, requestData.booking);
+    document.getElementById('app').innerHTML = html;
+    return;
+  }
+
+  // Live status ticker banner (if not yet booked)
+  html += `
+    <div class="live-banner">
+      <div class="live-banner-left">
+        <div class="live-spinner"></div>
+        <div>
+          <div class="live-title">${hasOffers ? `${offers.length} Verified Tour Operator(s) have sent packages!` : 'Tour operators are preparing custom packages now...'}</div>
+          <div class="live-sub">TripMozy WhatsApp Bot is coordinating with tour operators in ${esc(req.destination)}.</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
+        <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
+      </div>
+    </div>
+  `;
+
+  // Offers Section
+  html += `
+    <div class="section-head">
+      <h2>Received Tour Package Quotes</h2>
+      <span class="offer-count-chip">${offers.length} Available</span>
+    </div>
+  `;
+
+  if (offers.length === 0) {
+    html += `
+      <div class="empty-box">
+        <div class="empty-icon">🎒</div>
+        <div class="empty-title">Waiting for Tour Operator Quotes</div>
+        <div class="empty-desc">
+          We've dispatched your tour request to <strong>${recips.length} verified local tour operators</strong> in ${esc(req.destination)}.
+          As soon as operators respond with tailored package pricing and inclusions, their official quotes will appear here automatically.
+        </div>
+      </div>
+    `;
+  } else {
+    html += `<div class="offers-list">${offers.map(o => renderOfferCard(o, req)).join('')}</div>`;
+  }
+
+  document.getElementById('app').innerHTML = html;
+}
+
+// Single Offer Card
+function renderOfferCard(o, req) {
+  const totalINR = o.total_payable_paise / 100;
+  const budgetINR = req.total_budget_paise / 100;
+  const savings = Math.max(0, budgetINR - totalINR);
+  const stars = '★'.repeat(o.star_rating || 4) + '☆'.repeat(5 - (o.star_rating || 4));
+
+  const tp = o.tourPricing || {
+    totalTourINR: totalINR,
+    advanceBaseINR: Math.round(totalINR * 0.30),
+    advanceGstINR: Math.round(totalINR * 0.30 * 0.05),
+    payableNowINR: Math.round(totalINR * 0.30 * 1.05),
+    remainingBalanceINR: totalINR - Math.round(totalINR * 0.30)
+  };
+
+  return `
+    <div class="offer-card ${savings > 0 ? 'highlight' : ''}">
+      <div class="offer-header">
+        <div>
+          <div class="hotel-name">${esc(o.property_name)}</div>
+          <div class="hotel-meta">📍 ${esc(o.property_city)} · <span class="stars">${stars}</span> (${o.star_rating || 4}.0 Star Tour Operator)</div>
+        </div>
+        ${savings > 0 ? `<div class="savings-badge">✓ ₹${savings.toLocaleString('en-IN')} Below Your Budget</div>` : ''}
+      </div>
+
+      <div class="offer-body">
+        <div class="offer-details">
+          <div class="room-name">🎒 ${esc(o.room_type_name || 'All-Inclusive Tour Package')}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span class="feature-tag">🍳 ${esc(o.meal_plan || 'Meals &amp; Sightseeing Included')}</span>
+            <span class="feature-tag">🚗 Private Vehicle / Transfers</span>
+            <span class="feature-tag">🏨 Verified Accommodation</span>
+          </div>
+          <div class="policy-tag">
+            🛡️ ${esc(o.cancellation_terms || 'Free cancellation up to 48 hours before tour start')}
+          </div>
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 12px; margin-top:10px; font-size:12px;">
+            <div style="font-weight:700; color:#166534; margin-bottom:2px;">💳 Easy Payment Terms:</div>
+            <div style="color:#15803d;">Pay <strong>₹${tp.payableNowINR.toLocaleString('en-IN')} (30% Advance + 5% GST)</strong> to TripMozy to lock this tour.</div>
+            <div style="color:#15803d; margin-top:2px;">Remaining <strong>₹${tp.remainingBalanceINR.toLocaleString('en-IN')} (70%)</strong> can be paid on tour arrival or on TripMozy!</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">
+            ⏱️ Guaranteed quote valid for 4 hours from dispatch
+          </div>
+        </div>
+
+        <div class="offer-pricing-box">
+          <div>
+            <div class="price-total">₹${totalINR.toLocaleString('en-IN')}</div>
+            <div class="price-sub">Total tour price for ${o.total_nights + 1} Days / ${o.total_nights} Nights (${o.total_rooms} vehicle/setup)</div>
+            <div style="font-size:14px; font-weight:800; color:#059669; margin-top:6px;">
+              Payable Now: ₹${tp.payableNowINR.toLocaleString('en-IN')}
+            </div>
+            <div style="font-size:11px; color:#64748b; margin-top:2px;">
+              (30% Advance ₹${tp.advanceBaseINR.toLocaleString('en-IN')} + 5% GST ₹${tp.advanceGstINR.toLocaleString('en-IN')} to TripMozy)
+            </div>
+            <div style="font-size:11px; color:#64748b; margin-top:2px;">
+              Remaining ₹${tp.remainingBalanceINR.toLocaleString('en-IN')} due at hotel or online
+            </div>
+          </div>
+          <button class="book-btn" onclick="openCheckoutModal('${o.id}')">
+            <span>⚡ Book Tour (Pay ₹${tp.payableNowINR.toLocaleString('en-IN')})</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Checkout & 15-Minute Inventory Hold ──────────────────────────────────────
+async function openCheckoutModal(offerId) {
+  const offer = requestData.offers.find(x => x.id === offerId);
+  if (!offer) return;
+
+  // 1. Call API to lock inventory hold
+  const btn = event?.currentTarget;
+  if (btn) { btn.disabled = true; btn.innerHTML = '🔒 Holding Tour Package...'; }
+
+  try {
+    const res = await fetch(`/api/offers/${offerId}/hold`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerId: requestData.request.customer_id })
+    });
+    const holdRes = await res.json();
+
+    if (!res.ok || !holdRes.success) {
+      alert('Could not hold tour package: ' + (holdRes.message || 'Package unavailable'));
+      if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Book This Tour Package'; }
+      return;
+    }
+
+    activeHoldId = holdRes.holdId;
+
+    const totalINR = offer.total_payable_paise / 100;
+    const tp = offer.tourPricing || {
+      totalTourINR: totalINR,
+      advanceBaseINR: Math.round(totalINR * 0.30),
+      advanceGstINR: Math.round(totalINR * 0.30 * 0.05),
+      payableNowINR: Math.round(totalINR * 0.30 * 1.05),
+      remainingBalanceINR: totalINR - Math.round(totalINR * 0.30)
+    };
+
+    // Populate Modal
+    document.getElementById('modalHotelName').textContent = offer.property_name;
+    document.getElementById('modalRoomType').textContent = `🎒 ${offer.room_type_name || 'All-Inclusive Tour Package'}`;
+    document.getElementById('modalStayDates').textContent = `${requestData.request.nights + 1} Days / ${requestData.request.nights} Nights (${fmtDate(requestData.request.check_in_date)} - ${fmtDate(requestData.request.check_out_date)}) · ${requestData.request.num_rooms} Vehicle/Room`;
+    document.getElementById('modalMealPlan').textContent = `🍳 ${offer.meal_plan || 'Meals & Sightseeing Included'} · Free Cancellation`;
+
+    document.getElementById('billTourTotal').textContent = '₹' + tp.totalTourINR.toLocaleString('en-IN');
+    document.getElementById('billAdvanceBase').textContent = '₹' + tp.advanceBaseINR.toLocaleString('en-IN');
+    document.getElementById('billAdvanceGst').textContent = '₹' + tp.advanceGstINR.toLocaleString('en-IN');
+    document.getElementById('billPayableNow').textContent = '₹' + tp.payableNowINR.toLocaleString('en-IN');
+    document.getElementById('billRemainingBalance').textContent = '₹' + tp.remainingBalanceINR.toLocaleString('en-IN');
+    document.getElementById('balanceAmountLabel').textContent = '₹' + tp.remainingBalanceINR.toLocaleString('en-IN');
+
+    document.getElementById('confirmPayBtn').innerHTML = `<span>🔒 Pay Advance ₹${tp.payableNowINR.toLocaleString('en-IN')} to TripMozy &amp; Confirm Tour</span>`;
+
+    // Start 15-minute countdown clock
+    startHoldTimer(holdRes.expiresAt);
+
+    document.getElementById('checkoutModal').classList.remove('hidden');
+
+  } catch (err) {
+    alert('Network error while holding tour package: ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Book This Tour Package'; }
+  }
+}
+
+function closeCheckoutModal() {
+  document.getElementById('checkoutModal').classList.add('hidden');
+  if (activeHoldTimer) clearInterval(activeHoldTimer);
+}
+
+let selectedRemainingOption = 'hotel_arrival';
+
+function selectRemainingOption(opt) {
+  selectedRemainingOption = opt;
+  const optHotel = document.getElementById('optPayHotel');
+  const optTripmozy = document.getElementById('optPayTripmozy');
+  const radioHotel = document.getElementById('radioHotel');
+  const radioTripmozy = document.getElementById('radioTripmozy');
+  if (optHotel) optHotel.classList.toggle('selected', opt === 'hotel_arrival');
+  if (optTripmozy) optTripmozy.classList.toggle('selected', opt === 'tripmozy_online');
+  if (radioHotel) radioHotel.checked = (opt === 'hotel_arrival');
+  if (radioTripmozy) radioTripmozy.checked = (opt === 'tripmozy_online');
+}
+
+function selectPayment(el, method) {
+  document.querySelectorAll('.payment-option').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPaymentMethod = method;
+}
+
+function startHoldTimer(expiresAt) {
+  if (activeHoldTimer) clearInterval(activeHoldTimer);
+  const target = new Date(expiresAt).getTime();
+
+  activeHoldTimer = setInterval(() => {
+    const now = Date.now();
+    const diff = Math.max(0, target - now);
+    const mins = Math.floor(diff / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+
+    const el = document.getElementById('holdCountdown');
+    if (el) el.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+    if (diff <= 0) {
+      clearInterval(activeHoldTimer);
+      alert('Your 15-minute hold has expired. Please select the offer again.');
+      closeCheckoutModal();
+      loadRequest();
+    }
+  }, 1000);
+}
+
+// Confirm booking & finalize payment
+async function executeBookingConfirmation() {
+  if (!activeHoldId) return;
+
+  const btn = document.getElementById('confirmPayBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳ Processing Payment & Confirming...</span>';
+
+  try {
+    const res = await fetch('/api/bookings/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        holdId: activeHoldId,
+        customerId: requestData.request.customer_id,
+        paymentReference: `${selectedPaymentMethod}_${Date.now()}`,
+        remainingPaymentOption: selectedRemainingOption
+      })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      alert('Tour booking confirmation failed: ' + (result.error || 'Please try again'));
+      btn.disabled = false;
+      btn.innerHTML = '<span>🔒 Pay &amp; Confirm Tour Booking</span>';
+      return;
+    }
+
+    closeCheckoutModal();
+    // Reload to render voucher
+    await loadRequest();
+
+  } catch (err) {
+    alert('Payment error: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔒 Pay &amp; Confirm Tour Booking</span>';
+  }
+}
+
+// ── Confirmed Booking Voucher Card ───────────────────────────────────────────
+function renderConfirmedVoucher(req, offers, booking) {
+  const b = booking || (requestData && requestData.booking) || null;
+  const terms = b && b.terms_snapshot ? b.terms_snapshot : {};
+  const tourPricing = terms.tourPricing || (offers && offers[0] && offers[0].tourPricing) || null;
+  const totalTourINR = tourPricing ? tourPricing.totalTourINR : (b ? b.total_amount_paise / 100 : req.total_budget_paise / 100);
+  const advancePaidINR = tourPricing ? tourPricing.payableNowINR : Math.round(totalTourINR * 0.315);
+  const remainingBalanceINR = tourPricing ? tourPricing.remainingBalanceINR : Math.round(totalTourINR * 0.70);
+  const isOnlineOption = terms.remainingPaymentOption === 'tripmozy_online';
+
+  return `
+    <div class="voucher-card">
+      <div class="voucher-header">
+        <div style="font-size:48px; margin-bottom:8px;">🎉</div>
+        <h2 style="font-size:24px; font-weight:800; margin-bottom:6px;">Tour Booking Confirmed &amp; Guaranteed!</h2>
+        <div style="font-size:14px; opacity:0.9;">Your custom tour package is locked. An official confirmation voucher has been dispatched to your WhatsApp &amp; Email.</div>
+      </div>
+
+      <div class="voucher-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Tour Booking Reference ID</div>
+            <div style="font-size:20px; font-weight:800; color:var(--primary); font-family:monospace;">${esc(req.request_reference)}</div>
+          </div>
+          <button onclick="window.print()" style="background:#f1f5f9; border:1px solid var(--border); padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">
+            🖨️ Print / Save Tour Voucher
+          </button>
+        </div>
+
+        <div class="voucher-grid">
+          <div>
+            <div class="v-lbl">Lead Traveler</div>
+            <div class="v-val">${esc(req.guest_name)}</div>
+            <div style="font-size:12px; color:var(--text-muted);">${esc(req.guest_phone)} · ${esc(req.guest_email)}</div>
+          </div>
+          <div>
+            <div class="v-lbl">Tour Destination</div>
+            <div class="v-val">${esc(req.destination)}</div>
+          </div>
+          <div>
+            <div class="v-lbl">Tour Departure Date</div>
+            <div class="v-val">${fmtDate(req.check_in_date)} (Day 1)</div>
+          </div>
+          <div>
+            <div class="v-lbl">Tour Completion Date</div>
+            <div class="v-val">${fmtDate(req.check_out_date)} (Final Day)</div>
+          </div>
+          <div>
+            <div class="v-lbl">Duration &amp; Group Setup</div>
+            <div class="v-val">${req.nights + 1} Days / ${req.nights} Nights · ${req.num_adults} Adults · ${req.num_rooms} Vehicle</div>
+          </div>
+          <div>
+            <div class="v-lbl">Total Tour Package Price</div>
+            <div class="v-val" style="font-size:17px; font-weight:800; color:var(--navy);">₹${totalTourINR.toLocaleString('en-IN')}</div>
+          </div>
+          <div>
+            <div class="v-lbl">Advance Paid to TripMozy Account</div>
+            <div class="v-val" style="color:#059669; font-size:18px; font-weight:800;">₹${advancePaidINR.toLocaleString('en-IN')} (Paid &amp; Locked)</div>
+            <div style="font-size:11px; color:#166534; margin-top:2px;">30% Base Deposit + 5% GST Guaranteed</div>
+          </div>
+          <div>
+            <div class="v-lbl">Remaining 70% Balance Due</div>
+            <div class="v-val" style="color:var(--navy); font-size:17px; font-weight:800;">₹${remainingBalanceINR.toLocaleString('en-IN')}</div>
+            <div style="font-size:11px; color:#64748b; margin-top:2px;">${isOnlineOption ? '🌐 Scheduled to pay online via TripMozy before departure' : '🏨 Scheduled to pay to Hotel / Driver upon Arrival'}</div>
+          </div>
+        </div>
+
+        <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:16px; font-size:13px; color:#065f46; margin-bottom:20px; line-height:1.5;">
+          <strong>Tour Payment &amp; Instructions:</strong><br>
+          • <strong>TripMozy Advance Received:</strong> Your advance deposit of <strong>₹${advancePaidINR.toLocaleString('en-IN')}</strong> has been received in the official TripMozy Account. Your tour is locked.<br>
+          • <strong>Remaining 70% Balance:</strong> Balance of <strong>₹${remainingBalanceINR.toLocaleString('en-IN')}</strong> is scheduled to be paid <strong>${isOnlineOption ? 'online via TripMozy before tour departure' : 'directly to your local driver / tour operator upon arrival'}</strong>.<br>
+          • Please present a government-issued photo ID (Aadhaar, Passport, Voter ID) and this Tour Booking Reference (<strong>${esc(req.request_reference)}</strong>) to your driver upon tour commencement.
+        </div>
+
+        <div style="text-align:center;">
+          <a href="/smart-tour-booking" style="color:var(--primary); font-weight:700; font-size:14px; text-decoration:none;">
+            ← Plan Another Tour with TripMozy
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Lookup Screen (if accessed without ID) ──────────────────────────────────
+function renderLookupScreen() {
+  document.getElementById('app').innerHTML = `
+    <div class="lookup-card">
+      <div style="font-size:48px; margin-bottom:12px;">🔍</div>
+      <h2 style="font-size:22px; font-weight:800; color:var(--navy); margin-bottom:6px;">Track Your Tour Quotes</h2>
+      <p style="font-size:14px; color:var(--text-muted);">Enter your TripMozy Tour Reference (e.g. TM-REQ-20261028-XXXX) to view live quotes from verified tour operators.</p>
+      <input type="text" id="lookupInput" class="lookup-input" placeholder="TM-REQ-20261028-XXXX">
+      <button class="book-btn" onclick="doLookup()">
+        <span>View My Tour Offers</span>
+      </button>
+      <div style="margin-top:20px; font-size:13px;">
+        Don't have a tour request yet? <a href="/smart-tour-booking" style="color:var(--primary); font-weight:700;">Submit a tour request</a>
+      </div>
+    </div>
+  `;
+}
+
+async function doLookup() {
+  const val = document.getElementById('lookupInput').value.trim();
+  if (!val) return alert('Please enter your request reference');
+
+  // If reference, check if it's an ID or lookup
+  window.location.search = `?id=${val}`;
+}
+
+function renderErrorScreen(msg) {
+  document.getElementById('app').innerHTML = `
+    <div class="lookup-card">
+      <div style="font-size:44px; margin-bottom:12px;">⚠️</div>
+      <h2 style="font-size:20px; font-weight:800; color:var(--navy); margin-bottom:6px;">Notice</h2>
+      <p style="font-size:14px; color:var(--text-muted); margin-bottom:18px;">${esc(msg)}</p>
+      <a href="/smart-tour-booking" class="book-btn" style="text-decoration:none;">Create New Tour Request</a>
+    </div>
+  `;
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&amp;/g, '&').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(day, 10)} ${M[parseInt(m, 10) - 1]} ${y}`;
+}
+
+// Close modal on backdrop click
+document.getElementById('checkoutModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('checkoutModal')) closeCheckoutModal();
+});
+
+// Boot
+(function checkCustomerSession() {
+  try {
+    const raw = localStorage.getItem('tm_user_info');
+    const role = localStorage.getItem('tm_user_role');
+    if (raw && role === 'customer') {
+      const u = JSON.parse(raw);
+      const item = document.getElementById('custAuthHeader');
+      if (item) {
+        item.innerHTML = `<span style="font-size:12px;color:#cbd5e1;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.08);">👤 ${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:4px;">(Sign Out)</a>`;
+      }
+    }
+  } catch (_) {}
+})();
+
+function signOutCustomer() {
+  localStorage.removeItem('tm_session_token');
+  localStorage.removeItem('tm_user_role');
+  localStorage.removeItem('tm_user_info');
+  fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+    window.location.reload();
+  });
+}
+
+init();
+</script>
+</body>
+</html>

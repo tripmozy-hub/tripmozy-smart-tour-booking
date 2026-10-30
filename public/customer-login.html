@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Customer Login | TripMozy - Smart Tour Booking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --navy: #0f172a;
+      --accent: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --radius: 16px;
+      --shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 16px 24px;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
+    .brand-logo { font-size: 22px; font-weight: 800; }
+    .brand-logo span { color: var(--accent); }
+    .brand-tag { font-size: 11px; background: rgba(255,255,255,0.12); padding: 3px 8px; border-radius: 6px; color: #94a3b8; }
+    .nav-link { color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 600; }
+    .nav-link:hover { color: #fff; }
+
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 440px;
+      width: 100%;
+      padding: 36px 32px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .input-wrap { position: relative; }
+    input[type="text"], input[type="email"], input[type="tel"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px; /* Prevents iOS auto-zoom */
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* OTP Screen */
+    .step-2 { display: none; }
+    .otp-inputs { display: flex; gap: 6px; justify-content: center; margin: 20px 0; width: 100%; }
+    .otp-box {
+      width: clamp(38px, 12vw, 48px);
+      height: clamp(46px, 14vw, 54px);
+      text-align: center;
+      font-size: 20px;
+      font-weight: 800;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: monospace;
+    }
+
+    @media (max-width: 640px) {
+      .main-wrap { padding: 20px 14px; }
+      .login-card { padding: 24px 18px; border-radius: 14px; }
+      header { padding: 12px 16px; }
+      h1 { font-size: 22px; }
+      .subtitle { font-size: 13px; margin-bottom: 20px; }
+    }
+    .otp-box:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .test-pill {
+      background: #fef3c7;
+      border: 1px dashed #d97706;
+      color: #92400e;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin: 14px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .test-pill:hover { background: #fde68a; }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 14px;
+      display: inline-block;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-note a { color: var(--primary); text-decoration: none; font-weight: 700; }
+    .footer-note a:hover { text-decoration: underline; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+      z-index: 1000;
+      opacity: 0;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="/smart-tour-booking" class="brand">
+        <div class="brand-logo">Trip<span>Mozy</span></div>
+        <div class="brand-tag">Traveler Portal</div>
+      </a>
+      <div>
+        <a href="/smart-tour-booking" class="nav-link">← Back to Tours</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <div class="login-card">
+      
+      <!-- STEP 1: Enter Email or Phone -->
+      <div id="step1">
+        <div class="badge-pill">🎒 Traveler Sign In</div>
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Enter your mobile number or email to view your active tour requests, compare live operator quotes, and manage vouchers.</p>
+
+        <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
+          <div class="form-group">
+            <label for="identifier">Mobile Number or Email</label>
+            <input type="text" id="identifier" placeholder="e.g. +91 98765 43210 or name@gmail.com" required autofocus>
+          </div>
+          <button type="submit" class="btn" id="sendBtn">Send Verification Code</button>
+        </form>
+      </div>
+
+      <!-- STEP 2: Verify 6-digit OTP -->
+      <div id="step2" class="step-2">
+        <div class="badge-pill">🔐 Verification Code</div>
+        <h1>Enter 6-Digit Code</h1>
+        <p class="subtitle">We sent a verification code to <strong id="sentTarget">—</strong> via Email &amp; WhatsApp.</p>
+
+        <!-- Test helper badge for quick verification -->
+        <div id="testOtpPill" class="test-pill" onclick="autoFillTestCode()" style="display:none;">
+          <span>⚡ <strong>Quick Test Code:</strong> <span id="quickCode" style="font-family:monospace;font-weight:800;letter-spacing:1px;"></span></span>
+          <span style="text-decoration:underline;">Click to Auto-fill</span>
+        </div>
+
+        <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
+          <div class="form-group">
+            <input type="text" id="otpCode" placeholder="Enter 6-digit code" maxlength="6" style="text-align:center;font-size:24px;font-weight:800;letter-spacing:6px;font-family:monospace;" required>
+          </div>
+          <button type="submit" class="btn" id="verifyBtn">Verify &amp; Continue</button>
+        </form>
+
+        <div style="text-align:center;">
+          <button type="button" class="back-btn" onclick="backToStep1()">← Change phone or email</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentIdentifier = '';
+    let currentTestOtp = '';
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    async function handleSendOtp(e) {
+      e.preventDefault();
+      const input = document.getElementById('identifier').value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending code...';
+
+      try {
+        const res = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: input, role: 'customer' })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          currentIdentifier = data.identifier;
+          currentTestOtp = data.otpForTesting;
+
+          document.getElementById('sentTarget').textContent = input;
+          if (currentTestOtp) {
+            document.getElementById('quickCode').textContent = currentTestOtp;
+            document.getElementById('testOtpPill').style.display = 'flex';
+          }
+
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+          document.getElementById('otpCode').focus();
+          showToast('✅ ' + data.message);
+        } else {
+          showToast('⚠️ ' + (data.error || 'Could not send verification code'));
+        }
+      } catch (err) {
+        showToast('Network error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Verification Code';
+      }
+    }
+
+    function autoFillTestCode() {
+      if (currentTestOtp) {
+        document.getElementById('otpCode').value = currentTestOtp;
+        document.getElementById('verifyBtn').click();
+      }
+    }
+
+    async function handleVerifyOtp(e) {
+      e.preventDefault();
+      const code = document.getElementById('otpCode').value.trim();
+      if (!code || code.length !== 6) {
+        showToast('Please enter the 6-digit code');
+        return;
+      }
+
+      const btn = document.getElementById('verifyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            identifier: currentIdentifier,
+            otpCode: code,
+            role: 'customer'
+          })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          // Store session
+          localStorage.setItem('tm_session_token', data.sessionToken);
+          localStorage.setItem('tm_user_role', 'customer');
+          localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+
+          showToast('🎉 Login successful! Redirecting...');
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || '/booking';
+          }, 600);
+        } else {
+          showToast('❌ ' + (data.error || 'Invalid code'));
+        }
+      } catch (err) {
+        showToast('Network error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify & Continue';
+      }
+    }
+
+    function backToStep1() {
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step1').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

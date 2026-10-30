@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tour Operator Partner Sign In | TripMozy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --navy: #0f172a;
+      --navy-dark: #090d16;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #10b981;
+      --radius: 18px;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: radial-gradient(circle at top right, #1e3a8a 0%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
+    .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-logo span { color: var(--accent); }
+    .brand-badge {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .nav-link { color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; }
+    .nav-link:hover { color: #fff; }
+
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 460px;
+      width: 100%;
+      padding: 40px 36px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      color: #60a5fa;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+
+    .quick-fills {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quick-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip:hover {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--accent);
+      color: #fbbf24;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #cbd5e1; }
+    input[type="text"], input[type="email"], input[type="tel"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px; /* Prevents iOS auto-zoom */
+      font-family: inherit;
+      color: #fff;
+      transition: all 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Step 2 */
+    .step-2 { display: none; }
+    .test-pill {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .test-pill:hover { background: rgba(245, 158, 11, 0.2); }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 16px;
+      display: inline-block;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    .back-btn:hover { color: #fff; }
+
+    @media (max-width: 640px) {
+      .main-wrap { padding: 20px 14px; }
+      .login-card { padding: 24px 18px; border-radius: 14px; }
+      header { padding: 12px 16px; }
+      h1 { font-size: 22px; }
+      .subtitle { font-size: 13px; margin-bottom: 20px; }
+      .chip { padding: 6px 12px; font-size: 12px; }
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-note a { color: var(--accent); text-decoration: none; font-weight: 700; }
+    .footer-note a:hover { text-decoration: underline; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0284c7;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transition: all 0.3s;
+      z-index: 1000;
+      opacity: 0;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="/partner/dashboard" class="brand">
+        <div class="brand-logo">Trip<span>Mozy</span></div>
+        <div class="brand-badge">TOUR OPERATOR PORTAL</div>
+      </a>
+      <div>
+        <a href="/smart-tour-booking" class="nav-link">← Traveler Portal</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <div class="login-card">
+      
+      <!-- STEP 1: Enter Partner Phone or Email -->
+      <div id="step1">
+        <div class="badge-pill">🎒 Operator Portal Access</div>
+        <h1>Partner Sign In</h1>
+        <p class="subtitle">Enter your registered operator phone number or partner email to access active customer requests, send quotes, and manage bookings.</p>
+
+        <!-- Quick 1-click test credentials -->
+        <div class="quick-fills">
+          <div class="quick-label">⚡ Verified Operator Accounts</div>
+          <div class="quick-chips">
+            <span class="chip" onclick="fillCred('+917478290140')">📞 +91 74782 90140</span>
+            <span class="chip" onclick="fillCred('tripmozy@gmail.com')">✉️ tripmozy@gmail.com</span>
+          </div>
+        </div>
+
+        <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
+          <div class="form-group">
+            <label for="identifier">Registered Phone or Partner Email</label>
+            <input type="text" id="identifier" placeholder="e.g. +91 74782 90140 or tripmozy@gmail.com" value="+917478290140" required autofocus>
+          </div>
+          <button type="submit" class="btn" id="sendBtn">Send Partner Verification Code</button>
+        </form>
+
+        <div class="footer-note">
+          Are you a traveler? <a href="/customer/login">Sign in to Customer Portal</a>
+        </div>
+      </div>
+
+      <!-- STEP 2: Verify 6-digit OTP -->
+      <div id="step2" class="step-2">
+        <div class="badge-pill">🔐 Partner Verification</div>
+        <h1>Enter 6-Digit Code</h1>
+        <p class="subtitle">Dispatched code to <strong id="sentTarget" style="color:#fff;">—</strong> via registered WhatsApp &amp; Email.</p>
+
+        <!-- Test helper badge for quick verification -->
+        <div id="testOtpPill" class="test-pill" onclick="autoFillTestCode()" style="display:none;">
+          <span>⚡ <strong>Operator Test OTP:</strong> <span id="quickCode" style="font-family:monospace;font-weight:800;letter-spacing:1px;font-size:15px;"></span></span>
+          <span style="text-decoration:underline;">Click to Auto-fill</span>
+        </div>
+
+        <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
+          <div class="form-group">
+            <input type="text" id="otpCode" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="Enter 6-digit code" maxlength="6" style="text-align:center;font-size:26px;font-weight:800;letter-spacing:8px;font-family:monospace;background:#0f172a;color:#fbbf24;" required>
+          </div>
+          <button type="submit" class="btn" id="verifyBtn">Verify &amp; Open Partner Dashboard</button>
+        </form>
+
+        <div style="text-align:center;">
+          <button type="button" class="back-btn" onclick="backToStep1()">← Change phone or email</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentIdentifier = '';
+    let currentTestOtp = '';
+
+    function fillCred(val) {
+      document.getElementById('identifier').value = val;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    async function handleSendOtp(e) {
+      e.preventDefault();
+      const input = document.getElementById('identifier').value.trim();
+      if (!input) return;
+
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending code...';
+
+      try {
+        const res = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: input, role: 'vendor' })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          currentIdentifier = data.identifier;
+          currentTestOtp = data.otpForTesting;
+
+          document.getElementById('sentTarget').textContent = input;
+          if (currentTestOtp) {
+            document.getElementById('quickCode').textContent = currentTestOtp;
+            document.getElementById('testOtpPill').style.display = 'flex';
+          }
+
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+          document.getElementById('otpCode').focus();
+          showToast('✅ ' + data.message);
+        } else {
+          showToast('⚠️ ' + (data.error || 'Could not send verification code'));
+        }
+      } catch (err) {
+        showToast('Network error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Partner Verification Code';
+      }
+    }
+
+    function autoFillTestCode() {
+      if (currentTestOtp) {
+        document.getElementById('otpCode').value = currentTestOtp;
+        document.getElementById('verifyBtn').click();
+      }
+    }
+
+    async function handleVerifyOtp(e) {
+      e.preventDefault();
+      const code = document.getElementById('otpCode').value.trim();
+      if (!code || code.length !== 6) {
+        showToast('Please enter the 6-digit code');
+        return;
+      }
+
+      const btn = document.getElementById('verifyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying partner code...';
+
+      try {
+        const res = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            identifier: currentIdentifier,
+            otpCode: code,
+            role: 'vendor'
+          })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          // Store session & vendorId
+          localStorage.setItem('tm_session_token', data.sessionToken);
+          localStorage.setItem('tm_user_role', 'vendor');
+          localStorage.setItem('tm_vendor_id', data.vendor.id);
+          localStorage.setItem('tm_vendor_info', JSON.stringify(data.vendor));
+
+          showToast('🎉 Partner verified! Opening dashboard...');
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || `/partner/dashboard?vendorId=${data.vendor.id}`;
+          }, 600);
+        } else {
+          showToast('❌ ' + (data.error || 'Invalid code'));
+        }
+      } catch (err) {
+        showToast('Network error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify & Open Partner Dashboard';
+      }
+    }
+
+    function backToStep1() {
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step1').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

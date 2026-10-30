@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tour Operator Dashboard | TripMozy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --navy: #0f172a;
+      --accent: #f59e0b;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(15,23,42,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
+    /* ── Header ── */
+    header { background: var(--navy); color: #fff; padding: 0 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+    .header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 62px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
+    .brand-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-logo span { color: var(--accent); }
+    .brand-badge { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); color: var(--accent); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .vendor-name-display { font-size: 13px; font-weight: 700; color: #fff; }
+    .vendor-status-display { font-size: 11px; color: #94a3b8; }
+    .refresh-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: background .2s; font-family: inherit; }
+    .refresh-btn:hover { background: rgba(255,255,255,.2); }
+    .live-dot { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+    .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* ── Page Nav Tabs (the "pages") ── */
+    .page-nav { background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 62px; z-index: 90; }
+    .page-nav-inner { max-width: 1280px; margin: 0 auto; display: flex; padding: 0 24px; gap: 0; }
+    .page-tab {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 22px; border: none; background: transparent;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: color .18s, border-color .18s;
+      position: relative; white-space: nowrap;
+    }
+    .page-tab:hover { color: var(--text); }
+    .page-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-icon { font-size: 16px; }
+    .tab-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 22px; height: 22px; padding: 0 6px;
+      border-radius: 11px; font-size: 11px; font-weight: 800;
+      background: #f1f5f9; color: var(--text-muted);
+      transition: background .2s, color .2s;
+    }
+    .page-tab.active .tab-count { background: #dbeafe; color: var(--primary); }
+    .page-tab[data-page="pending"].active .tab-count { background: #fef3c7; color: #92400e; }
+    .page-tab[data-page="accepted"].active .tab-count { background: #d1fae5; color: #065f46; }
+    .page-tab[data-page="rejected"].active .tab-count { background: #fee2e2; color: #991b1b; }
+
+    /* ── Container ── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 28px 24px 80px; }
+
+    /* ── Stats Bar ── */
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border-left: 4px solid var(--border); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(15,23,42,.12); }
+    .stat-card.pending  { border-left-color: var(--warning); }
+    .stat-card.accepted { border-left-color: var(--success); }
+    .stat-card.rejected { border-left-color: var(--danger); }
+    .stat-card.all      { border-left-color: var(--primary); }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .stat-value { font-size: 30px; font-weight: 800; }
+
+    /* ── Page Header ── */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .page-title { font-size: 18px; font-weight: 700; }
+    .page-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .section-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .section-badge.pending  { background: #fef3c7; color: #92400e; }
+    .section-badge.accepted { background: #d1fae5; color: #065f46; }
+    .section-badge.rejected { background: #fee2e2; color: #991b1b; }
+    .section-badge.all      { background: #eff6ff; color: #1d4ed8; }
+
+    /* ── Cards ── */
+    .requests-grid { display: flex; flex-direction: column; gap: 18px; }
+
+    .request-card {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform .15s, opacity .3s, max-height .4s;
+    }
+    .request-card:hover { transform: translateY(-2px); }
+    .request-card.removing {
+      opacity: 0; transform: translateX(40px) scale(.97);
+      max-height: 0 !important; margin: 0; overflow: hidden;
+      border: none; box-shadow: none;
+      transition: opacity .35s ease, transform .35s ease, max-height .4s ease .1s, margin .4s ease .1s;
+    }
+
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+    .request-ref { font-size: 12px; font-weight: 700; color: var(--primary); font-family: monospace; margin-bottom: 4px; }
+    .prop-name { font-size: 16px; font-weight: 700; }
+    .prop-loc   { font-size: 13px; color: var(--text-muted); }
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-pending  { background: #fef3c7; color: #92400e; }
+    .badge-accepted { background: #d1fae5; color: #065f46; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; }
+    .badge-expired  { background: #f1f5f9; color: #64748b; }
+    .countdown { font-size: 11px; font-weight: 700; color: #ef4444; }
+    .countdown.safe { color: var(--success); }
+
+    .card-body { padding: 18px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:640px){ .card-body { grid-template-columns: 1fr; } }
+
+    .detail-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+    .detail-value { font-size: 14px; font-weight: 600; }
+    .detail-value.big { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .detail-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .fac-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .fac-chip { background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+    .card-footer { padding: 14px 22px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    /* ── Accepted / Rejected footer info ── */
+    .outcome-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: 10px; width: 100%;
+      font-size: 13px; font-weight: 600;
+    }
+    .outcome-banner.accepted { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .outcome-banner.rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .outcome-icon { font-size: 20px; }
+    .outcome-text { display: flex; flex-direction: column; gap: 2px; }
+    .outcome-title { font-weight: 700; }
+    .outcome-sub { font-size: 12px; font-weight: 500; opacity: .8; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all .18s; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-accept { background: var(--success); color: #fff; }
+    .btn-accept:hover:not(:disabled) { background: #059669; transform: translateY(-1px); }
+    .btn-reject { background: #fff; color: var(--danger); border: 2px solid var(--danger); }
+    .btn-reject:hover:not(:disabled) { background: var(--danger); color: #fff; }
+    .btn-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+
+    /* ── Empty / Loading / Error ── */
+    .empty-state { text-align: center; padding: 80px 32px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .empty-icon  { font-size: 56px; margin-bottom: 14px; }
+    .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .empty-desc  { font-size: 14px; color: var(--text-muted); max-width: 380px; margin: 0 auto 18px; }
+    .empty-cta   { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--primary); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; }
+    .loading-state { text-align: center; padding: 60px; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 14px; }
+    .error-banner { background: #fee2e2; border: 1px solid #fca5a5; border-radius: var(--radius); padding: 18px 20px; color: #991b1b; font-weight: 600; }
+
+    /* ── Reject Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+    .modal-overlay.hidden { display: none; }
+    .modal { background: #fff; border-radius: 16px; padding: 28px; max-width: 460px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,.25); }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .modal-ref { font-size: 12px; color: var(--text-muted); font-family: monospace; margin-bottom: 20px; }
+    .form-label { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: block; color: var(--text); }
+    .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 14px; }
+    .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+    .btn-cancel  { background: #f1f5f9; color: var(--text-muted); }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-do-reject { background: var(--danger); color: #fff; }
+    .btn-do-reject:hover { background: #dc2626; }
+
+    /* ── Refresh countdown chip ── */
+    .refresh-chip { display: flex; align-items: center; gap: 7px; padding: 6px 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 20px; font-size: 11px; color: #94a3b8; }
+
+    /* ── Mobile Phone Browser Responsiveness ── */
+    @media (max-width: 768px) {
+      header { padding: 0 12px; }
+      .header-inner { height: auto; min-height: 56px; padding: 8px 0; flex-wrap: wrap; gap: 6px; }
+      .brand-logo { font-size: 19px; }
+      .brand-badge { font-size: 10px; padding: 2px 6px; }
+      .header-right { gap: 6px; flex-wrap: wrap; }
+      .refresh-chip { display: none; }
+      #vendorContactMeta { display: none; }
+      .vendor-name-display { font-size: 12px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .vendor-status-display { display: none; }
+      .refresh-btn { padding: 6px 10px; font-size: 12px; }
+
+      .page-nav {
+        top: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .page-nav::-webkit-scrollbar { display: none; }
+      .page-nav-inner {
+        width: max-content;
+        min-width: 100%;
+        padding: 0 8px;
+      }
+      .page-tab {
+        padding: 12px 14px;
+        font-size: 13px;
+        gap: 6px;
+      }
+      .tab-icon { font-size: 14px; }
+
+      .container { padding: 14px 10px 80px; }
+
+      .stats-bar {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .stat-card {
+        padding: 12px 14px;
+        border-radius: 10px;
+      }
+      .stat-label { font-size: 10px; margin-bottom: 2px; }
+      .stat-value { font-size: 22px; }
+
+      .card-header { padding: 14px 16px 10px; }
+      .card-body { padding: 14px 16px; gap: 12px; grid-template-columns: 1fr; }
+      .card-footer { padding: 12px 14px; }
+
+      .btn {
+        padding: 11px 16px;
+        font-size: 13px;
+      }
+
+      .modal {
+        padding: 20px 16px;
+        border-radius: 14px;
+        max-width: 95vw;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+      .form-select, .form-textarea, input[type="text"], input[type="email"], input[type="number"] {
+        font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Reject Modal -->
+<div class="modal-overlay hidden" id="rejectModal">
+  <div class="modal">
+    <div class="modal-title">❌ Decline Request</div>
+    <div class="modal-ref" id="modalRef">—</div>
+    <label class="form-label">Reason *</label>
+    <select class="form-select" id="rejectReason">
+      <option value="unavailable">Vehicles / guides unavailable for these dates</option>
+      <option value="no_suitable_room">No suitable tour package</option>
+      <option value="over_budget">Traveler budget too low</option>
+      <option value="facilities_mismatch">Inclusions mismatch</option>
+      <option value="other">Other</option>
+    </select>
+    <label class="form-label">Additional note (optional)</label>
+    <textarea class="form-textarea" id="rejectNote" rows="3" placeholder="e.g. Fully booked for the season…"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeRejectModal()">Cancel</button>
+      <button class="btn btn-do-reject" onclick="confirmReject()">Confirm Decline</button>
+    </div>
+  </div>
+</div>
+
+<!-- Operator Contact Settings Modal -->
+<div class="modal-overlay hidden" id="contactModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ Operator Contact Settings</div>
+    <div class="modal-ref">Configure phone &amp; email for WhatsApp alerts and main email notifications</div>
+    
+    <label class="form-label">WhatsApp Contact Number *</label>
+    <input type="text" class="form-select" id="settingsPhone" placeholder="e.g. +91 74782 90140">
+    <div style="font-size:11px;color:var(--text-muted);margin:-10px 0 14px;">Used to dispatch real-time WhatsApp tour requests and 1-click action links.</div>
+
+    <label class="form-label">Notification Email Address *</label>
+    <input type="email" class="form-select" id="settingsEmail" placeholder="e.g. tripmozy@gmail.com">
+    <div style="font-size:11px;color:var(--text-muted);margin:-10px 0 14px;">Used to receive official tour request dispatches and booking confirmation vouchers.</div>
+
+    <label class="form-label">Business Name</label>
+    <input type="text" class="form-select" id="settingsBusinessName" placeholder="Operator name">
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeContactSettingsModal()">Cancel</button>
+      <button class="btn btn-accept" onclick="saveContactSettings(this)">💾 Save Contact Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <a href="/partner/dashboard" class="brand">
+      <div class="brand-logo">Trip<span>Mozy</span></div>
+      <div class="brand-badge">TOUR OPERATOR PORTAL</div>
+    </a>
+    <div class="header-right">
+      <div class="refresh-chip">
+        <div class="pulse"></div>
+        <span id="countdown">Auto-refresh in 30s</span>
+      </div>
+      <div style="text-align:right">
+        <div class="vendor-name-display" id="vendorName">Loading…</div>
+        <div class="vendor-status-display" id="vendorMeta">Verified Partner ✓</div>
+        <div style="font-size:11px;color:#cbd5e1;margin-top:2px;" id="vendorContactMeta">📞 <span id="vPhone">...</span> · ✉️ <span id="vEmail">...</span></div>
+      </div>
+      <button class="refresh-btn" onclick="openContactSettingsModal()" title="Update Notification Contacts">⚙️ Contacts</button>
+      <button class="refresh-btn" onclick="loadDashboard()">🔄</button>
+      <button class="refresh-btn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.4);color:#fca5a5;" onclick="logout()">🚪 Sign Out</button>
+    </div>
+  </div>
+</header>
+
+<!-- Page Navigation Tabs -->
+<nav class="page-nav">
+  <div class="page-nav-inner">
+    <button class="page-tab active" data-page="pending" onclick="switchPage('pending')">
+      <span class="tab-icon">⏳</span> Pending
+      <span class="tab-count" id="cnt-pending">0</span>
+    </button>
+    <button class="page-tab" data-page="accepted" onclick="switchPage('accepted')">
+      <span class="tab-icon">✅</span> Accepted
+      <span class="tab-count" id="cnt-accepted">0</span>
+    </button>
+    <button class="page-tab" data-page="rejected" onclick="switchPage('rejected')">
+      <span class="tab-icon">❌</span> Declined
+      <span class="tab-count" id="cnt-rejected">0</span>
+    </button>
+    <button class="page-tab" data-page="all" onclick="switchPage('all')">
+      <span class="tab-icon">📋</span> All Requests
+      <span class="tab-count" id="cnt-all">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+
+  <!-- Stats Bar (clickable → switches page) -->
+  <div class="stats-bar">
+    <div class="stat-card pending"  onclick="switchPage('pending')"  title="View pending requests">
+      <div class="stat-label">⏳ Awaiting Response</div>
+      <div class="stat-value" id="s-pending">—</div>
+    </div>
+    <div class="stat-card accepted" onclick="switchPage('accepted')" title="View accepted requests">
+      <div class="stat-label">✅ Offers Sent</div>
+      <div class="stat-value" id="s-accepted">—</div>
+    </div>
+    <div class="stat-card rejected" onclick="switchPage('rejected')" title="View declined requests">
+      <div class="stat-label">❌ Declined</div>
+      <div class="stat-value" id="s-rejected">—</div>
+    </div>
+    <div class="stat-card all" onclick="switchPage('all')" title="View all requests">
+      <div class="stat-label">📋 Total Received</div>
+      <div class="stat-value" id="s-all">—</div>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title" id="pageTitle">Pending Requests</div>
+      <div class="page-meta" id="pageMeta">Loading…</div>
+    </div>
+    <span class="section-badge pending" id="pageBadge">⏳ Awaiting Response</span>
+  </div>
+
+  <!-- Cards -->
+  <div id="cardsArea">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div style="color:var(--text-muted);font-size:14px">Loading requests from database…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =============================================================================
+// TripMozy Partner Dashboard — Page-based navigation
+// =============================================================================
+
+let vendorId       = null;
+let allRequests    = [];
+let activePage     = 'pending';   // default → pending only
+let rejectTarget   = null;
+let autoTimer      = null;
+let cdTimer        = null;
+let cdSec          = 30;
+
+// ─── Page config ─────────────────────────────────────────────────────────────
+const PAGE_CONFIG = {
+  pending:  { title: 'Pending Tour Requests',  badge: '⏳ Awaiting Response', badgeCls: 'pending',  emptyIcon: '📭', emptyTitle: 'No pending tour requests', emptyDesc: 'All clear! When travelers submit tour requests matching your destination, they will appear here.' },
+  accepted: { title: 'Accepted Tour Quotes',   badge: '✅ Quotes Sent',       badgeCls: 'accepted', emptyIcon: '🤝', emptyTitle: 'No accepted tour quotes yet', emptyDesc: 'Quotes you send to travelers will move here. Start accepting pending requests to send quotes.' },
+  rejected: { title: 'Declined Tour Requests', badge: '❌ Declined',          badgeCls: 'rejected', emptyIcon: '📁', emptyTitle: 'No declined requests', emptyDesc: 'Requests you decline will be archived here for your records.' },
+  all:      { title: 'All Tour Requests',      badge: '📋 All',               badgeCls: 'all',      emptyIcon: '📂', emptyTitle: 'No tour requests received', emptyDesc: 'No tour requests have been dispatched to your packages yet.' }
+};
+
+let currentVendorData = null;
+
+// ─── Boot ────────────────────────────────────────────────────────────────────
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  vendorId = params.get('vendorId') || localStorage.getItem('tm_vendor_id') || '30913fc5-870f-44a9-a077-99a5bfbd9f6e';
+
+  if (!vendorId) {
+    window.location.href = '/partner/login';
+    return;
+  }
+
+  await loadVendorInfo();
+  await loadDashboard();
+  startAutoRefresh();
+}
+
+// ─── Vendor info ─────────────────────────────────────────────────────────────
+async function loadVendorInfo() {
+  try {
+    const r = await fetch(`/api/vendor/info?vendorId=${vendorId}`);
+    const d = await r.json();
+    if (d.vendor) {
+      currentVendorData = d.vendor;
+      document.getElementById('vendorName').textContent = d.vendor.business_name;
+      document.getElementById('vendorMeta').textContent =
+        `✓ ${d.properties.length} propert${d.properties.length === 1 ? 'y' : 'ies'} · ${d.vendor.verification_status}`;
+      document.getElementById('vPhone').textContent = d.vendor.contact_phone || 'None';
+      document.getElementById('vEmail').textContent = d.vendor.contact_email || 'None';
+    }
+  } catch (_) {}
+}
+
+// ─── Contact Settings Modal ──────────────────────────────────────────────────
+function openContactSettingsModal() {
+  if (currentVendorData) {
+    document.getElementById('settingsPhone').value = currentVendorData.contact_phone || '';
+    document.getElementById('settingsEmail').value = currentVendorData.contact_email || '';
+    document.getElementById('settingsBusinessName').value = currentVendorData.business_name || '';
+  }
+  document.getElementById('contactModal').classList.remove('hidden');
+}
+function closeContactSettingsModal() {
+  document.getElementById('contactModal').classList.add('hidden');
+}
+async function saveContactSettings(btn) {
+  const contactPhone = document.getElementById('settingsPhone').value.trim();
+  const contactEmail = document.getElementById('settingsEmail').value.trim();
+  const businessName = document.getElementById('settingsBusinessName').value.trim();
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="btn-spinner"></span> Saving…`;
+
+  try {
+    const res = await fetch('/api/vendor/profile/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vendorId, contactPhone, contactEmail, businessName })
+    });
+    const d = await res.json();
+    if (res.ok && d.success) {
+      currentVendorData = d.vendor;
+      document.getElementById('vendorName').textContent = d.vendor.business_name;
+      document.getElementById('vPhone').textContent = d.vendor.contact_phone;
+      document.getElementById('vEmail').textContent = d.vendor.contact_email;
+      closeContactSettingsModal();
+      showToast('✅ Contact settings updated! WhatsApp & Email alerts updated.', 'success');
+    } else {
+      showToast('⚠️ ' + (d.error || 'Could not update settings'), 'error');
+    }
+  } catch (err) {
+    showToast('Network error: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `💾 Save Contact Settings`;
+  }
+}
+
+// ─── Sign Out ─────────────────────────────────────────────────────────────────
+function logout() {
+  localStorage.removeItem('tm_vendor_id');
+  localStorage.removeItem('tm_session_token');
+  localStorage.removeItem('tm_vendor_info');
+  fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+    window.location.href = '/partner/login';
+  });
+}
+
+// ─── Load from API ───────────────────────────────────────────────────────────
+async function loadDashboard() {
+  if (!vendorId) return;
+  try {
+    const r = await fetch(`/api/vendor/requests?vendorId=${vendorId}`);
+    if (!r.ok) { const e = await r.json().catch(() => ({})); showError(`API Error: ${e.error || r.statusText}`); return; }
+    const d = await r.json();
+    allRequests = d.requests || [];
+    updateCounts();
+    renderPage();
+    document.getElementById('pageMeta').textContent =
+      `Last updated ${new Date().toLocaleTimeString('en-IN')}`;
+  } catch (e) { showError(`Cannot reach server: ${e.message}`); }
+  resetCountdown();
+}
+
+// ─── Counts + tab badges ─────────────────────────────────────────────────────
+function updateCounts() {
+  const now = new Date();
+  let p = 0, a = 0, rj = 0;
+  allRequests.forEach(r => {
+    if      (r.response_status === 'accepted') a++;
+    else if (r.response_status === 'rejected') rj++;
+    else if (new Date(r.recipient_expires_at) >= now && r.request_status !== 'booked') p++;
+  });
+  const total = allRequests.length;
+
+  // Tab counts
+  document.getElementById('cnt-pending').textContent  = p;
+  document.getElementById('cnt-accepted').textContent = a;
+  document.getElementById('cnt-rejected').textContent = rj;
+  document.getElementById('cnt-all').textContent      = total;
+
+  // Stat cards
+  document.getElementById('s-pending').textContent  = p;
+  document.getElementById('s-accepted').textContent = a;
+  document.getElementById('s-rejected').textContent = rj;
+  document.getElementById('s-all').textContent      = total;
+}
+
+// ─── Switch pages ─────────────────────────────────────────────────────────────
+function switchPage(page) {
+  activePage = page;
+
+  // Update nav tabs
+  document.querySelectorAll('.page-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.page === page);
+  });
+
+  // Update page header
+  const cfg = PAGE_CONFIG[page];
+  document.getElementById('pageTitle').textContent = cfg.title;
+  const badge = document.getElementById('pageBadge');
+  badge.textContent = cfg.badge;
+  badge.className = `section-badge ${cfg.badgeCls}`;
+
+  renderPage();
+}
+
+// ─── Render cards for current page ───────────────────────────────────────────
+function renderPage() {
+  const now = new Date();
+
+  const filtered = allRequests.filter(r => {
+    const expired = new Date(r.recipient_expires_at) < now;
+    if (activePage === 'pending')  return r.response_status === 'pending' && !expired && r.request_status !== 'booked';
+    if (activePage === 'accepted') return r.response_status === 'accepted';
+    if (activePage === 'rejected') return r.response_status === 'rejected';
+    return true; // 'all'
+  });
+
+  const area = document.getElementById('cardsArea');
+
+  if (filtered.length === 0) {
+    const cfg = PAGE_CONFIG[activePage];
+    area.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${cfg.emptyIcon}</div>
+        <div class="empty-title">${cfg.emptyTitle}</div>
+        <div class="empty-desc">${cfg.emptyDesc}</div>
+        ${activePage !== 'pending' ? `<button class="empty-cta" onclick="switchPage('pending')">⏳ View Pending Requests</button>` : ''}
+      </div>`;
+    document.getElementById('pageMeta').textContent =
+      `${filtered.length} request(s) · Last updated ${new Date().toLocaleTimeString('en-IN')}`;
+    return;
+  }
+
+  area.innerHTML = `<div class="requests-grid">${filtered.map(r => buildCard(r)).join('')}</div>`;
+  document.getElementById('pageMeta').textContent =
+    `${filtered.length} request(s) · Last updated ${new Date().toLocaleTimeString('en-IN')}`;
+}
+
+// ─── Build a single card ──────────────────────────────────────────────────────
+function buildCard(r) {
+  const now     = new Date();
+  const expires = new Date(r.recipient_expires_at);
+  const expired = expires < now || r.is_expired;
+  const status  = r.response_status;
+  const isPend  = status === 'pending' && !expired;
+
+  // Status badge
+  const badgeMap = {
+    accepted: `<span class="badge badge-accepted">✅ Offer Sent</span>`,
+    rejected: `<span class="badge badge-rejected">❌ Declined</span>`,
+  };
+  const statusBadge = badgeMap[status] ||
+    (expired ? `<span class="badge badge-expired">⌛ Expired</span>` : `<span class="badge badge-pending">⏳ Action Required</span>`);
+
+  // Countdown
+  let cdHtml = '';
+  if (isPend) {
+    const mins = Math.max(0, Math.round((expires - now) / 60000));
+    cdHtml = `<span class="countdown ${mins > 30 ? 'safe' : ''}">⏱ ${mins > 60 ? Math.round(mins/60)+'h' : mins+'m'} left</span>`;
+  }
+
+  const totalTourINR = r.total_budget_paise / 100;
+  const budgetINR = totalTourINR.toLocaleString('en-IN');
+  const advanceBaseINR = Math.round(totalTourINR * 0.30);
+  const advanceGstINR = Math.round(advanceBaseINR * 0.05);
+  const payableNowINR = advanceBaseINR + advanceGstINR;
+  const remainingBalanceINR = totalTourINR - advanceBaseINR;
+
+  const facs = r.required_facilities || [];
+  const facsHtml = facs.length
+    ? `<div class="fac-list">${facs.map(f => `<span class="fac-chip">${esc(f)}</span>`).join('')}</div>`
+    : `<span style="color:var(--text-muted);font-size:13px">None specified</span>`;
+
+  // Footer based on status
+  let footer = '';
+  if (status === 'accepted') {
+    footer = `
+      <div class="outcome-banner accepted">
+        <div class="outcome-icon">✅</div>
+        <div class="outcome-text">
+          <div class="outcome-title">Tour quote of ₹${budgetINR} sent successfully</div>
+          <div class="outcome-sub">TripMozy Advance (30%+5% GST): ₹${payableNowINR.toLocaleString('en-IN')} · Balance Collected: ₹${remainingBalanceINR.toLocaleString('en-IN')}. Traveler is reviewing.</div>
+        </div>
+      </div>`;
+  } else if (status === 'rejected') {
+    const reason = r.rejection_reason ? r.rejection_reason.replace(/_/g,' ') : 'reason not specified';
+    footer = `
+      <div class="outcome-banner rejected">
+        <div class="outcome-icon">❌</div>
+        <div class="outcome-text">
+          <div class="outcome-title">Declined · ${esc(reason)}</div>
+          <div class="outcome-sub">This request has been declined and removed from your active queue.</div>
+        </div>
+      </div>`;
+  } else if (expired) {
+    footer = `<span style="color:var(--text-muted);font-size:13px;padding:4px 0">⌛ This request expired without a response.</span>`;
+  } else {
+    footer = `
+      <div style="display:flex; flex-direction:column; gap:6px; width:100%; margin-bottom:10px; background:#eff6ff; padding:10px 12px; border-radius:10px; border:1px solid #bfdbfe;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span style="font-size:12px; font-weight:700; color:#1e40af;">Tour Package Quote:</span>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:15px; font-weight:800; color:#1e40af;">₹</span>
+            <input type="number" id="quote-${r.recipient_id}" value="${totalTourINR}" min="1000" step="500" style="padding:6px 10px; border:1.5px solid #93c5fd; border-radius:8px; font-size:16px; font-weight:800; width:130px; font-family:inherit; color:#0f172a;" oninput="updateCardPricing('${r.recipient_id}')">
+          </div>
+        </div>
+        <div id="split-info-${r.recipient_id}" style="font-size:11px; color:#1d4ed8; font-weight:600; line-height:1.4;">
+          TripMozy Advance: ₹${payableNowINR.toLocaleString('en-IN')} (30%+5% GST) · Operator Balance: ₹${remainingBalanceINR.toLocaleString('en-IN')}
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+        <button class="btn btn-accept" style="width:100%; justify-content:center; padding:12px; font-size:14px;" onclick="acceptRequest('${r.recipient_id}', this)">✅ Accept &amp; Send Tour Quote</button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; width:100%;">
+          <button class="btn btn-reject" style="width:100%; justify-content:center; padding:10px; font-size:13px;" onclick="openRejectModal('${r.recipient_id}', '${esc(r.request_reference)}')">❌ Decline</button>
+          ${r.waDirectLink ? `<a href="${r.waDirectLink}" target="_blank" class="btn" style="background:#25D366; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; font-size:13px; padding:10px; border-radius:8px; width:100%;" title="Open pre-filled WhatsApp tour request alert">💬 WhatsApp</a>` : ''}
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="request-card" id="card-${r.recipient_id}">
+      <div class="card-header">
+        <div>
+          <div class="request-ref">${esc(r.request_reference)}</div>
+          <div class="prop-name">${esc(r.property_name)}</div>
+          <div class="prop-loc">📍 ${esc(r.property_city || '')}</div>
+        </div>
+        <div class="card-right">
+          ${statusBadge}
+          ${cdHtml}
+        </div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="detail-label">🗺 Destination Requested</div>
+          <div class="detail-value">${esc(r.destination)}</div>
+          ${r.destination_locality ? `<div class="detail-sub">${esc(r.destination_locality)}</div>` : ''}
+        </div>
+        <div>
+          <div class="detail-label">💰 Traveler Budget</div>
+          <div class="detail-value big">₹${budgetINR}</div>
+          <div class="detail-sub">Total tour budget</div>
+        </div>
+        <div>
+          <div class="detail-label">📅 Tour Dates</div>
+          <div class="detail-value">${fmtDate(r.check_in_date)} → ${fmtDate(r.check_out_date)}</div>
+          <div class="detail-sub">${r.nights + 1} Days / ${r.nights} Night${r.nights>1?'s':''}</div>
+        </div>
+        <div>
+          <div class="detail-label">👥 Travelers & Setup</div>
+          <div class="detail-value">${r.num_adults} Adult${r.num_adults>1?'s':''}${r.num_children>0?' · '+r.num_children+' Child':''} · ${r.num_rooms} Vehicle${r.num_rooms>1?'s':''}</div>
+          ${r.room_preference && r.room_preference!=='any' ? `<div class="detail-sub">Style: ${esc(r.room_preference.toUpperCase())}</div>` : ''}
+        </div>
+        <div>
+          <div class="detail-label">🛎 Tour Inclusions</div>
+          ${facsHtml}
+        </div>
+        <div>
+          <div class="detail-label">🎒 Operator / Base</div>
+          <div class="detail-value" style="font-size:14px">${esc(r.property_name)}</div>
+          <div class="detail-sub">${esc(r.property_city||'')}</div>
+        </div>
+      </div>
+      <div class="card-footer">${footer}</div>
+    </div>`;
+}
+
+function updateCardPricing(recipientId) {
+  const input = document.getElementById(`quote-${recipientId}`);
+  const label = document.getElementById(`split-info-${recipientId}`);
+  if (!input || !label) return;
+  const total = parseFloat(input.value) || 0;
+  const advance = Math.round(total * 0.30);
+  const gst = Math.round(advance * 0.05);
+  const payableNow = advance + gst;
+  const remaining = total - advance;
+  label.textContent = `(TripMozy Advance: ₹${payableNow.toLocaleString('en-IN')} · Operator Balance: ₹${remaining.toLocaleString('en-IN')})`;
+}
+
+// ─── Accept ───────────────────────────────────────────────────────────────────
+async function acceptRequest(recipientId, btn) {
+  btn.disabled = true;
+  btn.innerHTML = `<span class="btn-spinner"></span> Sending tour quote…`;
+
+  try {
+    const input = document.getElementById(`quote-${recipientId}`);
+    const customQuote = input ? parseFloat(input.value) : null;
+    const bodyPayload = customQuote && customQuote > 0 ? { customTotalPaise: Math.round(customQuote * 100) } : {};
+
+    const res = await fetch(`/api/vendor/recipients/${recipientId}/accept`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(bodyPayload)
+    });
+    const data = await res.json();
+
+    if (data.success || data.idempotent) {
+      // Update local state
+      const r = allRequests.find(x => x.recipient_id === recipientId);
+      if (r) {
+        r.response_status = 'accepted';
+        if (customQuote && customQuote > 0) {
+          r.total_budget_paise = Math.round(customQuote * 100);
+          r.total_budget_inr = customQuote;
+        }
+      }
+      updateCounts();
+
+      // Animate card out, then switch to Accepted page
+      animateCardOut(recipientId, () => {
+        renderPage();      // re-render current (pending) page — card gone
+        // Brief flash notification
+        showToast('✅ Tour quote sent! View it in the Accepted tab.', 'success');
+      });
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = `✅ Accept &amp; Send Tour Quote`;
+      showToast(`Error: ${data.error || 'Could not accept'}`, 'error');
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = `✅ Accept &amp; Send Tour Quote`;
+    showToast(`Network error: ${e.message}`, 'error');
+  }
+}
+
+// ─── Reject modal ─────────────────────────────────────────────────────────────
+function openRejectModal(recipientId, reference) {
+  rejectTarget = recipientId;
+  document.getElementById('modalRef').textContent = reference;
+  document.getElementById('rejectNote').value = '';
+  document.getElementById('rejectReason').selectedIndex = 0;
+  document.getElementById('rejectModal').classList.remove('hidden');
+}
+function closeRejectModal() {
+  document.getElementById('rejectModal').classList.add('hidden');
+  rejectTarget = null;
+}
+async function confirmReject() {
+  if (!rejectTarget) return;
+  const targetId = rejectTarget;                     // capture before nulling
+  const reason   = document.getElementById('rejectReason').value;
+  const note     = document.getElementById('rejectNote').value.trim();
+  closeRejectModal();
+
+  try {
+    const res = await fetch(`/api/vendor/recipients/${targetId}/reject`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ reason, note })
+    });
+    const data = await res.json();
+
+    if (data.success || data.idempotent) {
+      const r = allRequests.find(x => x.recipient_id === targetId);
+      if (r) { r.response_status = 'rejected'; r.rejection_reason = reason; }
+      updateCounts();
+
+      animateCardOut(targetId, () => {
+        renderPage();
+        showToast('❌ Request declined and moved to Declined tab.', 'info');
+      });
+    } else {
+      showToast(`Error: ${data.error || 'Could not decline'}`, 'error');
+    }
+  } catch (e) {
+    showToast(`Network error: ${e.message}`, 'error');
+  }
+}
+
+// ─── Card slide-out animation ─────────────────────────────────────────────────
+function animateCardOut(recipientId, callback) {
+  const card = document.getElementById(`card-${recipientId}`);
+  if (!card) { callback(); return; }
+  card.style.maxHeight = card.offsetHeight + 'px';  // lock height for animation
+  requestAnimationFrame(() => {
+    card.classList.add('removing');
+    card.addEventListener('transitionend', () => callback(), { once: true });
+    // Fallback in case transition doesn't fire
+    setTimeout(callback, 500);
+  });
+}
+
+// ─── Toast notification ────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6' };
+  const t = document.createElement('div');
+  t.style.cssText = `
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:${colors[type]||'#1e293b'}; color:#fff; padding:12px 24px;
+    border-radius:10px; font-size:14px; font-weight:600; z-index:9999;
+    box-shadow:0 8px 30px rgba(0,0,0,.2); transition:all .3s ease; opacity:0;
+    max-width:90vw; text-align:center;
+  `;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+  setTimeout(() => {
+    t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)';
+    setTimeout(() => t.remove(), 400);
+  }, 3500);
+}
+
+// ─── Auto-refresh ─────────────────────────────────────────────────────────────
+function startAutoRefresh() {
+  if (autoTimer) clearInterval(autoTimer);
+  autoTimer = setInterval(() => loadDashboard(), 30000);
+  resetCountdown();
+}
+function resetCountdown() {
+  cdSec = 30;
+  if (cdTimer) clearInterval(cdTimer);
+  cdTimer = setInterval(() => {
+    cdSec--;
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = cdSec > 0 ? `Auto-refresh in ${cdSec}s` : 'Refreshing…';
+    if (cdSec <= 0) clearInterval(cdTimer);
+  }, 1000);
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('cardsArea').innerHTML =
+    `<div class="error-banner">⚠️ ${esc(msg)}</div>`;
+}
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&amp;/g,'&').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${+day} ${M[+m-1]} ${y}`;
+}
+
+// Close modal on backdrop click
+document.getElementById('rejectModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeRejectModal(); });
+
+// Boot
+init();
+</script>
+</body>
+</html>

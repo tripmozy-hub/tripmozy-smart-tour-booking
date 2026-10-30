@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/smart-tour-booking.html" },
+    { "source": "/smart-tour-booking", "destination": "/smart-tour-booking.html" },
+    { "source": "/smart-hotel-booking", "destination": "/smart-tour-booking.html" },
+    { "source": "/ai-planner", "destination": "/index.html" },
+    { "source": "/planner", "destination": "/index.html" },
+    { "source": "/booking", "destination": "/customer-booking.html" },
+    { "source": "/my-booking", "destination": "/customer-booking.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/signin", "destination": "/login.html" },
+    { "source": "/customer/login", "destination": "/login.html" },
+    { "source": "/partner/login", "destination": "/login.html" },
+    { "source": "/vendor/login", "destination": "/login.html" },
+    { "source": "/partner/dashboard", "destination": "/partner-dashboard.html" },
+    { "source": "/partner", "destination": "/partner-dashboard.html" },
+    { "source": "/vendor", "destination": "/partner-dashboard.html" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/action", "destination": "/api/index.js" },
+    { "source": "/health", "destination": "/api/index.js" },
+    { "source": "/widget", "destination": "/widget.js" }
+  ]
+}
