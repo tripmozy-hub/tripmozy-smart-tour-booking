@@ -736,7 +736,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ identifier: val, role: currentRole })
         });
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (_) {
+          throw new Error(`Server returned: ${text.slice(0, 100)}`);
+        }
 
         if (!res.ok) {
           throw new Error(data.error || 'Failed to dispatch verification code');
@@ -859,7 +865,13 @@
             role: currentRole
           })
         });
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (_) {
+          throw new Error(`Server returned: ${text.slice(0, 100)}`);
+        }
 
         if (!res.ok) {
           throw new Error(data.error || 'Verification failed');

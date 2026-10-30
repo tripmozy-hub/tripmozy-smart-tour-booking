@@ -25,8 +25,8 @@
     { "source": "/partner/dashboard", "destination": "/partner-dashboard.html" },
     { "source": "/partner", "destination": "/partner-dashboard.html" },
     { "source": "/vendor", "destination": "/partner-dashboard.html" },
-    { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/action", "destination": "/api/index.js" },
-    { "source": "/health", "destination": "/api/index.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js?__url=/api/$1" },
+    { "source": "/action", "destination": "/api/index.js?__url=/action" },
+    { "source": "/health", "destination": "/api/index.js?__url=/health" }
   ]
 }

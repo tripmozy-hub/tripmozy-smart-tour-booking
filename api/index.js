@@ -26,6 +26,18 @@ module.exports = (req, res) => {
     return;
   }
 
+  // Restore original URL when rewritten by Vercel
+  const host = req.headers.host || 'localhost';
+  try {
+    const parsed = new URL(req.url, `http://${host}`);
+    const originalUrl = parsed.searchParams.get('__url') || req.headers['x-matched-path'] || req.headers['x-now-route-matches'];
+    if (originalUrl && !originalUrl.startsWith('/api/index.js')) {
+      parsed.searchParams.delete('__url');
+      const queryStr = parsed.searchParams.toString();
+      req.url = originalUrl + (queryStr ? `?${queryStr}` : '');
+    }
+  } catch (_) {}
+
   if (bootError) {
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({

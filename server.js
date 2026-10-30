@@ -102,7 +102,10 @@ const TRIP_PLANNER_DIR = process.env.TRIP_PLANNER_DIR || path.join(__dirname, 'p
 
 const appHandler = (req, res) => {
   const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = reqUrl.pathname;
+  let pathname = reqUrl.searchParams.get('__url') || req.headers['x-matched-path'] || reqUrl.pathname;
+  if (pathname.includes('?')) {
+    pathname = pathname.split('?')[0];
+  }
   const method = req.method;
 
   // Set CORS headers
@@ -739,7 +742,13 @@ const appHandler = (req, res) => {
     return;
   }
 
-  // Fallback 404
+  // Fallback 404 (always JSON for API endpoints to prevent SyntaxError on client fetch)
+  if (pathname.startsWith('/api/') || pathname === '/api') {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: `API route not found: ${method} ${pathname}`, pathname, method }));
+    return;
+  }
+
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('TripMozy Page Not Found');
 };
