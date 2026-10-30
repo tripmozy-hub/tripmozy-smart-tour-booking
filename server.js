@@ -135,8 +135,18 @@ const appHandler = (req, res) => {
     });
   };
 
-  // Helper to read JSON request body
+  // Helper to read JSON request body (supports standard HTTP streams and pre-parsed serverless req.body)
   const readBody = (callback) => {
+    if (req.body !== undefined && req.body !== null) {
+      if (typeof req.body === 'object') {
+        return callback(null, req.body);
+      }
+      try {
+        return callback(null, JSON.parse(req.body));
+      } catch (err) {
+        return callback(err);
+      }
+    }
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
