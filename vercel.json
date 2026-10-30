@@ -12,11 +12,9 @@
     }
   ],
   "rewrites": [
-    { "source": "/", "destination": "/smart-tour-booking.html" },
-    { "source": "/smart-tour-booking", "destination": "/smart-tour-booking.html" },
-    { "source": "/smart-hotel-booking", "destination": "/smart-tour-booking.html" },
-    { "source": "/ai-planner", "destination": "/index.html" },
-    { "source": "/planner", "destination": "/index.html" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/smart-tour-booking", "destination": "/index.html" },
+    { "source": "/smart-hotel-booking", "destination": "/index.html" },
     { "source": "/booking", "destination": "/customer-booking.html" },
     { "source": "/my-booking", "destination": "/customer-booking.html" },
     { "source": "/login", "destination": "/login.html" },
@@ -29,7 +27,6 @@
     { "source": "/vendor", "destination": "/partner-dashboard.html" },
     { "source": "/api/(.*)", "destination": "/api/index.js" },
     { "source": "/action", "destination": "/api/index.js" },
-    { "source": "/health", "destination": "/api/index.js" },
-    { "source": "/widget", "destination": "/widget.js" }
+    { "source": "/health", "destination": "/api/index.js" }
   ]
 }

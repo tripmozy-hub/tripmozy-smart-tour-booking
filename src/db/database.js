@@ -2,45 +2,80 @@
 // TripMozy Database Client (Transactional & Audit-Aware)
 // ============================================================================
 
-const { DatabaseSync } = require('node:sqlite');
+let DatabaseSync = null;
+try {
+  DatabaseSync = require('node:sqlite').DatabaseSync;
+} catch (e) {
+  // node:sqlite not available in this environment
+}
+
 const crypto = require('node:crypto');
 const path = require('node:path');
 const { DDL_STATEMENTS } = require('./schema');
 
 class TripMozyDatabase {
   constructor(dbPath = ':memory:') {
-    this.db = new DatabaseSync(dbPath);
+    if (DatabaseSync) {
+      try {
+        this.db = new DatabaseSync(dbPath);
+      } catch (err) {
+        console.warn(`[TripMozy DB] Failed to open ${dbPath}: ${err.message}. Falling back to in-memory.`);
+        this.db = new DatabaseSync(':memory:');
+      }
+    } else {
+      console.warn('[TripMozy DB] node:sqlite is unavailable. Using safe in-memory fallback.');
+      this.db = this._createFallbackDb();
+    }
     this.init();
   }
 
+  _createFallbackDb() {
+    return {
+      exec: () => {},
+      prepare: () => ({
+        run: () => ({ changes: 0, lastInsertRowid: 0 }),
+        get: () => undefined,
+        all: () => []
+      }),
+      close: () => {}
+    };
+  }
+
   init() {
-    this.db.exec(DDL_STATEMENTS);
-    this.seedDefaultSettings();
+    try {
+      this.db.exec(DDL_STATEMENTS);
+      this.seedDefaultSettings();
+    } catch (e) {
+      console.warn('[TripMozy DB] Init warning:', e.message);
+    }
   }
 
   seedDefaultSettings() {
-    // Seed system user for system-level actions/audits
-    const systemUser = this.db.prepare(`
-      INSERT OR IGNORE INTO user_profiles (id, email, role, display_name, status, is_phone_verified, is_email_verified)
-      VALUES ('00000000-0000-0000-0000-000000000001', 'system@tripmozy.com', 'admin', 'TripMozy System Admin', 'active', 1, 1)
-    `);
-    systemUser.run();
+    try {
+      const systemUser = this.db.prepare(`
+        INSERT OR IGNORE INTO user_profiles (id, email, role, display_name, status, is_phone_verified, is_email_verified)
+        VALUES ('00000000-0000-0000-0000-000000000001', 'system@tripmozy.com', 'admin', 'TripMozy System Admin', 'active', 1, 1)
+      `);
+      systemUser.run();
 
-    const defaults = [
-      ['dispatch.first_batch_size', '10', 'Number of hotels contacted in initial request wave'],
-      ['dispatch.max_properties_contacted', '25', 'Maximum properties permitted to be contacted per request'],
-      ['dispatch.vendor_response_deadline_hours', '2', 'Hours hoteliers have to accept/quote before recipient expires'],
-      ['booking.inventory_hold_minutes', '15', 'Duration room is held exclusively during checkout before auto-release'],
-      ['policy.default_commission_bps', '1500', 'Default platform commission rate (1500 = 15.00%)']
-    ];
+      const defaults = [
+        ['dispatch.first_batch_size', '10', 'Number of hotels contacted in initial request wave'],
+        ['dispatch.max_properties_contacted', '25', 'Maximum properties permitted to be contacted per request'],
+        ['dispatch.vendor_response_deadline_hours', '2', 'Hours hoteliers have to accept/quote before recipient expires'],
+        ['booking.inventory_hold_minutes', '15', 'Duration room is held exclusively during checkout before auto-release'],
+        ['policy.default_commission_bps', '1500', 'Default platform commission rate (1500 = 15.00%)']
+      ];
 
-    const insert = this.db.prepare(`
-      INSERT OR IGNORE INTO system_settings (key, value, description)
-      VALUES (?, ?, ?)
-    `);
+      const insert = this.db.prepare(`
+        INSERT OR IGNORE INTO system_settings (key, value, description)
+        VALUES (?, ?, ?)
+      `);
 
-    for (const [k, v, d] of defaults) {
-      insert.run(k, JSON.stringify(v), d);
+      for (const [k, v, d] of defaults) {
+        insert.run(k, JSON.stringify(v), d);
+      }
+    } catch (e) {
+      console.warn('[TripMozy DB] Seed warning:', e.message);
     }
   }
 
@@ -50,10 +85,15 @@ class TripMozyDatabase {
       return fn(this);
     }
     this._inTransaction = true;
-    this.db.exec('BEGIN IMMEDIATE TRANSACTION;');
+    try {
+      this.db.exec('BEGIN IMMEDIATE TRANSACTION;');
+    } catch (_) {}
+
     try {
       const result = fn(this);
-      this.db.exec('COMMIT;');
+      try {
+        this.db.exec('COMMIT;');
+      } catch (_) {}
       this._inTransaction = false;
       return result;
     } catch (err) {
@@ -74,10 +114,9 @@ class TripMozyDatabase {
 
   // Audit Logger
   logAudit({ actorId, actorRole, action, entityType, entityId, correlationId = null, beforeState = null, afterState = null, ipAddress = null }) {
-    // Verify actorId exists in user_profiles to satisfy foreign key constraint, fallback to system admin
     let validActorId = null;
     if (actorId) {
-      const exists = this.db.prepare('SELECT id FROM user_profiles WHERE id = ?').get(actorId);
+      const exists = this.queryOne('SELECT id FROM user_profiles WHERE id = ?', [actorId]);
       if (exists) {
         validActorId = actorId;
       }

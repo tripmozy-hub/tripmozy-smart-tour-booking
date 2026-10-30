@@ -83,20 +83,22 @@ if (propCount === 0) {
   }
 }
 
-// Background Cron: Release expired inventory holds every 60 seconds
-setInterval(() => {
-  try {
-    const res = holdEngine.releaseExpiredHolds();
-    if (res.releasedCount > 0) {
-      console.log(`[TripMozy Cron] Released ${res.releasedCount} expired inventory holds`);
+// Background Cron: Release expired inventory holds every 60 seconds (disabled in serverless environments)
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  setInterval(() => {
+    try {
+      const res = holdEngine.releaseExpiredHolds();
+      if (res.releasedCount > 0) {
+        console.log(`[TripMozy Cron] Released ${res.releasedCount} expired inventory holds`);
+      }
+    } catch (err) {
+      console.error('[TripMozy Cron Error]', err.message);
     }
-  } catch (err) {
-    console.error('[TripMozy Cron Error]', err.message);
-  }
-}, 60 * 1000);
+  }, 60 * 1000);
+}
 
-// Path to legacy trip planner assets
-const TRIP_PLANNER_DIR = 'C:\\Users\\user\\Documents\\GitHub\\AI-TRIP-PLANNER';
+// Path to static assets directory
+const TRIP_PLANNER_DIR = process.env.TRIP_PLANNER_DIR || path.join(__dirname, 'public');
 
 const appHandler = (req, res) => {
   const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -747,4 +749,9 @@ if (require.main === module) {
   });
 }
 
-module.exports = { server, db, appHandler };
+// Attach helpers to appHandler function so it can be called directly as a function OR accessed as an object
+appHandler.server = server;
+appHandler.db = db;
+appHandler.appHandler = appHandler;
+
+module.exports = appHandler;

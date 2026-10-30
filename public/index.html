@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Smart Tour Booking Marketplace | TripMozy - Memories Begin With a Tour</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --navy: #0f172a;
+      --navy-light: #1e293b;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --radius: 14px;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: var(--navy);
+      color: #ffffff;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #ffffff;
+    }
+    .brand-logo {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-logo span { color: var(--accent); }
+    .brand-tagline {
+      font-size: 12px;
+      color: #94a3b8;
+      border-left: 1px solid #334155;
+      padding-left: 12px;
+      display: none;
+    }
+    @media (min-width: 640px) { .brand-tagline { display: inline-block; } }
+    .header-nav { display: flex; gap: 14px; align-items: center; }
+    .nav-link { color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
+    .nav-link:hover { color: #ffffff; }
+    .partner-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .partner-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+    /* Hero Banner */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
+      color: #ffffff;
+      padding: 48px 24px 64px;
+      text-align: center;
+    }
+    .hero-container { max-width: 820px; margin: 0 auto; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+    @media (min-width: 768px) { .hero h1 { font-size: 42px; } }
+    .hero p { font-size: 16px; color: #cbd5e1; line-height: 1.6; }
+
+    /* Main Container & Form */
+    .main-wrap { max-width: 900px; margin: -32px auto 0; padding: 0 16px; }
+    .form-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 28px;
+      border: 1px solid var(--border);
+    }
+    @media (min-width: 640px) { .form-card { padding: 40px; } }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 28px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .section-title .num {
+      width: 28px;
+      height: 28px;
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 640px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: #ffffff;
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Budget Range Slider Box */
+    .budget-box {
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .budget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .budget-amount {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .budget-disclosure {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .budget-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .chip {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover, .chip.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Inclusions Grid */
+    .facilities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .facility-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .facility-checkbox { display: none; }
+    .facility-checkbox:checked + .facility-label {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: var(--primary);
+    }
+
+    /* Consent Checkboxes */
+    .consent-box {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.4;
+    }
+    .checkbox-row input { margin-top: 2px; }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #ffffff;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 800;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s;
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+    .submit-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    }
+    .submit-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Success / Result View */
+    .result-card {
+      display: none;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #d1fae5;
+      color: #059669;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 16px;
+    }
+    .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    .result-ref {
+      font-family: monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      background: #eff6ff;
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .result-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+    .action-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--text);
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary-link {
+      background: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Error Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #ef4444;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      max-width: 90vw;
+      text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Mobile Phone Browser Responsiveness ── */
+    @media (max-width: 768px) {
+      header { padding: 10px 14px; }
+      .header-inner { flex-wrap: wrap; gap: 8px; }
+      .brand-logo { font-size: 20px; }
+      .brand-badge { font-size: 10px; padding: 2px 6px; }
+      .header-nav { gap: 6px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
+      .nav-link { font-size: 12px; }
+      .partner-btn { padding: 6px 10px; font-size: 11px; }
+
+      .hero { padding: 32px 14px 48px; }
+      .hero h1 { font-size: 24px; line-height: 1.25; }
+      .hero p { font-size: 14px; }
+
+      .main-wrap { padding: 0 10px; margin-top: -24px; }
+      .form-card { padding: 20px 14px; border-radius: 14px; }
+      .section-title { font-size: 15px; margin: 20px 0 12px; }
+
+      .form-input, .form-select, input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"] {
+        font-size: 16px !important; /* Prevents iOS auto-zoom */
+        padding: 12px 14px;
+      }
+      .budget-input { font-size: 22px !important; }
+
+      .facilities-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .facility-label {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .stepper-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+      }
+      .stepper-val {
+        font-size: 16px;
+        min-width: 36px;
+      }
+
+      .result-card { padding: 24px 16px; }
+      .result-title { font-size: 20px; }
+      .action-links { flex-direction: column; width: 100%; }
+      .btn-secondary, .btn-primary-link { width: 100%; justify-content: center; padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <div class="brand-logo">Trip<span>Mozy</span></div>
+        <div class="brand-tagline">Smart Tour &amp; Holiday Booking</div>
+      </a>
+      <div class="header-nav">
+        <a href="/booking" class="nav-link">My Tour Offers</a>
+        <span id="authHeaderItem">
+          <a href="/login" class="nav-link" style="color:#fbbf24;font-weight:700;">Sign In</a>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="badge">✨ Real-Time Tour &amp; Holiday Package Marketplace</div>
+      <h1>Plan Your Dream Tour. Set Your Budget.</h1>
+      <p>Submit your destination, dates, and total group budget. TripMozy instantly contacts eligible verified tour operators across India to send you customized tour packages &amp; competitive quotes within your budget.</p>
+    </div>
+  </section>
+
+  <!-- Main Request Form -->
+  <main class="main-wrap">
+    <div class="form-card" id="formCard">
+      <form id="tourRequestForm">
+
+        <!-- 1. Destination & Dates -->
+        <div class="section-title">
+          <span class="num">1</span>
+          <span>Where &amp; When are you touring?</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="destination">Destination / Region *</label>
+            <input type="text" id="destination" class="form-control" placeholder="e.g. Goa, Manali, Shimla, Kerala, Rajasthan, Kashmir, Ladakh" list="destinationsList" required>
+            <datalist id="destinationsList">
+              <option value="Manali, Himachal Pradesh">
+              <option value="Shimla, Himachal Pradesh">
+              <option value="Dharamshala, Himachal Pradesh">
+              <option value="Dalhousie, Himachal Pradesh">
+              <option value="North Goa, Goa">
+              <option value="South Goa, Goa">
+              <option value="Goa">
+              <option value="Munnar, Kerala">
+              <option value="Alleppey, Kerala">
+              <option value="Kerala">
+              <option value="Jaipur, Rajasthan">
+              <option value="Udaipur, Rajasthan">
+              <option value="Rajasthan">
+              <option value="Srinagar, Jammu and Kashmir">
+              <option value="Gulmarg, Jammu and Kashmir">
+              <option value="Leh, Ladakh">
+              <option value="Rishikesh, Uttarakhand">
+              <option value="Mussoorie, Uttarakhand">
+              <option value="Ooty, Tamil Nadu">
+              <option value="Darjeeling, West Bengal">
+              <option value="Gangtok, Sikkim">
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label for="propertyType">Tour Package Style</label>
+            <select id="propertyType" class="form-control">
+              <option value="any">Any Tour Style</option>
+              <option value="resort">Resort &amp; Leisure Tour</option>
+              <option value="hotel">Standard Sightseeing Tour</option>
+              <option value="homestay">Heritage &amp; Homestay Experience</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label for="checkInDate">Tour Start Date *</label>
+            <input type="date" id="checkInDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="checkOutDate">Tour End Date *</label>
+            <input type="date" id="checkOutDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Tour Duration</label>
+            <input type="text" id="nightsDisplay" class="form-control" value="0 Nights" readonly style="background:#f1f5f9; font-weight:700;">
+          </div>
+        </div>
+
+        <!-- 2. Travelers & Vehicles/Rooms -->
+        <div class="section-title">
+          <span class="num">2</span>
+          <span>Travelers &amp; Vehicle / Accommodation Setup</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label for="numRooms">Vehicles / Rooms Required *</label>
+            <select id="numRooms" class="form-control">
+              <option value="1" selected>1 Vehicle / Room</option>
+              <option value="2">2 Vehicles / Rooms</option>
+              <option value="3">3 Vehicles / Rooms</option>
+              <option value="4">4 Vehicles / Rooms</option>
+              <option value="5">5+ Vehicles / Rooms</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="numAdults">Adult Travelers (12+ yrs) *</label>
+            <select id="numAdults" class="form-control">
+              <option value="1">1 Adult</option>
+              <option value="2" selected>2 Adults</option>
+              <option value="3">3 Adults</option>
+              <option value="4">4 Adults</option>
+              <option value="5">5 Adults</option>
+              <option value="6">6+ Adults</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="numChildren">Child Travelers (0-11 yrs)</label>
+            <select id="numChildren" class="form-control">
+              <option value="0" selected>0 Children</option>
+              <option value="1">1 Child</option>
+              <option value="2">2 Children</option>
+              <option value="3">3+ Children</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. Total Tour Budget -->
+        <div class="section-title">
+          <span class="num">3</span>
+          <span>Total Tour Budget (For Whole Group &amp; Full Trip)</span>
+        </div>
+
+        <div class="budget-box">
+          <div class="budget-header">
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: #475569;">Maximum Tour Budget (INR)</div>
+              <div class="budget-disclosure">💡 Must cover complete tour package including stays, transfers, and taxes</div>
+            </div>
+            <div class="budget-amount" id="budgetDisplay">₹15,000</div>
+          </div>
+
+          <input type="range" id="budgetSlider" min="3000" max="150000" step="1000" value="15000" style="width: 100%; accent-color: var(--primary);">
+
+          <div class="budget-chips">
+            <div class="chip" onclick="setBudget(8000)">₹8,000 (Budget Explorer)</div>
+            <div class="chip active" onclick="setBudget(15000)">₹15,000 (Standard Tour)</div>
+            <div class="chip" onclick="setBudget(25000)">₹25,000 (Comfort Tour)</div>
+            <div class="chip" onclick="setBudget(50000)">₹50,000 (Deluxe Tour)</div>
+            <div class="chip" onclick="setBudget(85000)">₹85,000+ (Luxury Private Tour)</div>
+          </div>
+        </div>
+
+        <!-- 4. Transport & Inclusions -->
+        <div class="section-title">
+          <span class="num">4</span>
+          <span>Transport Style &amp; Must-Have Inclusions</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="roomPreference">Transport / Vehicle Preference</label>
+            <select id="roomPreference" class="form-control">
+              <option value="any">Flexible / Operator Recommended</option>
+              <option value="ac">Dedicated Air-Conditioned Cab (Sedan / SUV)</option>
+              <option value="non_ac">Standard Non-AC / Hill Taxi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="contactChannel">Preferred Update Channel</label>
+            <select id="contactChannel" class="form-control">
+              <option value="whatsapp">WhatsApp &amp; Email (Instant delivery)</option>
+              <option value="email">Email Only</option>
+              <option value="sms">SMS &amp; Email</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 8px;">Must-Have Tour Inclusions:</div>
+        <div class="facilities-grid">
+          <div>
+            <input type="checkbox" id="fac_wifi" class="facility-checkbox" value="wifi" checked>
+            <label for="fac_wifi" class="facility-label">📶 Wi-Fi in Stays</label>
+          </div>
+          <div>
+            <input type="checkbox" id="fac_parking" class="facility-checkbox" value="parking" checked>
+            <label for="fac_parking" class="facility-label">🚗 Dedicated Cab &amp; Transfers</label>
+          </div>
+          <div>
+            <input type="checkbox" id="fac_breakfast" class="facility-checkbox" value="breakfast" checked>
+            <label for="fac_breakfast" class="facility-label">🍳 Daily Breakfast &amp; Meals</label>
+          </div>
+          <div>
+            <input type="checkbox" id="fac_mountain_view" class="facility-checkbox" value="mountain_view">
+            <label for="fac_mountain_view" class="facility-label">🏔️ Scenic Viewpoints &amp; Excursions</label>
+          </div>
+          <div>
+            <input type="checkbox" id="fac_pool" class="facility-checkbox" value="pool">
+            <label for="fac_pool" class="facility-label">🏊 Pool / Leisure Resort Access</label>
+          </div>
+          <div>
+            <input type="checkbox" id="fac_accessible" class="facility-checkbox" value="accessible">
+            <label for="fac_accessible" class="facility-label">♿ Elderly / Accessible Friendly</label>
+          </div>
+        </div>
+
+        <!-- 5. Traveler Contact Details -->
+        <div class="section-title">
+          <span class="num">5</span>
+          <span>Lead Traveler Contact Details for Receiving Quotes</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label for="guestName">Lead Traveler Name *</label>
+            <input type="text" id="guestName" class="form-control" placeholder="Rahul Sharma" required>
+          </div>
+          <div class="form-group">
+            <label for="guestEmail">Email Address (for Tour Quotes) *</label>
+            <input type="email" id="guestEmail" class="form-control" placeholder="rahul@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="guestPhone">Mobile Number (WhatsApp) *</label>
+            <input type="tel" id="guestPhone" class="form-control" placeholder="9876543210" required>
+          </div>
+        </div>
+
+        <!-- Consent & Terms -->
+        <div class="consent-box">
+          <label class="checkbox-row">
+            <input type="checkbox" id="commConsent" checked>
+            <span>I agree to receive automated tour package quotes, 1-click booking updates, and itineraries via WhatsApp &amp; Email.</span>
+          </label>
+          <label class="checkbox-row">
+            <input type="checkbox" id="termsAccept" required>
+            <span>I accept the TripMozy Tour Marketplace Booking Terms, Privacy Policy, and 15-Minute Guaranteed Price Hold guidelines. *</span>
+          </label>
+        </div>
+
+        <button type="submit" id="submitBtn" class="submit-btn">
+          <span>🚀 Request Tour Quotes Now</span>
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Result / Success View -->
+    <div class="result-card" id="resultCard">
+      <div class="success-icon">🎒</div>
+      <h2 class="result-title">Tour Request Dispatched!</h2>
+      <div class="result-ref" id="resultRef">TM-REQ-20261029-XXXX</div>
+      <p class="result-desc" id="resultMsg">
+        Verified local tour operators in your destination have been contacted. You will receive customized tour quotes in your email and WhatsApp shortly.
+      </p>
+      <div class="action-links">
+        <a href="#" id="viewOffersBtn" class="btn-primary-link">⚡ View Live Tour Offers</a>
+        <a href="/smart-tour-booking" class="btn-secondary">Submit Another Request</a>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Error notification</div>
+
+  <script>
+    // Set min date to today for check-in
+    const checkInInput = document.getElementById('checkInDate');
+    const checkOutInput = document.getElementById('checkOutDate');
+    const nightsDisplay = document.getElementById('nightsDisplay');
+
+    const today = new Date().toISOString().split('T')[0];
+    checkInInput.min = today;
+
+    // Default dates: tomorrow to +3 days (4 days / 3 nights)
+    const defaultIn = new Date();
+    defaultIn.setDate(defaultIn.getDate() + 1);
+    const defaultOut = new Date();
+    defaultOut.setDate(defaultOut.getDate() + 4);
+
+    checkInInput.value = defaultIn.toISOString().split('T')[0];
+    checkOutInput.min = checkInInput.value;
+    checkOutInput.value = defaultOut.toISOString().split('T')[0];
+
+    function updateNights() {
+      const inDate = new Date(checkInInput.value);
+      const outDate = new Date(checkOutInput.value);
+      if (checkInInput.value && checkOutInput.value && outDate > inDate) {
+        const diffTime = Math.abs(outDate - inDate);
+        const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const days = nights + 1;
+        nightsDisplay.value = `${days} Days / ${nights} Night${nights > 1 ? 's' : ''}`;
+      } else {
+        nightsDisplay.value = 'Invalid Dates';
+      }
+    }
+
+    checkInInput.addEventListener('change', () => {
+      checkOutInput.min = checkInInput.value;
+      if (checkOutInput.value <= checkInInput.value) {
+        const nextDay = new Date(checkInInput.value);
+        nextDay.setDate(nextDay.getDate() + 3);
+        checkOutInput.value = nextDay.toISOString().split('T')[0];
+      }
+      updateNights();
+    });
+    checkOutInput.addEventListener('change', updateNights);
+    updateNights();
+
+    // Budget Slider
+    const slider = document.getElementById('budgetSlider');
+    const budgetDisplay = document.getElementById('budgetDisplay');
+
+    function setBudget(val) {
+      slider.value = val;
+      budgetDisplay.textContent = '₹' + parseInt(val).toLocaleString('en-IN');
+      document.querySelectorAll('.chip').forEach(c => {
+        c.classList.toggle('active', c.textContent.includes(parseInt(val).toLocaleString('en-IN')));
+      });
+    }
+
+    slider.addEventListener('input', (e) => {
+      budgetDisplay.textContent = '₹' + parseInt(e.target.value).toLocaleString('en-IN');
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // Submit Request
+    document.getElementById('tourRequestForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⚡ Dispatching to Verified Tour Operators...</span>';
+
+      const facilities = Array.from(document.querySelectorAll('.facility-checkbox:checked')).map(cb => cb.value);
+
+      const payload = {
+        destination: document.getElementById('destination').value,
+        propertyTypePreference: document.getElementById('propertyType').value,
+        checkInDate: checkInInput.value,
+        checkOutDate: checkOutInput.value,
+        numRooms: parseInt(document.getElementById('numRooms').value),
+        numAdults: parseInt(document.getElementById('numAdults').value),
+        numChildren: parseInt(document.getElementById('numChildren').value),
+        totalBudgetINR: parseInt(slider.value),
+        roomPreference: document.getElementById('roomPreference').value,
+        requiredFacilities: facilities,
+        guestName: document.getElementById('guestName').value,
+        guestEmail: document.getElementById('guestEmail').value,
+        guestPhone: document.getElementById('guestPhone').value,
+        communicationConsent: document.getElementById('commConsent').checked,
+        termsAccepted: document.getElementById('termsAccept').checked
+      };
+
+      try {
+        const res = await fetch('/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to submit tour request');
+        }
+
+        // Show Result Card
+        document.getElementById('formCard').style.display = 'none';
+        const resultCard = document.getElementById('resultCard');
+        resultCard.style.display = 'block';
+
+        document.getElementById('resultRef').textContent = data.reference;
+        document.getElementById('resultMsg').textContent =
+          `Success! Your tour request for ${data.destination} has been sent to ${data.matchedCount} eligible TripMozy verified tour operators. Quotes will arrive in real time.`;
+
+        const viewOffersUrl = `/booking?id=${data.id}`;
+        document.getElementById('viewOffersBtn').href = viewOffersUrl;
+
+        // Auto-redirect to live offers after 2.5 seconds
+        setTimeout(() => {
+          window.location.href = viewOffersUrl;
+        }, 2500);
+
+      } catch (err) {
+        showToast(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span>🚀 Request Tour Quotes Now</span>';
+      }
+    });
+
+    // Check logged in customer session & prefill
+    (function checkCustomerSession() {
+      try {
+        const raw = localStorage.getItem('tm_user_info');
+        const role = localStorage.getItem('tm_user_role');
+        if (raw && role === 'customer') {
+          const u = JSON.parse(raw);
+          if (u.displayName && u.displayName !== 'Traveler') {
+            document.getElementById('guestName').value = u.displayName;
+          }
+          if (u.email && !u.email.includes('@tripmozy.local')) {
+            document.getElementById('guestEmail').value = u.email;
+          }
+          if (u.phone) {
+            document.getElementById('guestPhone').value = u.phone.replace('+91', '');
+          }
+          const item = document.getElementById('authHeaderItem');
+          if (item) {
+            item.innerHTML = `<span style="font-size:13px;color:#cbd5e1;">👤 ${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
+          }
+        }
+      } catch (_) {}
+    })();
+
+    function signOutCustomer() {
+      localStorage.removeItem('tm_session_token');
+      localStorage.removeItem('tm_user_role');
+      localStorage.removeItem('tm_user_info');
+      fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+        window.location.reload();
+      });
+    }
+  </script>
+</body>
+</html>
