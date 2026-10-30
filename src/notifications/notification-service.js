@@ -18,6 +18,7 @@ class NotificationService {
       gmailAppPassword: config.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || null,
       emailApiKey: config.emailApiKey || process.env.EMAIL_PROVIDER_API_KEY || null,
       smsApiKey: config.smsApiKey || process.env.SMS_PROVIDER_API_KEY || null,
+      baseUrl: config.baseUrl || process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080'),
       ...config
     };
     this.mockLogs = [];
@@ -39,6 +40,8 @@ class NotificationService {
 
   // Generate formatted text message for WhatsApp
   generateWhatsAppText(templateCode, payload) {
+    const base = payload.baseUrl || this.config.baseUrl || 'http://localhost:8080';
+
     if (templateCode === 'hotel_request_received') {
       return `🎒 *TripMozy Tour Request Alert!*\n` +
         `Hi Partner, a new tour request matches your package / region *${payload.propertyName || 'Verified Tour Operator'}*!\n\n` +
@@ -47,8 +50,8 @@ class NotificationService {
         `👥 Travelers & Setup: ${payload.numAdults} Adults · ${payload.numRooms} Vehicle\n` +
         `💰 Traveler Budget: ₹${(payload.totalBudgetINR || 0).toLocaleString('en-IN')}\n\n` +
         `⚡ Quick Action (No login required):\n` +
-        `👉 Tap to Accept & Send Tour Quote: http://localhost:8080/action?token=${payload.rawToken}&action=accept\n` +
-        `👉 Tap to Decline: http://localhost:8080/action?token=${payload.rawToken}&action=reject`;
+        `👉 Tap to Accept & Send Tour Quote: ${base}/action?token=${payload.rawToken}&action=accept\n` +
+        `👉 Tap to Decline: ${base}/action?token=${payload.rawToken}&action=reject`;
     }
 
     if (templateCode === 'hotel_offer_received') {
