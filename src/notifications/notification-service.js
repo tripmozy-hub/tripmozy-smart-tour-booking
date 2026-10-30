@@ -6,6 +6,11 @@
 const crypto = require('node:crypto');
 const tls = require('node:tls');
 
+let nodemailer = null;
+try {
+  nodemailer = require('nodemailer');
+} catch (_) {}
+
 class NotificationService {
   constructor(db, config = {}) {
     this.db = db;
@@ -15,13 +20,14 @@ class NotificationService {
       whatsappPhoneId: config.whatsappPhoneId || process.env.WHATSAPP_PHONE_NUMBER_ID || null,
       whatsappSecret: config.whatsappSecret || process.env.WHATSAPP_APP_SECRET || 'tripmozy_dev_secret',
       gmailUser: config.gmailUser || process.env.GMAIL_USER || 'tripmozy@gmail.com',
-      gmailAppPassword: config.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || null,
+      gmailAppPassword: config.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || 'hiul rjbe mftg novo',
       emailApiKey: config.emailApiKey || process.env.EMAIL_PROVIDER_API_KEY || null,
       smsApiKey: config.smsApiKey || process.env.SMS_PROVIDER_API_KEY || null,
       baseUrl: config.baseUrl || process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080'),
       ...config
     };
     this.mockLogs = [];
+    this.pendingDispatches = [];
   }
 
   // Verify Meta WhatsApp Cloud API HMAC-SHA256 signature
@@ -411,25 +417,50 @@ class NotificationService {
     }
   }
 
-  // Live Email Dispatch (Gmail SMTP or Resend API)
+  // Live Email Dispatch (Nodemailer Gmail SMTP, Fallback TLS SMTP, or Resend API)
   async sendLiveEmailMessage(destination, subject, htmlContent) {
-    // 1. Try Gmail SMTP if configured
-    if (this.config.gmailUser && this.config.gmailAppPassword) {
+    const user = this.config.gmailUser || 'tripmozy@gmail.com';
+    const rawPass = this.config.gmailAppPassword || 'hiul rjbe mftg novo';
+    const pass = (rawPass || '').replace(/\s+/g, '');
+
+    // 1. Send via Nodemailer Gmail SMTP (Preferred & Most Reliable)
+    if (nodemailer && user && pass) {
       try {
-        console.log(`[TripMozy Email] Sending live email via Gmail SMTP (from: ${this.config.gmailUser} to: ${destination})...`);
+        console.log(`[TripMozy Email] Sending live email via nodemailer Gmail SMTP (to: ${destination})...`);
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user, pass }
+        });
+        const info = await transporter.sendMail({
+          from: `"TripMozy Marketplace" <${user}>`,
+          to: destination,
+          subject: subject,
+          html: htmlContent
+        });
+        console.log(`[TripMozy Email] Successfully delivered via nodemailer to ${destination} (MsgId: ${info.messageId})`);
+        return { success: true, messageId: info.messageId };
+      } catch (err) {
+        console.error(`[TripMozy Email Error] Nodemailer failed for ${destination}:`, err.message);
+      }
+    }
+
+    // 2. Fallback to native TLS SMTP if nodemailer unavailable
+    if (user && pass) {
+      try {
+        console.log(`[TripMozy Email] Trying fallback TLS Gmail SMTP (to: ${destination})...`);
         return await NotificationService.sendViaGmailSmtp({
-          user: this.config.gmailUser,
-          pass: this.config.gmailAppPassword,
+          user,
+          pass,
           to: destination,
           subject: subject,
           html: htmlContent
         });
       } catch (err) {
-        console.error('[Gmail SMTP Send Error]', err.message);
+        console.error('[Gmail TLS SMTP Send Error]', err.message);
       }
     }
 
-    // 2. Try Resend API if API key provided
+    // 3. Try Resend API if API key provided
     if (this.config.emailApiKey) {
       try {
         const url = 'https://api.resend.com/emails';
@@ -440,7 +471,7 @@ class NotificationService {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: this.config.emailFrom || `TripMozy <${this.config.gmailUser || 'onboarding@resend.dev'}>`,
+            from: this.config.emailFrom || `TripMozy <${user || 'onboarding@resend.dev'}>`,
             to: destination,
             subject: subject,
             html: htmlContent
@@ -632,20 +663,34 @@ class NotificationService {
           ? `TripMozy Update: Tour Request for ${payload.propertyName}`
           : 'TripMozy Notification';
         const html = this.generateEmailHtml(templateCode, payload);
-        this.sendLiveEmailMessage(destination, subject, html).then((smtpRes) => {
+        const p = this.sendLiveEmailMessage(destination, subject, html).then((smtpRes) => {
           try {
             if (smtpRes && smtpRes.success) {
               console.log(`[TripMozy Email] Live email delivered to ${destination} (MsgId: ${smtpRes.messageId})`);
               this.db.execute("UPDATE notifications SET status = 'delivered' WHERE id = ?", [result.notificationId]);
             }
           } catch (_) {}
+          return smtpRes;
         }).catch((err) => {
           console.error('[Live Email Dispatch Failed]', err.message);
+          return { error: err.message };
         });
+        this.pendingDispatches.push(p);
       }
     }
 
     return result;
+  }
+
+  // Wait for all in-flight email dispatches to finish (essential for serverless Lambda execution)
+  async waitForPendingDispatches(timeoutMs = 6000) {
+    if (!this.pendingDispatches || this.pendingDispatches.length === 0) return;
+    const current = [...this.pendingDispatches];
+    this.pendingDispatches = [];
+    try {
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, timeoutMs));
+      await Promise.race([Promise.allSettled(current), timeoutPromise]);
+    } catch (_) {}
   }
 
   // Handle incoming webhooks with deduplication & delivery receipts

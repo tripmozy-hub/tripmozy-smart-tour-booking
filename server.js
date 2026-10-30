@@ -311,10 +311,11 @@ const appHandler = (req, res) => {
   // AUTHENTICATION & LOGIN API ENDPOINTS (Customer & Tour Operator)
   // --------------------------------------------------------------------------
   if (pathname === '/api/auth/send-otp' && method === 'POST') {
-    readBody((err, body) => {
+    readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
       try {
         const result = authService.sendOtp(body);
+        await notifService.waitForPendingDispatches();
         sendJson(200, result);
       } catch (e) {
         sendJson(400, { error: e.message });
@@ -392,11 +393,13 @@ const appHandler = (req, res) => {
   }
 
   if (pathname === '/api/requests' && method === 'POST') {
-    readBody((err, body) => {
+    readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
       try {
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const result = reqService.submitStayRequest({ ...body, ipAddress: ip });
+        // Guarantee all live email alerts to partner and traveler are received by Gmail SMTP before freezing serverless context
+        await notifService.waitForPendingDispatches();
         sendJson(201, result);
       } catch (e) {
         sendJson(400, { error: e.message });
@@ -630,7 +633,7 @@ const appHandler = (req, res) => {
   // POST /api/vendor/recipients/:id/accept  — Accept a request (generate offer)
   if (pathname.match(/^\/api\/vendor\/recipients\/[^/]+\/accept$/) && method === 'POST') {
     const recipientId = pathname.split('/')[4];
-    readBody((err, body) => {
+    readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
       try {
         const recipient = db.queryOne('SELECT r.property_id, req.total_budget_paise FROM booking_request_recipients r JOIN hotel_booking_requests req ON r.request_id = req.id WHERE r.id = ?', [recipientId]);
@@ -654,6 +657,7 @@ const appHandler = (req, res) => {
           mealPlan: body.mealPlan || 'Breakfast Included',
           actorContext: null
         });
+        await notifService.waitForPendingDispatches();
         sendJson(200, result);
       } catch (e) {
         sendJson(400, { error: e.message });
