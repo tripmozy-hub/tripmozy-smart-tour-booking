@@ -93,31 +93,6 @@
     h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
     .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
 
-    .quick-fills {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .quick-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: #cbd5e1;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .chip:hover {
-      background: rgba(245, 158, 11, 0.2);
-      border-color: var(--accent);
-      color: #fbbf24;
-    }
-
     .form-group { margin-bottom: 20px; }
     label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #cbd5e1; }
     input[type="text"], input[type="email"], input[type="tel"] {
@@ -246,19 +221,10 @@
         <h1>Partner Sign In</h1>
         <p class="subtitle">Enter your registered operator phone number or partner email to access active customer requests, send quotes, and manage bookings.</p>
 
-        <!-- Quick 1-click test credentials -->
-        <div class="quick-fills">
-          <div class="quick-label">⚡ Verified Operator Accounts</div>
-          <div class="quick-chips">
-            <span class="chip" onclick="fillCred('+917478290140')">📞 +91 74782 90140</span>
-            <span class="chip" onclick="fillCred('tripmozy@gmail.com')">✉️ tripmozy@gmail.com</span>
-          </div>
-        </div>
-
         <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
           <div class="form-group">
             <label for="identifier">Registered Phone or Partner Email</label>
-            <input type="text" id="identifier" placeholder="e.g. +91 74782 90140 or tripmozy@gmail.com" value="+917478290140" required autofocus>
+            <input type="text" id="identifier" placeholder="e.g. +91 98765 43210 or partner@example.com" required autofocus>
           </div>
           <button type="submit" class="btn" id="sendBtn">Send Partner Verification Code</button>
         </form>
@@ -300,10 +266,6 @@
   <script>
     let currentIdentifier = '';
     let currentTestOtp = '';
-
-    function fillCred(val) {
-      document.getElementById('identifier').value = val;
-    }
 
     function showToast(msg) {
       const t = document.getElementById('toast');

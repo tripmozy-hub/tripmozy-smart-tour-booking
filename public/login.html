@@ -185,50 +185,6 @@
       line-height: 1.55;
     }
 
-    /* Quick Fill Chips (Especially helpful for Partner test / quick access) */
-    .quick-fills {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      background: #f8fafc;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px dashed var(--border);
-    }
-    .quick-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-    }
-    .quick-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .chip {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: var(--navy);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .chip:hover {
-      background: #eff6ff;
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-    .chip.partner-chip:hover {
-      background: #fef3c7;
-      border-color: var(--accent);
-      color: #b45309;
-    }
 
     /* Form Fields */
     .form-group { margin-bottom: 20px; }
@@ -527,11 +483,6 @@
             Enter your mobile number or email to view your tour requests, compare live operator quotes, and manage vouchers.
           </p>
 
-          <!-- Quick Fill Suggestions (Adapts dynamically) -->
-          <div class="quick-fills" id="quickFillsWrap" style="display:none;">
-            <div class="quick-label" id="quickLabel">Fast Sign In Credentials</div>
-            <div class="quick-chips" id="quickChips"></div>
-          </div>
 
           <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
             <div class="form-group">
@@ -624,8 +575,6 @@
     const pageSub = document.getElementById('pageSub');
     const identifierInput = document.getElementById('identifier');
     const identifierLabel = document.getElementById('identifierLabel');
-    const quickFillsWrap = document.getElementById('quickFillsWrap');
-    const quickChips = document.getElementById('quickChips');
     const sendBtn = document.getElementById('sendBtn');
     const verifyBtn = document.getElementById('verifyBtn');
     const alertBox = document.getElementById('alertBox');
@@ -637,20 +586,13 @@
     const maskedTarget = document.getElementById('maskedTarget');
     const otpBoxes = document.querySelectorAll('.otp-box');
 
-    // Partner preset chips
-    const partnerChips = [
-      { label: '📱 +91 74782 90140 (Partner Desk)', val: '+917478290140' },
-      { label: '✉️ tripmozy@gmail.com', val: 'tripmozy@gmail.com' },
-      { label: '✉️ sujansutradhar2004@gmail.com', val: 'sujansutradhar2004@gmail.com' }
-    ];
-
     function showAlert(msg, type = 'error') {
       alertBox.className = `alert-box ${type}`;
       let html = `<div>${msg}</div>`;
       if (msg.includes('switch to the Customer tab') || msg.includes('registered as a Customer')) {
-        html += `<button type="button" class="chip" style="margin-top:10px;background:#2563eb;color:#fff;border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:8px;" onclick="switchCategory('customer')">👉 Click here to Switch to Customer Tab</button>`;
+        html += `<button type="button" class="btn" style="margin-top:10px;background:#2563eb;color:#fff;border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:8px;" onclick="switchCategory('customer')">👉 Click here to Switch to Customer Tab</button>`;
       } else if (msg.includes('switch to the TripMozy Partner tab') || msg.includes('registered as a TripMozy Tour Operator Partner')) {
-        html += `<button type="button" class="chip" style="margin-top:10px;background:#d97706;color:#fff;border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:8px;" onclick="switchCategory('partner')">👉 Click here to Switch to Partner Tab</button>`;
+        html += `<button type="button" class="btn" style="margin-top:10px;background:#d97706;color:#fff;border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:8px;" onclick="switchCategory('partner')">👉 Click here to Switch to Partner Tab</button>`;
       }
       alertBox.innerHTML = html;
     }
@@ -676,16 +618,10 @@
         pageSub.textContent = 'Sign in with your registered phone or email to view dispatched tour requests, send quotes, and manage bookings.';
 
         identifierLabel.textContent = 'Partner Mobile or Registered Email';
-        identifierInput.placeholder = 'e.g. +91 74782 90140 or tripmozy@gmail.com';
+        identifierInput.placeholder = 'e.g. +91 98765 43210 or partner@example.com';
 
         sendBtn.classList.add('partner-btn-style');
         verifyBtn.classList.add('partner-btn-style');
-
-        // Render quick chips for partner convenience
-        quickFillsWrap.style.display = 'flex';
-        quickChips.innerHTML = partnerChips.map(c => `
-          <button type="button" class="chip partner-chip" onclick="fillIdentifier('${c.val}')">${c.label}</button>
-        `).join('');
 
         switchHint.innerHTML = `Are you a traveler planning a trip? <a href="javascript:void(0)" onclick="switchCategory('customer')">Switch to Customer Login</a>`;
       } else {
@@ -705,16 +641,8 @@
         sendBtn.classList.remove('partner-btn-style');
         verifyBtn.classList.remove('partner-btn-style');
 
-        quickFillsWrap.style.display = 'none';
-        quickChips.innerHTML = '';
-
         switchHint.innerHTML = `Are you a verified tour operator? <a href="javascript:void(0)" onclick="switchCategory('partner')">Switch to Partner Login</a>`;
       }
-    }
-
-    function fillIdentifier(val) {
-      identifierInput.value = val;
-      identifierInput.focus();
     }
 
     // STEP 1: Send OTP
