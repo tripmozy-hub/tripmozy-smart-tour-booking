@@ -239,13 +239,7 @@
       <div id="step2" class="step-2">
         <div class="badge-pill">🔐 Verification Code</div>
         <h1>Enter 6-Digit Code</h1>
-        <p class="subtitle">We sent a verification code to <strong id="sentTarget">—</strong> via Email &amp; WhatsApp.</p>
-
-        <!-- Test helper badge for quick verification -->
-        <div id="testOtpPill" class="test-pill" onclick="autoFillTestCode()" style="display:none;">
-          <span>⚡ <strong>Quick Test Code:</strong> <span id="quickCode" style="font-family:monospace;font-weight:800;letter-spacing:1px;"></span></span>
-          <span style="text-decoration:underline;">Click to Auto-fill</span>
-        </div>
+        <p class="subtitle">We sent a verification code to <strong id="sentTarget">—</strong> via Email &amp; WhatsApp. Please check your inbox and enter the code below:</p>
 
         <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
           <div class="form-group">
@@ -266,7 +260,6 @@
 
   <script>
     let currentIdentifier = '';
-    let currentTestOtp = '';
 
     function showToast(msg) {
       const t = document.getElementById('toast');
@@ -294,14 +287,8 @@
 
         if (res.ok && data.success) {
           currentIdentifier = data.identifier;
-          currentTestOtp = data.otpForTesting;
-
           document.getElementById('sentTarget').textContent = input;
-          if (currentTestOtp) {
-            document.getElementById('quickCode').textContent = currentTestOtp;
-            document.getElementById('testOtpPill').style.display = 'flex';
-            document.getElementById('otpCode').value = currentTestOtp;
-          }
+          document.getElementById('otpCode').value = '';
 
           document.getElementById('step1').style.display = 'none';
           document.getElementById('step2').style.display = 'block';
@@ -315,13 +302,6 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Send Verification Code';
-      }
-    }
-
-    function autoFillTestCode() {
-      if (currentTestOtp) {
-        document.getElementById('otpCode').value = currentTestOtp;
-        document.getElementById('verifyBtn').click();
       }
     }
 

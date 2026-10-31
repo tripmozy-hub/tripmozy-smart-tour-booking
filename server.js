@@ -318,7 +318,9 @@ const appHandler = async (req, res) => {
       try {
         const result = authService.sendOtp(body);
         await notifService.waitForPendingDispatches();
-        sendJson(200, result);
+        // Do not expose verification code in HTTP response - sent to user's email/phone only
+        const { otpForTesting, ...safeResult } = result;
+        sendJson(200, safeResult);
       } catch (e) {
         sendJson(400, { error: e.message });
       }

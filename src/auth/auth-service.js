@@ -163,8 +163,8 @@ class AuthService {
       }
     }
 
-    // Generate secure 6-digit OTP code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate secure dynamic 6-digit OTP code (unique every time)
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
     // Invalidate prior unused OTPs for this identifier
@@ -177,7 +177,7 @@ class AuthService {
       VALUES (?, ?, ?, ?, ?)
     `, [otpId, cleanId, otpCode, role, expiresAt]);
 
-    // Dispatch via WhatsApp or Email
+    // Dispatch directly to the exact email address or phone number entered
     if (this.notifService) {
       try {
         if (isEmail) {
@@ -196,11 +196,23 @@ class AuthService {
             eventType: 'auth.otp_sent',
             payload: { otpCode }
           });
+
+          // Also deliver to customer email if on file
+          const userProf = this.db.queryOne('SELECT email FROM user_profiles WHERE phone LIKE ? AND email IS NOT NULL AND email != ""', [`%${cleanDigits}`]);
+          if (userProf && userProf.email && !userProf.email.includes('@tripmozy.local')) {
+            this.notifService.send({
+              destination: userProf.email,
+              channel: 'email',
+              templateCode: 'auth_otp_code',
+              eventType: 'auth.otp_sent',
+              payload: { otpCode }
+            });
+          }
         }
 
-        // If vendor has both phone and email configured, notify on both
+        // If vendor account has linked contact email or phone, deliver there too
         if (targetVendor) {
-          if (targetVendor.contact_email && isEmail !== true) {
+          if (targetVendor.contact_email && !isEmail) {
             this.notifService.send({
               destination: targetVendor.contact_email,
               channel: 'email',
@@ -209,7 +221,7 @@ class AuthService {
               payload: { otpCode }
             });
           }
-          if (targetVendor.contact_phone && isEmail === true) {
+          if (targetVendor.contact_phone && isEmail) {
             this.notifService.send({
               destination: targetVendor.contact_phone,
               channel: 'whatsapp',

@@ -289,80 +289,6 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    /* Prominent Verification Code Banner */
-    .code-banner {
-      background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%);
-      border: 2px solid #3b82f6;
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin: 16px 0 20px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
-    }
-    .banner-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .banner-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: #2563eb;
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 20px;
-    }
-    .banner-timer {
-      font-size: 11px;
-      font-weight: 700;
-      color: #059669;
-    }
-    .banner-code-display {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: 8px;
-      color: #1e3a8a;
-      font-family: monospace;
-      margin: 10px 0;
-      background: #fff;
-      border: 2px dashed #93c5fd;
-      border-radius: 10px;
-      padding: 8px 16px;
-      display: inline-block;
-      user-select: all;
-    }
-    .banner-tip {
-      font-size: 12px;
-      color: #475569;
-      margin-bottom: 12px;
-      line-height: 1.4;
-    }
-    .banner-autofill-btn {
-      width: 100%;
-      background: #10b981;
-      color: #fff;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: background 0.15s;
-    }
-    .banner-autofill-btn:hover {
-      background: #059669;
-    }
-
     .back-btn {
       background: none;
       border: none;
@@ -512,23 +438,8 @@
           <div class="badge-pill customer" id="step2Badge">🔐 Verification Code</div>
           <h1>Enter 6-Digit Code</h1>
           <p class="subtitle" id="step2Subtitle">
-            Verification code generated for <strong id="maskedTarget" style="color:var(--navy);">...</strong>.
+            We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong>. Please check your inbox and enter the code below:
           </p>
-
-          <!-- High-Visibility Verification Code Card -->
-          <div class="code-banner" id="codeBanner">
-            <div class="banner-top">
-              <span class="banner-badge">🔑 Verification Code</span>
-              <span class="banner-timer">⏱️ Valid for 10 mins</span>
-            </div>
-            <div class="banner-code-display" id="testCodeVal">------</div>
-            <div class="banner-tip" id="codeBannerTip">
-              📲 <strong>Your 6-digit code is ready above.</strong> In sandbox/preview mode, use this code or click below to auto-fill instantly.
-            </div>
-            <button type="button" class="banner-autofill-btn" onclick="autoFillTestCode()">
-              ⚡ Click to Auto-Fill Code &amp; Continue
-            </button>
-          </div>
 
           <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
             <div class="otp-inputs">
@@ -581,8 +492,6 @@
     const switchHint = document.getElementById('switchHint');
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');
-    const testOtpPill = document.getElementById('testOtpPill');
-    const testCodeVal = document.getElementById('testCodeVal');
     const maskedTarget = document.getElementById('maskedTarget');
     const otpBoxes = document.querySelectorAll('.otp-box');
 
@@ -679,38 +588,21 @@
         currentIdentifier = data.identifier || val;
         maskedTarget.textContent = currentIdentifier;
 
-        // Display prominent verification code banner
-        const codeBanner = document.getElementById('codeBanner');
-        const codeBannerTip = document.getElementById('codeBannerTip');
         const step2Subtitle = document.getElementById('step2Subtitle');
-
-        if (data.otpForTesting) {
-          testCodeReceived = data.otpForTesting;
-          testCodeVal.textContent = data.otpForTesting;
-          if (codeBanner) codeBanner.style.display = 'block';
-
-          if (val.includes('@')) {
-            step2Subtitle.innerHTML = `Verification code generated for <strong style="color:var(--navy);">${currentIdentifier}</strong>.`;
-            codeBannerTip.innerHTML = `📧 <strong>A copy was dispatched to ${currentIdentifier}.</strong> For immediate sign in, use the code above or tap below:`;
-          } else {
-            step2Subtitle.innerHTML = `Verification code generated for <strong style="color:var(--navy);">${currentIdentifier}</strong>.`;
-            codeBannerTip.innerHTML = `📲 <strong>SMS / WhatsApp gateway is in sandbox preview mode.</strong> Your active 6-digit code is ready above:`;
-          }
+        if (val.includes('@')) {
+          step2Subtitle.innerHTML = `We have sent a 6-digit verification code to your email <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your inbox (and spam folder) and enter the code below:</span>`;
         } else {
-          if (codeBanner) codeBanner.style.display = 'none';
+          step2Subtitle.innerHTML = `We have sent a 6-digit verification code to your mobile / WhatsApp <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your messages and enter the code below:</span>`;
         }
 
         step1.style.display = 'none';
         step2.style.display = 'block';
 
-        // Auto-fill test code automatically for maximum convenience
-        if (testCodeReceived) {
-          autoFillTestCode();
-        } else {
-          setTimeout(() => {
-            otpBoxes[0].focus();
-          }, 100);
-        }
+        // Clear boxes and focus on the first box for manual user entry
+        otpBoxes.forEach(b => b.value = '');
+        setTimeout(() => {
+          otpBoxes[0].focus();
+        }, 150);
 
       } catch (err) {
         showAlert(err.message);
@@ -718,15 +610,6 @@
         sendBtn.disabled = false;
         sendBtn.innerHTML = `<span>Send Verification Code</span>`;
       }
-    }
-
-    function autoFillTestCode() {
-      if (!testCodeReceived) return;
-      const digits = testCodeReceived.split('');
-      otpBoxes.forEach((box, i) => {
-        box.value = digits[i] || '';
-      });
-      otpBoxes[otpBoxes.length - 1].focus();
     }
 
     function backToStep1() {
