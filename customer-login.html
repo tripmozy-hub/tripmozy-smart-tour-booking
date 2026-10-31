@@ -341,13 +341,21 @@
         if (res.ok && data.success) {
           // Store session
           localStorage.setItem('tm_session_token', data.sessionToken);
-          localStorage.setItem('tm_user_role', 'customer');
-          localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+          localStorage.setItem('tm_user_role', data.role || 'customer');
 
-          showToast('🎉 Login successful! Redirecting...');
-          setTimeout(() => {
-            window.location.href = data.redirectUrl || '/booking';
-          }, 600);
+          if (data.role === 'vendor') {
+            localStorage.setItem('tm_vendor_info', JSON.stringify(data.vendor));
+            showToast('🎉 Partner account verified! Redirecting to Partner Dashboard...');
+            setTimeout(() => {
+              window.location.href = data.redirectUrl || '/partner/dashboard';
+            }, 600);
+          } else {
+            localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+            showToast('🎉 Login successful! Redirecting to Customer Portal...');
+            setTimeout(() => {
+              window.location.href = data.redirectUrl || '/booking';
+            }, 600);
+          }
         } else {
           showToast('❌ ' + (data.error || 'Invalid code'));
         }

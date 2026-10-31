@@ -86,7 +86,7 @@ class AuthService {
   }
 
   // Send 6-digit OTP code to Customer or Tour Operator
-  sendOtp({ identifier, role = 'customer' }) {
+  sendOtp({ identifier, role = 'customer', mode = 'any', businessName = null }) {
     const cleanId = this.normalizeIdentifier(identifier);
     if (!cleanId) {
       throw new Error('Please enter a valid email address or mobile number');
@@ -95,10 +95,37 @@ class AuthService {
     const isEmail = cleanId.includes('@');
     const cleanDigits = cleanId.replace(/\D/g, '').slice(-10);
     const existingRole = this.getExistingRole(cleanId);
+    let autoSwitchedToLogin = false;
 
-    // STRICT ROLE LOCKING:
-    // Once an account exists as Customer or Vendor, they CANNOT log in as the opposite role
-    if (existingRole && existingRole !== role) {
+    // 1. If mode === 'login' (user is logging into an existing account):
+    if (mode === 'login') {
+      if (existingRole) {
+        // Automatically adapt to the registered role (customer or vendor)
+        role = existingRole;
+      } else {
+        const err = new Error('No account found with this phone number or email. Please sign up to create a new account.');
+        err.needsSignup = true;
+        err.accountExists = false;
+        throw err;
+      }
+    }
+
+    // 2. If mode === 'signup' (user is registering as a new user):
+    // "if acc is already made then the user should automaticaly redirect to log in page"
+    if (mode === 'signup' || mode === 'register') {
+      if (existingRole) {
+        role = existingRole;
+        autoSwitchedToLogin = true;
+      }
+    }
+
+    // 3. Fallback for generic requests: adopt existing role if already made
+    if (mode === 'any' && existingRole) {
+      role = existingRole;
+    }
+
+    // STRICT ROLE LOCKING (when explicitly requesting opposite role):
+    if (existingRole && existingRole !== role && !autoSwitchedToLogin) {
       if (existingRole === 'customer' && role === 'vendor') {
         const hasBookings = this.db.queryOne(`
           SELECT b.id FROM bookings b
@@ -276,9 +303,13 @@ class AuthService {
 
     return {
       success: true,
-      message: isEmail
-        ? `Verification code sent to ${this.maskIdentifier(cleanId)}`
-        : `Verification code sent via SMS to ${this.maskIdentifier(cleanId)}`,
+      accountExists: !!existingRole,
+      autoSwitchedToLogin,
+      message: autoSwitchedToLogin
+        ? `An account is already registered with this ${isEmail ? 'email' : 'mobile'}. Automatically switched to Log In.`
+        : (isEmail
+            ? `Verification code sent to ${this.maskIdentifier(cleanId)}`
+            : `Verification code sent via SMS to ${this.maskIdentifier(cleanId)}`),
       identifier: cleanId,
       channel: isEmail ? 'email' : 'sms',
       role
@@ -294,6 +325,33 @@ class AuthService {
     if (!code || code.length !== 6) {
       throw new Error('Please enter a valid 6-digit verification code');
     }
+
+    // Look up OTP - if role is provided, try that first; otherwise fall back to identifier + code
+    let otpRecord = null;
+    if (role) {
+      otpRecord = this.db.queryOne(`
+        SELECT * FROM auth_otps
+        WHERE identifier = ? AND otp_code = ? AND role = ? AND is_used = 0
+          AND datetime('now') <= datetime(expires_at)
+        ORDER BY created_at DESC LIMIT 1
+      `, [cleanId, code, role]);
+    }
+
+    if (!otpRecord) {
+      otpRecord = this.db.queryOne(`
+        SELECT * FROM auth_otps
+        WHERE identifier = ? AND otp_code = ? AND is_used = 0
+          AND datetime('now') <= datetime(expires_at)
+        ORDER BY created_at DESC LIMIT 1
+      `, [cleanId, code]);
+    }
+
+    if (!otpRecord) {
+      throw new Error('Invalid or expired verification code. Please check and try again.');
+    }
+
+    // Adopt the role from the valid OTP record
+    role = otpRecord.role;
 
     const existingRole = this.getExistingRole(cleanId);
     if (existingRole && existingRole !== role) {
@@ -313,18 +371,6 @@ class AuthService {
       if (existingRole === 'vendor' && role === 'customer') {
         throw new Error('This account is registered as a TripMozy Tour Operator Partner. Role locking prevents access to Customer Portal.');
       }
-    }
-
-    // Verify OTP against database
-    const otpRecord = this.db.queryOne(`
-      SELECT * FROM auth_otps
-      WHERE identifier = ? AND otp_code = ? AND role = ? AND is_used = 0
-        AND datetime('now') <= datetime(expires_at)
-      ORDER BY created_at DESC LIMIT 1
-    `, [cleanId, code, role]);
-
-    if (!otpRecord) {
-      throw new Error('Invalid or expired verification code. Please check and try again.');
     }
 
     // Mark consumed

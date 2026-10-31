@@ -338,16 +338,26 @@
         const data = await res.json();
 
         if (res.ok && data.success) {
-          // Store session & vendorId
+          // Store session & role
           localStorage.setItem('tm_session_token', data.sessionToken);
-          localStorage.setItem('tm_user_role', 'vendor');
-          localStorage.setItem('tm_vendor_id', data.vendor.id);
-          localStorage.setItem('tm_vendor_info', JSON.stringify(data.vendor));
+          localStorage.setItem('tm_user_role', data.role || 'vendor');
 
-          showToast('🎉 Partner verified! Opening dashboard...');
-          setTimeout(() => {
-            window.location.href = data.redirectUrl || `/partner/dashboard?vendorId=${data.vendor.id}`;
-          }, 600);
+          if (data.role === 'customer') {
+            localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+            showToast('🎉 Customer account verified! Opening Customer Portal...');
+            setTimeout(() => {
+              window.location.href = data.redirectUrl || '/booking';
+            }, 600);
+          } else {
+            if (data.vendor) {
+              localStorage.setItem('tm_vendor_id', data.vendor.id);
+              localStorage.setItem('tm_vendor_info', JSON.stringify(data.vendor));
+            }
+            showToast('🎉 Partner verified! Opening dashboard...');
+            setTimeout(() => {
+              window.location.href = data.redirectUrl || (data.vendor ? `/partner/dashboard?vendorId=${data.vendor.id}` : '/partner/dashboard');
+            }, 600);
+          }
         } else {
           showToast('❌ ' + (data.error || 'Invalid code'));
         }

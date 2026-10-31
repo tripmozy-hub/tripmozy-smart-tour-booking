@@ -340,7 +340,7 @@ const appHandler = async (req, res) => {
         const { otpForTesting, ...safeResult } = result;
         sendJson(200, safeResult);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -354,7 +354,7 @@ const appHandler = async (req, res) => {
         res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -396,7 +396,7 @@ const appHandler = async (req, res) => {
         const updated = authService.updateVendorProfile(vendorId, body);
         sendJson(200, { success: true, vendor: updated });
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -424,7 +424,7 @@ const appHandler = async (req, res) => {
         await notifService.waitForPendingDispatches();
         sendJson(201, result);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -447,7 +447,7 @@ const appHandler = async (req, res) => {
         }
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -579,7 +579,7 @@ const appHandler = async (req, res) => {
 
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -705,7 +705,7 @@ const appHandler = async (req, res) => {
         await notifService.waitForPendingDispatches();
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;
@@ -725,7 +725,7 @@ const appHandler = async (req, res) => {
         });
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message });
+        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
       }
     });
     return;

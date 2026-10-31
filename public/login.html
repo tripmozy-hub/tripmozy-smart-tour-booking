@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Sign In | TripMozy - Smart Tour Booking & Partner Portal</title>
+  <title>Sign In & Register | TripMozy - Smart Tour Booking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,8 +21,8 @@
       --text-muted: #64748b;
       --border: #e2e8f0;
       --success: #10b981;
-      --radius: 18px;
-      --shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.04);
+      --radius: 20px;
+      --shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.05);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -93,31 +93,31 @@
     }
     .login-container {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
     }
 
-    /* Unified Login Card */
+    /* Auth Card */
     .login-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 36px 32px;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
     }
 
-    /* Category Switcher Tabs */
-    .category-toggle {
+    /* Top Mode Toggle: Log In vs Sign Up */
+    .mode-toggle {
       display: grid;
       grid-template-columns: 1fr 1fr;
       background: #f1f5f9;
       padding: 5px;
-      border-radius: 12px;
-      margin-bottom: 28px;
+      border-radius: 14px;
+      margin-bottom: 26px;
       border: 1px solid var(--border);
-      gap: 4px;
+      gap: 6px;
     }
-    .cat-btn {
+    .mode-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -125,7 +125,7 @@
       padding: 12px 14px;
       border: none;
       background: transparent;
-      border-radius: 9px;
+      border-radius: 10px;
       font-size: 14px;
       font-weight: 700;
       color: var(--text-muted);
@@ -134,21 +134,75 @@
       font-family: inherit;
       user-select: none;
     }
-    .cat-btn:hover:not(.active) {
+    .mode-btn:hover:not(.active) {
       color: var(--text);
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.6);
     }
-    .cat-btn.active {
+    .mode-btn.active {
       background: #ffffff;
       color: var(--navy);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
     }
-    .cat-btn.active.partner-tab {
+    .mode-btn.active.login-tab {
+      color: #1e40af;
+      border: 1px solid #dbeafe;
+    }
+    .mode-btn.active.signup-tab {
       color: #92400e;
-      background: #ffffff;
+      border: 1px solid #fde68a;
     }
 
-    /* Dynamic Badges & Headings */
+    /* Role selection pills inside Sign Up */
+    .signup-role-box {
+      margin-bottom: 20px;
+      display: none;
+    }
+    .role-pills {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .role-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 10px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      background: #fff;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .role-pill:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .role-pill.active {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+    .role-pill.active.partner-pill {
+      border-color: var(--accent);
+      background: #fffbeb;
+    }
+    .role-pill-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .role-pill-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Badges & Headings */
     .badge-pill {
       display: inline-flex;
       align-items: center;
@@ -157,8 +211,7 @@
       font-weight: 700;
       padding: 4px 12px;
       border-radius: 20px;
-      margin-bottom: 14px;
-      transition: all 0.2s;
+      margin-bottom: 12px;
     }
     .badge-pill.customer {
       background: #eff6ff;
@@ -170,24 +223,28 @@
       color: #92400e;
       border: 1px solid #fde68a;
     }
+    .badge-pill.auto {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
 
     h1 {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       margin-bottom: 8px;
       letter-spacing: -0.5px;
       color: var(--navy);
     }
     .subtitle {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--text-muted);
       margin-bottom: 22px;
       line-height: 1.55;
     }
 
-
     /* Form Fields */
-    .form-group { margin-bottom: 20px; }
+    .form-group { margin-bottom: 18px; }
     label {
       display: block;
       font-size: 13px;
@@ -197,187 +254,170 @@
     }
     input[type="text"], input[type="email"], input[type="tel"] {
       width: 100%;
-      padding: 14px 16px;
+      padding: 13px 16px;
       border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 16px !important; /* Prevents iOS auto-zoom */
+      border-radius: 12px;
+      font-size: 15px;
       font-family: inherit;
       color: var(--text);
-      background: #fff;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input:focus {
+      background: #ffffff;
       outline: none;
+      transition: all 0.2s ease;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    /* Submit Button */
+    /* Buttons */
     .btn {
       width: 100%;
-      padding: 15px;
-      background: var(--primary);
-      color: #fff;
+      padding: 14px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
-      font-family: inherit;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+      gap: 10px;
+      background: var(--primary);
+      color: #ffffff;
+      transition: all 0.2s ease;
+      font-family: inherit;
     }
-    .btn:hover:not(:disabled) {
+    .btn:hover {
       background: var(--primary-dark);
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
-    }
-    .btn.partner-btn-style {
-      background: #0f172a;
-      color: #fbbf24;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
-    }
-    .btn.partner-btn-style:hover:not(:disabled) {
-      background: #1e293b;
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.35);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
     .btn:disabled {
-      opacity: 0.6;
+      opacity: 0.65;
       cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+      transform: none !important;
+      box-shadow: none !important;
     }
-    .btn-spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .btn.partner-btn {
+      background: #d97706;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn.partner-btn:hover {
+      background: #b45309;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    }
 
-    /* Step 2: OTP Verification */
+    /* Step 2: OTP Inputs */
     .step-2 { display: none; }
     .otp-inputs {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin: 22px 0 16px;
-      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
     }
     .otp-box {
-      width: clamp(38px, 12vw, 48px);
-      height: clamp(46px, 14vw, 54px);
+      width: 100%;
+      height: 54px;
       text-align: center;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 800;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: monospace;
-      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #ffffff;
       color: var(--navy);
-      transition: all 0.2s;
+      font-family: monospace;
+      outline: none;
+      transition: all 0.18s ease;
     }
     .otp-box:focus {
       border-color: var(--primary);
-      outline: none;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    .back-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 13px;
-      cursor: pointer;
-      margin-top: 16px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-      font-family: inherit;
-    }
-    .back-btn:hover { color: var(--text); }
-
-    /* Alert / Error Box */
+    /* Alert Boxes */
     .alert-box {
-      display: none;
-      padding: 12px 14px;
-      border-radius: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
       font-size: 13px;
-      font-weight: 600;
+      line-height: 1.5;
       margin-bottom: 18px;
-      line-height: 1.45;
-    }
-    .alert-box.error {
-      display: block;
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
+      display: none;
     }
     .alert-box.info {
       display: block;
       background: #eff6ff;
-      color: #1e40af;
       border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+    .alert-box.success {
+      display: block;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .alert-box.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .alert-box.warning {
+      display: block;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
     }
 
-    /* Footer Feature Summary */
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    .switch-mode-note {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .switch-mode-note a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .switch-mode-note a:hover { text-decoration: underline; }
+
     .login-footer-info {
       margin-top: 24px;
-      padding-top: 20px;
+      padding-top: 18px;
       border-top: 1px solid var(--border);
       display: flex;
-      align-items: center;
       justify-content: space-between;
       font-size: 12px;
       color: var(--text-muted);
-    }
-    .portal-switch-note {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 20px;
-    }
-    .portal-switch-note a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 700;
-    }
-    .portal-switch-note a:hover { text-decoration: underline; }
-
-    /* ── Mobile Phone Browser Responsiveness ── */
-    @media (max-width: 640px) {
-      header { padding: 12px 16px; }
-      .header-inner { flex-wrap: wrap; gap: 8px; }
-      .brand-logo { font-size: 20px; }
-      .main-wrap { padding: 20px 12px; }
-      .login-card { padding: 24px 18px; border-radius: 16px; }
-      .category-toggle { margin-bottom: 20px; }
-      .cat-btn { padding: 10px 8px; font-size: 13px; }
-      h1 { font-size: 22px; }
-      .subtitle { font-size: 13px; margin-bottom: 18px; }
-      .otp-inputs { gap: 6px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Top Navigation -->
   <header>
     <div class="header-inner">
-      <a href="/smart-tour-booking" class="brand">
+      <a href="/" class="brand">
         <div class="brand-logo">Trip<span>Mozy</span></div>
-        <div class="brand-tag">Unified Sign In</div>
+        <div class="brand-tag">Authentication Portal</div>
       </a>
       <div class="header-right">
-        <a href="/smart-tour-booking" class="nav-link">← Explore Tours</a>
-        <a href="/booking" class="nav-link">My Offers</a>
+        <a href="/smart-tour-booking" class="nav-link">🎒 Tour Requests</a>
+        <a href="/booking" class="nav-link">📋 My Quotes</a>
+        <a href="/partner/dashboard" class="nav-link">🤝 Partner Desk</a>
       </div>
     </div>
   </header>
@@ -387,32 +427,46 @@
     <div class="login-container">
       <div class="login-card">
 
-        <!-- Category Selector: Customer vs TripMozy Partner -->
-        <div class="category-toggle" role="tablist">
-          <button type="button" class="cat-btn active" id="tabCustomer" onclick="switchCategory('customer')">
-            <span style="font-size:16px;">🎒</span>
-            <span>Customer</span>
+        <!-- Top Mode Tabs: Log In vs Sign Up -->
+        <div class="mode-toggle" role="tablist">
+          <button type="button" class="mode-btn active login-tab" id="tabModeLogin" onclick="switchMode('login')">
+            <span>🔑</span>
+            <span>Log In</span>
           </button>
-          <button type="button" class="cat-btn partner-tab" id="tabPartner" onclick="switchCategory('partner')">
-            <span style="font-size:16px;">🤝</span>
-            <span>TripMozy Partner</span>
+          <button type="button" class="mode-btn signup-tab" id="tabModeSignup" onclick="switchMode('signup')">
+            <span>✨</span>
+            <span>New User? Sign Up</span>
           </button>
         </div>
 
         <div id="alertBox" class="alert-box"></div>
 
-        <!-- STEP 1: Enter Identifier -->
+        <!-- STEP 1: Identification & Registration Form -->
         <div id="step1">
-          <div class="badge-pill customer" id="catBadge">🎒 Traveler Sign In</div>
-          <h1 id="pageTitle">Welcome Traveler</h1>
+          <div class="badge-pill customer" id="headerBadge">🔐 Welcome Back</div>
+          <h1 id="pageTitle">Sign In to TripMozy</h1>
           <p class="subtitle" id="pageSub">
-            Enter your mobile number or email to view your tour requests, compare live operator quotes, and manage vouchers.
+            Enter your mobile number or email. We'll automatically recognize whether you are a Customer or Tour Operator and open your portal.
           </p>
 
+          <!-- Sign Up Only: Role Selector (Customer vs Partner) -->
+          <div id="signupRoleBox" class="signup-role-box">
+            <label>Choose Account Type:</label>
+            <div class="role-pills">
+              <div class="role-pill active" id="rolePillCustomer" onclick="selectSignupRole('customer')">
+                <div class="role-pill-title"><span>🎒</span> Traveler / Customer</div>
+                <div class="role-pill-desc">Request & compare custom tour quotes</div>
+              </div>
+              <div class="role-pill" id="rolePillPartner" onclick="selectSignupRole('vendor')">
+                <div class="role-pill-title"><span>🤝</span> Tour Operator</div>
+                <div class="role-pill-desc">Receive tour requests & send quotes</div>
+              </div>
+            </div>
+          </div>
 
-          <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
+          <form id="authForm" onsubmit="handleSendOtp(event)">
             <div class="form-group">
-              <label for="identifier" id="identifierLabel">Mobile Number or Email</label>
+              <label for="identifier" id="identifierLabel">Mobile Number or Email Address</label>
               <input
                 type="text"
                 id="identifier"
@@ -422,14 +476,25 @@
                 autocomplete="username"
               >
             </div>
+
+            <!-- Optional Business Name for new Tour Operator Registration -->
+            <div class="form-group" id="businessNameGroup" style="display:none;">
+              <label for="businessName">Tour Agency / Business Name</label>
+              <input
+                type="text"
+                id="businessName"
+                placeholder="e.g. Himalayan Explorers Tours & Travels"
+              >
+            </div>
+
             <button type="submit" class="btn" id="sendBtn">
-              <span>Send Verification Code</span>
+              <span id="sendBtnText">Send Verification Code</span>
             </button>
           </form>
 
-          <div class="portal-switch-note" id="switchHint">
-            Are you a verified tour operator?
-            <a href="javascript:void(0)" onclick="switchCategory('partner')">Switch to Partner Login</a>
+          <div class="switch-mode-note" id="switchModeNote">
+            Don't have an account yet?
+            <a href="javascript:void(0)" onclick="switchMode('signup')">Sign Up as New User →</a>
           </div>
         </div>
 
@@ -438,7 +503,7 @@
           <div class="badge-pill customer" id="step2Badge">🔐 Verification Code</div>
           <h1>Enter 6-Digit Code</h1>
           <p class="subtitle" id="step2Subtitle">
-            We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong>. Please check your inbox and enter the code below:
+            We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong> via SMS. Please enter the code below:
           </p>
 
           <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
@@ -452,7 +517,7 @@
             </div>
 
             <button type="submit" class="btn" id="verifyBtn">
-              <span>Verify &amp; Enter Portal</span>
+              <span id="verifyBtnText">Verify &amp; Enter Portal</span>
             </button>
           </form>
 
@@ -463,8 +528,8 @@
 
         <!-- Card Footer Info -->
         <div class="login-footer-info">
-          <span>🔒 256-bit Secure Multi-Factor Auth</span>
-          <span>⚡ Instant WhatsApp Delivery</span>
+          <span>🔒 256-bit Secure SMS Verification</span>
+          <span>⚡ Instant Portal Access</span>
         </div>
 
       </div>
@@ -473,121 +538,171 @@
 
   <script>
     // State
-    let currentRole = 'customer'; // 'customer' | 'vendor'
+    let currentMode = 'login'; // 'login' | 'signup'
+    let currentSignupRole = 'customer'; // 'customer' | 'vendor'
+    let activeRole = 'customer'; // 'customer' | 'vendor'
     let currentIdentifier = '';
 
-    // Elements
-    const tabCustomer = document.getElementById('tabCustomer');
-    const tabPartner = document.getElementById('tabPartner');
-    const catBadge = document.getElementById('catBadge');
-    const step2Badge = document.getElementById('step2Badge');
+    // DOM Elements
+    const tabModeLogin = document.getElementById('tabModeLogin');
+    const tabModeSignup = document.getElementById('tabModeSignup');
+    const headerBadge = document.getElementById('headerBadge');
     const pageTitle = document.getElementById('pageTitle');
     const pageSub = document.getElementById('pageSub');
+    const signupRoleBox = document.getElementById('signupRoleBox');
+    const rolePillCustomer = document.getElementById('rolePillCustomer');
+    const rolePillPartner = document.getElementById('rolePillPartner');
+    const businessNameGroup = document.getElementById('businessNameGroup');
+    const businessNameInput = document.getElementById('businessName');
     const identifierInput = document.getElementById('identifier');
-    const identifierLabel = document.getElementById('identifierLabel');
     const sendBtn = document.getElementById('sendBtn');
-    const verifyBtn = document.getElementById('verifyBtn');
+    const sendBtnText = document.getElementById('sendBtnText');
+    const switchModeNote = document.getElementById('switchModeNote');
     const alertBox = document.getElementById('alertBox');
-    const switchHint = document.getElementById('switchHint');
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');
+    const step2Badge = document.getElementById('step2Badge');
+    const step2Subtitle = document.getElementById('step2Subtitle');
     const maskedTarget = document.getElementById('maskedTarget');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const verifyBtnText = document.getElementById('verifyBtnText');
     const otpBoxes = document.querySelectorAll('.otp-box');
 
     function showAlert(msg, type = 'error') {
       alertBox.className = `alert-box ${type}`;
-      let html = `<div>${msg}</div>`;
-      if (msg.includes('switch to the Customer tab') || msg.includes('registered as a Customer')) {
-        html += `<button type="button" class="btn" style="margin-top:10px;background:#2563eb;color:#fff;border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:8px;" onclick="switchCategory('customer')">👉 Click here to Switch to Customer Tab</button>`;
-      } else if (msg.includes('switch to the TripMozy Partner tab') || msg.includes('registered as a TripMozy Tour Operator Partner')) {
-        html += `<button type="button" class="btn" style="margin-top:10px;background:#d97706;color:#fff;border:none;padding:8px 16px;cursor:pointer;font-weight:700;border-radius:8px;" onclick="switchCategory('partner')">👉 Click here to Switch to Partner Tab</button>`;
-      }
-      alertBox.innerHTML = html;
+      alertBox.innerHTML = msg;
+      alertBox.style.display = 'block';
     }
+
     function hideAlert() {
       alertBox.className = 'alert-box';
-      alertBox.textContent = '';
+      alertBox.style.display = 'none';
+      alertBox.innerHTML = '';
     }
 
-    // Category Switcher
-    function switchCategory(cat) {
+    // Switch between "Log In" (Existing User) and "Sign Up" (New User)
+    function switchMode(mode) {
       hideAlert();
-      currentRole = (cat === 'partner' || cat === 'vendor') ? 'vendor' : 'customer';
+      currentMode = mode;
 
-      if (currentRole === 'vendor') {
-        tabCustomer.classList.remove('active');
-        tabPartner.classList.add('active');
+      if (currentMode === 'login') {
+        tabModeLogin.classList.add('active');
+        tabModeSignup.classList.remove('active');
 
-        catBadge.className = 'badge-pill partner';
-        catBadge.innerHTML = '🤝 Tour Operator Partner Desk';
-        step2Badge.className = 'badge-pill partner';
+        headerBadge.className = 'badge-pill customer';
+        headerBadge.textContent = '🔐 Welcome Back';
 
-        pageTitle.textContent = 'Tour Operator Partner Portal';
-        pageSub.textContent = 'Sign in or register your tour operations with your mobile number or email. You will receive live customer tour requests and can send instant quotes.';
+        pageTitle.textContent = 'Sign In to TripMozy';
+        pageSub.textContent = "Enter your mobile number or email. We'll automatically recognize whether you are a Customer or Tour Operator and open your dashboard.";
 
-        identifierLabel.textContent = 'Partner Mobile or Email Address';
-        identifierInput.placeholder = 'e.g. +91 98765 43210 or partner@example.com';
+        signupRoleBox.style.display = 'none';
+        businessNameGroup.style.display = 'none';
 
-        sendBtn.classList.add('partner-btn-style');
-        verifyBtn.classList.add('partner-btn-style');
+        sendBtn.classList.remove('partner-btn');
+        sendBtnText.textContent = 'Send Verification Code';
 
-        switchHint.innerHTML = `Are you a traveler planning a trip? <a href="javascript:void(0)" onclick="switchCategory('customer')">Switch to Customer Login</a>`;
+        switchModeNote.innerHTML = `Don't have an account yet? <a href="javascript:void(0)" onclick="switchMode('signup')">Sign Up as New User →</a>`;
       } else {
-        tabPartner.classList.remove('active');
-        tabCustomer.classList.add('active');
+        tabModeSignup.classList.add('active');
+        tabModeLogin.classList.remove('active');
 
-        catBadge.className = 'badge-pill customer';
-        catBadge.innerHTML = '🎒 Traveler Sign In';
-        step2Badge.className = 'badge-pill customer';
+        headerBadge.className = 'badge-pill partner';
+        headerBadge.textContent = '✨ New User Registration';
 
-        pageTitle.textContent = 'Welcome Traveler';
-        pageSub.textContent = 'Enter your mobile number or email to view your tour requests, compare live operator quotes, and manage vouchers.';
+        pageTitle.textContent = 'Join TripMozy';
+        pageSub.textContent = 'Choose your account type and enter your mobile number or email to create your new account:';
 
-        identifierLabel.textContent = 'Mobile Number or Email';
-        identifierInput.placeholder = 'e.g. +91 98765 43210 or yourname@gmail.com';
+        signupRoleBox.style.display = 'block';
+        updateSignupRoleUI();
 
-        sendBtn.classList.remove('partner-btn-style');
-        verifyBtn.classList.remove('partner-btn-style');
+        sendBtnText.textContent = 'Register & Send Code';
 
-        switchHint.innerHTML = `Are you a verified tour operator? <a href="javascript:void(0)" onclick="switchCategory('partner')">Switch to Partner Login</a>`;
+        switchModeNote.innerHTML = `Already have an account? <a href="javascript:void(0)" onclick="switchMode('login')">Log In here →</a>`;
+      }
+      identifierInput.focus();
+    }
+
+    function selectSignupRole(role) {
+      currentSignupRole = role;
+      updateSignupRoleUI();
+    }
+
+    function updateSignupRoleUI() {
+      if (currentSignupRole === 'vendor') {
+        rolePillCustomer.classList.remove('active');
+        rolePillPartner.classList.add('active', 'partner-pill');
+        businessNameGroup.style.display = 'block';
+        sendBtn.classList.add('partner-btn');
+      } else {
+        rolePillPartner.classList.remove('active', 'partner-pill');
+        rolePillCustomer.classList.add('active');
+        businessNameGroup.style.display = 'none';
+        sendBtn.classList.remove('partner-btn');
       }
     }
 
-    // STEP 1: Send OTP
+    // STEP 1: Submit Identifier to Send OTP
     async function handleSendOtp(e) {
       e.preventDefault();
       hideAlert();
       const val = identifierInput.value.trim();
       if (!val) {
-        showAlert('Please enter your mobile number or email address');
+        showAlert('Please enter your mobile number or email address', 'error');
         return;
       }
 
       sendBtn.disabled = true;
-      sendBtn.innerHTML = `<span class="btn-spinner"></span> Sending code…`;
+      sendBtnText.innerHTML = `<span class="btn-spinner"></span> Sending code…`;
 
       try {
+        const payload = {
+          identifier: val,
+          mode: currentMode,
+          role: currentMode === 'signup' ? currentSignupRole : 'customer',
+          businessName: currentSignupRole === 'vendor' ? businessNameInput.value.trim() : null
+        };
+
         const res = await fetch('/api/auth/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier: val, role: currentRole })
+          body: JSON.stringify(payload)
         });
-        const text = await res.text();
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (_) {
-          throw new Error(`Server returned: ${text.slice(0, 100)}`);
-        }
+
+        const data = await res.json();
 
         if (!res.ok) {
+          // If user tried to log in but no account was found, auto-switch to Sign Up
+          if (data.needsSignup) {
+            showAlert(`⚠️ ${data.error} We've automatically switched you to Sign Up!`, 'warning');
+            switchMode('signup');
+            identifierInput.value = val;
+            return;
+          }
           throw new Error(data.error || 'Failed to dispatch verification code');
         }
 
         currentIdentifier = data.identifier || val;
+        activeRole = data.role || 'customer';
         maskedTarget.textContent = currentIdentifier;
 
-        const step2Subtitle = document.getElementById('step2Subtitle');
+        // If user was on Sign Up but account was ALREADY made, notify auto-switch to Log In!
+        if (data.autoSwitchedToLogin) {
+          showAlert(`ℹ️ <strong>Account Already Found!</strong> An account is already registered with this mobile/email. Automatically switched to Log In.`, 'info');
+          tabModeLogin.classList.add('active');
+          tabModeSignup.classList.remove('active');
+        }
+
+        // Configure Step 2 Heading & Badges
+        if (activeRole === 'vendor') {
+          step2Badge.className = 'badge-pill partner';
+          step2Badge.innerHTML = '🤝 Tour Operator Partner Desk';
+          verifyBtn.classList.add('partner-btn');
+        } else {
+          step2Badge.className = 'badge-pill customer';
+          step2Badge.innerHTML = '🎒 Traveler Sign In';
+          verifyBtn.classList.remove('partner-btn');
+        }
+
         if (val.includes('@')) {
           step2Subtitle.innerHTML = `We have sent a 6-digit verification code to your email <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your inbox (and spam folder) and enter the code below:</span>`;
         } else {
@@ -597,17 +712,15 @@
         step1.style.display = 'none';
         step2.style.display = 'block';
 
-        // Clear boxes and focus on the first box for manual user entry
+        // Clear boxes and focus on the first box
         otpBoxes.forEach(b => b.value = '');
-        setTimeout(() => {
-          otpBoxes[0].focus();
-        }, 150);
+        setTimeout(() => otpBoxes[0].focus(), 150);
 
       } catch (err) {
-        showAlert(err.message);
+        showAlert(err.message, 'error');
       } finally {
         sendBtn.disabled = false;
-        sendBtn.innerHTML = `<span>Send Verification Code</span>`;
+        sendBtnText.textContent = currentMode === 'signup' ? 'Register & Send Code' : 'Send Verification Code';
       }
     }
 
@@ -654,16 +767,14 @@
       e.preventDefault();
       hideAlert();
 
-      let code = '';
-      otpBoxes.forEach(b => code += b.value.trim());
-
-      if (code.length !== 6) {
-        showAlert('Please enter the complete 6-digit verification code');
+      const otp = Array.from(otpBoxes).map(b => b.value.trim()).join('');
+      if (otp.length !== 6) {
+        showAlert('Please enter the complete 6-digit verification code', 'error');
         return;
       }
 
       verifyBtn.disabled = true;
-      verifyBtn.innerHTML = `<span class="btn-spinner"></span> Verifying…`;
+      verifyBtnText.innerHTML = `<span class="btn-spinner"></span> Verifying code…`;
 
       try {
         const res = await fetch('/api/auth/verify-otp', {
@@ -671,88 +782,54 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             identifier: currentIdentifier,
-            otpCode: code,
-            role: currentRole
+            otpCode: otp,
+            role: activeRole
           })
         });
-        const text = await res.text();
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (_) {
-          throw new Error(`Server returned: ${text.slice(0, 100)}`);
-        }
 
+        const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.error || 'Verification failed');
+          throw new Error(data.error || 'Invalid or expired verification code');
         }
 
-        // Store session tokens in browser localStorage
-        localStorage.setItem('tm_session_token', data.sessionToken);
-        localStorage.setItem('tm_user_role', data.role);
-        if (data.vendor) {
-          localStorage.setItem('tm_vendor_id', data.vendor.id);
-          localStorage.setItem('tm_user_info', JSON.stringify(data.vendor));
-        } else if (data.user) {
-          localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+        // Automatic Redirection according to role:
+        // Existing or new Customer -> Customer Page (/booking or pending tour request)
+        // Existing or new Vendor -> Vendor Dashboard (/partner/dashboard)
+        if (data.role === 'vendor') {
+          showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || '/partner/dashboard';
+          }, 600);
+        } else {
+          showAlert('✅ Verification successful! Redirecting to Customer Portal…', 'success');
+          // Check if there was a saved tour request in localStorage waiting to be submitted
+          const pendingDraft = localStorage.getItem('tm_pending_tour_request');
+          setTimeout(() => {
+            if (pendingDraft) {
+              window.location.href = '/smart-tour-booking?auto_submit=true';
+            } else {
+              window.location.href = data.redirectUrl || '/booking';
+            }
+          }, 600);
         }
-
-        showAlert('Verified successfully! Redirecting...', 'info');
-
-        // Check returnUrl query parameter
-        const params = new URLSearchParams(window.location.search);
-        const returnUrl = params.get('returnUrl') || params.get('redirect');
-
-        setTimeout(() => {
-          if (returnUrl) {
-            window.location.href = returnUrl;
-          } else if (data.redirectUrl) {
-            window.location.href = data.redirectUrl;
-          } else if (data.role === 'vendor') {
-            window.location.href = '/partner/dashboard';
-          } else {
-            window.location.href = '/booking';
-          }
-        }, 600);
 
       } catch (err) {
-        showAlert(err.message);
-      } finally {
+        showAlert(err.message, 'error');
         verifyBtn.disabled = false;
-        verifyBtn.innerHTML = `<span>Verify &amp; Enter Portal</span>`;
+        verifyBtnText.textContent = 'Verify & Enter Portal';
       }
     }
 
-    // Boot: Detect category from query param or URL path
-    (function init() {
-      const p = window.location.pathname.toLowerCase();
-      const s = new URLSearchParams(window.location.search);
-      const roleParam = (s.get('type') || s.get('role') || s.get('category') || '').toLowerCase();
-
-      if (
-        roleParam === 'partner' ||
-        roleParam === 'vendor' ||
-        p.includes('partner') ||
-        p.includes('vendor')
-      ) {
-        switchCategory('partner');
-      } else {
-        switchCategory('customer');
+    // Auto-detect URL query params (?mode=signup, ?role=partner, etc.)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'signup' || params.get('mode') === 'register') {
+        switchMode('signup');
       }
-
-      // Check prefill identifier
-      const prefill = s.get('identifier') || localStorage.getItem('tm_prefill_identifier');
-      if (prefill && identifierInput) {
-        identifierInput.value = prefill;
-        localStorage.removeItem('tm_prefill_identifier');
+      if (params.get('role') === 'partner' || params.get('role') === 'vendor') {
+        selectSignupRole('vendor');
       }
-
-      // Check auth required notice
-      const reason = s.get('reason');
-      if (reason === 'auth_required') {
-        showAlert('Please sign in or enter your mobile/email to verify your account and dispatch your tour request.', 'info');
-      }
-    })();
+    });
   </script>
 </body>
 </html>
