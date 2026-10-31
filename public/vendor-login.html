@@ -218,12 +218,12 @@
       <!-- STEP 1: Enter Partner Phone or Email -->
       <div id="step1">
         <div class="badge-pill">🎒 Operator Portal Access</div>
-        <h1>Partner Sign In</h1>
-        <p class="subtitle">Enter your registered operator phone number or partner email to access active customer requests, send quotes, and manage bookings.</p>
+        <h1>Partner Sign In &amp; Registration</h1>
+        <p class="subtitle">Enter your operator mobile number or partner email to access active customer tour requests, send quotes, or register a new vendor ID.</p>
 
         <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
           <div class="form-group">
-            <label for="identifier">Registered Phone or Partner Email</label>
+            <label for="identifier">Operator Mobile or Partner Email</label>
             <input type="text" id="identifier" placeholder="e.g. +91 98765 43210 or partner@example.com" required autofocus>
           </div>
           <button type="submit" class="btn" id="sendBtn">Send Partner Verification Code</button>

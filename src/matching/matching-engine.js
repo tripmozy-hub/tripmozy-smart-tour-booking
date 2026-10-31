@@ -75,7 +75,7 @@ class MatchingEngine {
       const likeParams = searchTerms.map(t => `%${t}%`);
 
       properties = this.db.query(
-        `SELECT * FROM properties WHERE (${cityEq} OR ${cityLike} OR ${stateEq} OR ${stateLike} OR ${nameLike})`,
+        `SELECT * FROM properties WHERE (${cityEq} OR ${cityLike} OR ${stateEq} OR ${stateLike} OR ${nameLike} OR city IN ('All Destinations', 'All India', 'Pan-India', 'Nationwide'))`,
         [...exactParams, ...likeParams, ...exactParams, ...likeParams, ...likeParams]
       );
 

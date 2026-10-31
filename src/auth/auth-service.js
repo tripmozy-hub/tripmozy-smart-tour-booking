@@ -100,9 +100,20 @@ class AuthService {
     // Once an account exists as Customer or Vendor, they CANNOT log in as the opposite role
     if (existingRole && existingRole !== role) {
       if (existingRole === 'customer' && role === 'vendor') {
-        throw new Error(
-          `This account (${cleanId}) is registered as a Customer (Traveler) account. Role locking prevents Customer accounts from signing in to the Tour Operator Partner Portal. Please switch to the Customer tab.`
-        );
+        const hasBookings = this.db.queryOne(`
+          SELECT b.id FROM bookings b
+          JOIN user_profiles u ON b.customer_id = u.id
+          WHERE u.email = ? OR u.phone = ? OR (length(?) >= 10 AND u.phone LIKE ?)
+        `, [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]);
+
+        if (hasBookings) {
+          throw new Error(
+            `This account (${cleanId}) has confirmed traveler bookings. Role locking prevents Customer accounts with bookings from switching to the Tour Operator Partner Portal. Please switch to the Customer tab.`
+          );
+        } else {
+          // Allow traveler without bookings to register as a Tour Operator Partner
+          this.db.execute("UPDATE user_profiles SET role = 'vendor' WHERE email = ? OR phone = ?", [cleanId, cleanId]);
+        }
       }
       if (existingRole === 'vendor' && role === 'customer') {
         throw new Error(
@@ -136,7 +147,8 @@ class AuthService {
       }
 
       if (!targetVendor) {
-        throw new Error(`No tour operator account registered with ${cleanId}. If you are a traveler planning a trip, please switch to the Customer tab.`);
+        // Automatically register new vendor account & tour fleet profile so any vendor can register
+        targetVendor = this.registerNewVendor({ cleanId, isEmail, cleanDigits });
       }
     } else {
       // Customer: find or prepare user profile
@@ -258,7 +270,17 @@ class AuthService {
     const existingRole = this.getExistingRole(cleanId);
     if (existingRole && existingRole !== role) {
       if (existingRole === 'customer' && role === 'vendor') {
-        throw new Error('This account is registered as a Customer. Role locking prevents access to Tour Operator Partner Portal.');
+        const hasBookings = this.db.queryOne(`
+          SELECT b.id FROM bookings b
+          JOIN user_profiles u ON b.customer_id = u.id
+          WHERE u.email = ? OR u.phone = ? OR (length(?) >= 10 AND u.phone LIKE ?)
+        `, [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]);
+
+        if (hasBookings) {
+          throw new Error('This account has confirmed bookings as a Customer. Role locking prevents access to Tour Operator Partner Portal.');
+        } else {
+          this.db.execute("UPDATE user_profiles SET role = 'vendor' WHERE email = ? OR phone = ?", [cleanId, cleanId]);
+        }
       }
       if (existingRole === 'vendor' && role === 'customer') {
         throw new Error('This account is registered as a TripMozy Tour Operator Partner. Role locking prevents access to Customer Portal.');
@@ -309,7 +331,7 @@ class AuthService {
       }
 
       if (!vendor) {
-        throw new Error(`No tour operator account registered with ${cleanId}`);
+        vendor = this.registerNewVendor({ cleanId, isEmail: cleanId.includes('@'), cleanDigits });
       }
 
       this.db.execute(`
@@ -464,6 +486,108 @@ class AuthService {
     `, [cleanId, cleanId, cleanId]);
 
     return requests;
+  }
+
+  // Register a new Tour Operator Partner account and initial nationwide tour fleet profile
+  registerNewVendor({ cleanId, isEmail, cleanDigits }) {
+    return this.db.transaction((tx) => {
+      // 1. Check if user profile already exists
+      let user = tx.queryOne(`
+        SELECT * FROM user_profiles
+        WHERE email = ? OR phone = ? OR (length(?) >= 10 AND phone LIKE ?)
+      `, [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]);
+
+      const rawName = isEmail ? cleanId.split('@')[0] : (cleanDigits && cleanDigits.length >= 4 ? `Partner_${cleanDigits.slice(-4)}` : 'Partner');
+      const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+      const userEmail = isEmail ? cleanId : `partner_${cleanDigits || Date.now()}@tripmozy.local`;
+      const userPhone = isEmail ? null : cleanId;
+
+      if (!user) {
+        const userId = tx.uuid();
+        tx.execute(`
+          INSERT INTO user_profiles (id, email, phone, role, display_name, status, is_email_verified, is_phone_verified)
+          VALUES (?, ?, ?, 'vendor', ?, 'active', ?, ?)
+        `, [
+          userId,
+          userEmail,
+          userPhone,
+          displayName,
+          isEmail ? 1 : 0,
+          isEmail ? 0 : 1
+        ]);
+        user = tx.queryOne('SELECT * FROM user_profiles WHERE id = ?', [userId]);
+      } else if (user.role !== 'vendor') {
+        tx.execute("UPDATE user_profiles SET role = 'vendor' WHERE id = ?", [user.id]);
+        user.role = 'vendor';
+      }
+
+      // 2. Check if vendor account already exists for this user
+      let vendor = tx.queryOne('SELECT * FROM vendor_accounts WHERE user_id = ?', [user.id]);
+      if (!vendor) {
+        const vendorId = tx.uuid();
+        const businessName = `${displayName} Tours & Travels`;
+        const contactEmail = isEmail ? cleanId : (user.email && !user.email.includes('@tripmozy.local') ? user.email : 'tripmozy@gmail.com');
+        const contactPhone = !isEmail ? cleanId : (user.phone || '+917478290140');
+
+        tx.execute(`
+          INSERT INTO vendor_accounts (
+            id, user_id, business_name, contact_person, contact_phone, contact_email,
+            verification_status, commission_rate_basis_points, status
+          ) VALUES (?, ?, ?, ?, ?, ?, 'verified', 1500, 'active')
+        `, [
+          vendorId,
+          user.id,
+          businessName,
+          displayName,
+          contactPhone,
+          contactEmail
+        ]);
+
+        // 3. Create initial nationwide tour fleet profile for marketplace matching
+        const propId = tx.uuid();
+        const slugPrefix = (cleanDigits && cleanDigits.length >= 4) ? cleanDigits : (cleanId.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') || 'tour');
+        const propSlug = `partner-${slugPrefix.toLowerCase()}-${Date.now()}`;
+
+        tx.execute(`
+          INSERT INTO properties (
+            id, vendor_id, name, slug, property_type, star_rating,
+            description, address_line, city, state, pincode, country,
+            latitude, longitude, timezone, check_in_time, check_out_time,
+            status, inventory_mode
+          ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, ?, 'All Destinations', 'India', '110001', 'India', 28.6139, 77.2090, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
+        `, [
+          propId,
+          vendorId,
+          `${businessName} - Tour Fleet & Operations`,
+          propSlug,
+          `Verified TripMozy Tour Operator Partner (${businessName}) providing premium guided tours, vehicle rentals, and customized holiday packages across India.`,
+          `Partner Operations Center, ${businessName}`
+        ]);
+
+        const roomTypeId = tx.uuid();
+        tx.execute(`
+          INSERT INTO room_types (
+            id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_active
+          ) VALUES (?, ?, 'Custom Tour Package', 'Tour Vehicle + Hotel', 10, 5, 20, 1, 1)
+        `, [roomTypeId, propId]);
+
+        const rateId = tx.uuid();
+        tx.execute(`
+          INSERT INTO room_rates (
+            id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, cancellation_rule, is_active
+          ) VALUES (?, ?, 'All Inclusions Tour Plan', 250000, 500, 'Breakfast, Dinner & Sightseeing', 'Free cancellation up to 48 hours before tour start', 1)
+        `, [rateId, roomTypeId]);
+
+        vendor = tx.queryOne('SELECT * FROM vendor_accounts WHERE id = ?', [vendorId]);
+      }
+
+      return tx.queryOne(`
+        SELECT v.*, u.email as u_email, u.phone as u_phone, u.display_name
+        FROM vendor_accounts v
+        JOIN user_profiles u ON v.user_id = u.id
+        WHERE v.id = ?
+      `, [vendor.id]);
+    });
   }
 }
 
