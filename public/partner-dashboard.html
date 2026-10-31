@@ -522,7 +522,7 @@ function updateCounts() {
   allRequests.forEach(r => {
     if      (r.response_status === 'accepted') a++;
     else if (r.response_status === 'rejected') rj++;
-    else if (new Date(r.recipient_expires_at) >= now && r.request_status !== 'booked') p++;
+    else if (new Date(r.recipient_expires_at) >= now && r.request_status !== 'booked' && r.request_status !== 'cancelled' && r.response_status !== 'cancelled') p++;
   });
   const total = allRequests.length;
 
@@ -564,7 +564,7 @@ function renderPage() {
 
   const filtered = allRequests.filter(r => {
     const expired = new Date(r.recipient_expires_at) < now;
-    if (activePage === 'pending')  return r.response_status === 'pending' && !expired && r.request_status !== 'booked';
+    if (activePage === 'pending')  return r.response_status === 'pending' && !expired && r.request_status !== 'booked' && r.request_status !== 'cancelled' && r.response_status !== 'cancelled';
     if (activePage === 'accepted') return r.response_status === 'accepted';
     if (activePage === 'rejected') return r.response_status === 'rejected';
     return true; // 'all'
@@ -597,15 +597,18 @@ function buildCard(r) {
   const expires = new Date(r.recipient_expires_at);
   const expired = expires < now || r.is_expired;
   const status  = r.response_status;
-  const isPend  = status === 'pending' && !expired;
+  const isCancelled = r.request_status === 'cancelled' || status === 'cancelled';
+  const isPend  = status === 'pending' && !expired && !isCancelled;
 
   // Status badge
   const badgeMap = {
     accepted: `<span class="badge badge-accepted">✅ Offer Sent</span>`,
     rejected: `<span class="badge badge-rejected">❌ Declined</span>`,
+    cancelled: `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">🚫 Cancelled by Traveler</span>`,
   };
-  const statusBadge = badgeMap[status] ||
-    (expired ? `<span class="badge badge-expired">⌛ Expired</span>` : `<span class="badge badge-pending">⏳ Action Required</span>`);
+  const statusBadge = isCancelled
+    ? `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">🚫 Cancelled by Traveler</span>`
+    : (badgeMap[status] || (expired ? `<span class="badge badge-expired">⌛ Expired</span>` : `<span class="badge badge-pending">⏳ Action Required</span>`));
 
   // Countdown
   let cdHtml = '';
@@ -628,7 +631,16 @@ function buildCard(r) {
 
   // Footer based on status
   let footer = '';
-  if (status === 'accepted') {
+  if (isCancelled) {
+    footer = `
+      <div class="outcome-banner rejected" style="background:#fef2f2;border-color:#fecaca;">
+        <div class="outcome-icon">🚫</div>
+        <div class="outcome-text">
+          <div class="outcome-title" style="color:#991b1b;">Cancelled by Traveler</div>
+          <div class="outcome-sub" style="color:#b91c1c;">The customer has cancelled this tour request. No response or quote is required.</div>
+        </div>
+      </div>`;
+  } else if (status === 'accepted') {
     footer = `
       <div class="outcome-banner accepted">
         <div class="outcome-icon">✅</div>

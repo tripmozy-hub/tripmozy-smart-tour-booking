@@ -177,6 +177,68 @@
     .status-pending { background: #fef3c7; color: #92400e; }
     .status-offers  { background: #d1fae5; color: #065f46; }
     .status-booked  { background: #eff6ff; color: #1e40af; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+    .step-item.cancelled .step-circle { background: #ef4444; color: #fff; }
+    .step-item.cancelled .step-label { color: #dc2626; }
+
+    .btn-cancel-req {
+      background: #fff;
+      border: 1.5px solid #fecaca;
+      color: #dc2626;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-cancel-req:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #b91c1c;
+      transform: translateY(-1px);
+    }
+
+    .btn-cancel-req-small {
+      background: #fff;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel-req-small:hover {
+      background: #fee2e2;
+    }
+
+    .btn-cancel-waiting {
+      background: #fff;
+      border: 1.5px solid #fca5a5;
+      color: #dc2626;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
+      transition: all 0.2s ease;
+    }
+    .btn-cancel-waiting:hover {
+      background: #fef2f2;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.15);
+    }
 
     .summary-grid {
       display: grid;
@@ -673,6 +735,42 @@
   </div>
 </div>
 
+<!-- Cancel Tour Request Confirmation Modal -->
+<div class="modal-overlay hidden" id="cancelModal">
+  <div class="checkout-modal" style="max-width:480px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="font-size:18px; font-weight:800; color:#991b1b;">Cancel Tour Request</h3>
+      <button onclick="closeCancelModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">&times;</button>
+    </div>
+
+    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px; margin-bottom:16px; font-size:13px; color:#991b1b; line-height:1.5;">
+      ⚠️ Are you sure you want to cancel your tour request for <strong id="cancelModalDest">your trip</strong>?
+      <br>Contacted tour operators will be notified to stop preparing quotes.
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:6px;">Reason for cancellation (optional):</label>
+      <select id="cancelReasonSelect" style="width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:#fff; margin-bottom:10px;">
+        <option value="change_of_plans">Change of travel dates or plans</option>
+        <option value="different_destination">Looking for a different destination</option>
+        <option value="budget_adjusted">Need to adjust budget or group size</option>
+        <option value="test_request">Submitted as a test request</option>
+        <option value="other">Other reason</option>
+      </select>
+      <textarea id="cancelReasonNotes" placeholder="Optional notes for tour operators..." style="width:100%; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; resize:vertical; min-height:60px; font-family:inherit;"></textarea>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button type="button" onclick="closeCancelModal()" style="background:#f1f5f9; color:#475569; border:none; padding:10px 18px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">
+        Keep Request Active
+      </button>
+      <button type="button" id="confirmCancelBtn" onclick="executeCancelRequest()" style="background:#dc2626; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+        <span>✕ Yes, Cancel Tour Request</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 // =============================================================================
 // TripMozy Customer Booking & Live Offers Engine
@@ -735,10 +833,15 @@ function startPolling() {
   if (pollTimer) clearInterval(pollTimer);
   if (tickerTimer) clearInterval(tickerTimer);
 
-  // Poll every 6s if not booked
+  if (requestData && (requestData.request.status === 'booked' || requestData.request.status === 'cancelled')) {
+    return;
+  }
+
+  // Poll every 6s if not booked and not cancelled
   pollTimer = setInterval(async () => {
-    if (requestData && requestData.request.status === 'booked') {
+    if (requestData && (requestData.request.status === 'booked' || requestData.request.status === 'cancelled')) {
       clearInterval(pollTimer);
+      if (tickerTimer) clearInterval(tickerTimer);
       return;
     }
     await loadRequest();
@@ -763,20 +866,29 @@ function renderPortal(data) {
   const offers = data.offers || [];
   const recips = data.recipients || [];
   const isBooked = req.status === 'booked';
+  const isCancelled = req.status === 'cancelled';
   const hasOffers = offers.length > 0;
+
+  if (isCancelled) {
+    if (pollTimer) clearInterval(pollTimer);
+    if (tickerTimer) clearInterval(tickerTimer);
+  }
 
   // Update Stepper
   let step1 = 'completed', step2 = 'active', step3 = '', step4 = '';
-  if (hasOffers && !isBooked) { step2 = 'completed'; step3 = 'active'; }
+  if (hasOffers && !isBooked && !isCancelled) { step2 = 'completed'; step3 = 'active'; }
   if (isBooked) { step2 = 'completed'; step3 = 'completed'; step4 = 'completed'; }
+  if (isCancelled) { step1 = 'completed'; step2 = 'cancelled'; step3 = ''; step4 = ''; }
 
   const statusLabel = isBooked
     ? '🎉 Tour Confirmed'
+    : isCancelled
+    ? '🚫 Request Cancelled'
     : hasOffers
     ? `✅ ${offers.length} Tour Quote${offers.length > 1 ? 's' : ''} Received`
     : '⏳ Awaiting Tour Operator Quotes';
 
-  const statusClass = isBooked ? 'status-booked' : hasOffers ? 'status-offers' : 'status-pending';
+  const statusClass = isBooked ? 'status-booked' : isCancelled ? 'status-cancelled' : hasOffers ? 'status-offers' : 'status-pending';
 
   let html = `
     <!-- Stepper -->
@@ -786,8 +898,8 @@ function renderPortal(data) {
         <div class="step-label">Tour Requested</div>
       </div>
       <div class="step-item ${step2}">
-        <div class="step-circle">2</div>
-        <div class="step-label">Operators Quoting</div>
+        <div class="step-circle">${isCancelled ? '✕' : '2'}</div>
+        <div class="step-label">${isCancelled ? 'Cancelled' : 'Operators Quoting'}</div>
       </div>
       <div class="step-item ${step3}">
         <div class="step-circle">3</div>
@@ -808,7 +920,14 @@ function renderPortal(data) {
             Tour in ${esc(req.destination)}
           </h1>
         </div>
-        <div class="status-pill ${statusClass}">${statusLabel}</div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div class="status-pill ${statusClass}">${statusLabel}</div>
+          ${!isBooked && !isCancelled ? `
+            <button type="button" class="btn-cancel-req" onclick="openCancelModal()" title="Cancel this tour request">
+              ✕ Cancel Request
+            </button>
+          ` : ''}
+        </div>
       </div>
 
       <div class="summary-grid">
@@ -835,6 +954,32 @@ function renderPortal(data) {
     </div>
   `;
 
+  // If cancelled by customer, show cancellation confirmation card
+  if (isCancelled) {
+    html += `
+      <div class="cancelled-card" style="background:#fff; border-radius:16px; border:2px solid #fecaca; padding:40px 24px; text-align:center; margin-top:24px; box-shadow:0 4px 20px rgba(239,68,68,0.06);">
+        <div style="width:68px; height:68px; background:#fee2e2; color:#dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 18px; font-weight:700;">✕</div>
+        <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:10px;">This Tour Request is Cancelled</h2>
+        <div style="font-family:monospace; font-size:14px; font-weight:700; background:#f1f5f9; color:#475569; display:inline-block; padding:5px 14px; border-radius:6px; margin-bottom:16px;">
+          ${esc(req.request_reference)}
+        </div>
+        <p style="font-size:15px; color:#64748b; line-height:1.6; max-width:540px; margin:0 auto 24px;">
+          Your tour request for <strong>${esc(req.destination)}</strong> has been cancelled. Verified tour operators have been notified to stop preparing quotes, and no quotes or holds will be processed.
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+          <a href="/smart-tour-booking" class="btn-primary-link" style="background:var(--primary); color:#fff; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px;">
+            <span>🎒 Plan a New Tour</span>
+          </a>
+          <a href="/" class="btn-secondary" style="background:#f1f5f9; color:#334155; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center;">
+            Return to Home
+          </a>
+        </div>
+      </div>
+    `;
+    document.getElementById('app').innerHTML = html;
+    return;
+  }
+
   // If already booked, show confirmation voucher directly!
   if (isBooked) {
     html += renderConfirmedVoucher(req, offers, requestData.booking);
@@ -842,7 +987,7 @@ function renderPortal(data) {
     return;
   }
 
-  // Live status ticker banner (if not yet booked)
+  // Live status ticker banner (if waiting / not yet booked)
   html += `
     <div class="live-banner">
       <div class="live-banner-left">
@@ -852,9 +997,10 @@ function renderPortal(data) {
           <div class="live-sub">TripMozy WhatsApp Bot is coordinating with tour operators in ${esc(req.destination)}.</div>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
         <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
+        <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">✕ Cancel Request</button>
       </div>
     </div>
   `;
@@ -875,6 +1021,12 @@ function renderPortal(data) {
         <div class="empty-desc">
           We've dispatched your tour request to <strong>${recips.length} verified local tour operators</strong> in ${esc(req.destination)}.
           As soon as operators respond with tailored package pricing and inclusions, their official quotes will appear here automatically.
+        </div>
+        <div style="margin-top:22px; padding-top:18px; border-top:1px dashed #e2e8f0; display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="font-size:13px; color:#64748b;">Need to change your travel dates, budget, or destination?</div>
+          <button type="button" class="btn-cancel-waiting" onclick="openCancelModal()">
+            ✕ Cancel This Tour Request
+          </button>
         </div>
       </div>
     `;
@@ -1239,6 +1391,62 @@ function fmtDate(d) {
 document.getElementById('checkoutModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('checkoutModal')) closeCheckoutModal();
 });
+
+const cancelModalEl = document.getElementById('cancelModal');
+if (cancelModalEl) {
+  cancelModalEl.addEventListener('click', (e) => {
+    if (e.target === cancelModalEl) closeCancelModal();
+  });
+}
+
+function openCancelModal() {
+  const dest = requestData && requestData.request ? requestData.request.destination : 'your trip';
+  const destEl = document.getElementById('cancelModalDest');
+  if (destEl) destEl.textContent = dest;
+  const modal = document.getElementById('cancelModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCancelModal() {
+  const modal = document.getElementById('cancelModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function executeCancelRequest() {
+  if (!requestId) return;
+  const btn = document.getElementById('confirmCancelBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Cancelling...</span>';
+  }
+
+  try {
+    const reason = document.getElementById('cancelReasonSelect').value;
+    const notes = document.getElementById('cancelReasonNotes').value.trim();
+
+    const res = await fetch(`/api/requests/${requestId}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, notes })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to cancel tour request');
+    }
+
+    closeCancelModal();
+    if (pollTimer) clearInterval(pollTimer);
+    if (tickerTimer) clearInterval(tickerTimer);
+    await loadRequest();
+  } catch (err) {
+    alert(err.message || 'Error cancelling request');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>✕ Yes, Cancel Tour Request</span>';
+    }
+  }
+}
 
 // Boot
 (function checkCustomerSession() {

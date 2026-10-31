@@ -705,6 +705,7 @@
       </p>
       <div class="action-links">
         <a href="#" id="viewOffersBtn" class="btn-primary-link">⚡ View Live Tour Offers</a>
+        <button type="button" id="cancelFromResultBtn" onclick="cancelFromSuccessCard()" class="btn-secondary" style="border:1.5px solid #fecaca; color:#dc2626; background:#fff; cursor:pointer;">✕ Cancel Tour Request</button>
         <a href="/smart-tour-booking" class="btn-secondary">Submit Another Request</a>
       </div>
     </div>
@@ -866,10 +867,13 @@
         const viewOffersUrl = `/booking?id=${data.id}`;
         document.getElementById('viewOffersBtn').href = viewOffersUrl;
 
-        // Auto-redirect to live offers after 2.5 seconds
-        setTimeout(() => {
+        latestSubmissionId = data.id;
+
+        // Auto-redirect to live offers after 3 seconds
+        if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
+        autoRedirectTimer = setTimeout(() => {
           window.location.href = viewOffersUrl;
-        }, 2500);
+        }, 3000);
 
       } catch (err) {
         showToast(err.message);
@@ -877,6 +881,35 @@
         btn.innerHTML = '<span>🚀 Request Tour Quotes Now</span>';
       }
     });
+
+    let latestSubmissionId = null;
+    let autoRedirectTimer = null;
+
+    async function cancelFromSuccessCard() {
+      if (!latestSubmissionId) return;
+      if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
+      const btn = document.getElementById('cancelFromResultBtn');
+      btn.disabled = true;
+      btn.textContent = 'Cancelling...';
+      try {
+        const res = await fetch(`/api/requests/${latestSubmissionId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'immediate_customer_cancellation' })
+        });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || 'Failed to cancel');
+        document.getElementById('resultMsg').innerHTML =
+          '<span style="color:#dc2626; font-weight:700;">Tour request cancelled.</span> Local tour operators will not send quotes. You can submit another request anytime.';
+        document.getElementById('viewOffersBtn').style.display = 'none';
+        btn.style.display = 'none';
+        showToast('Tour request cancelled.');
+      } catch (err) {
+        showToast(err.message);
+        btn.disabled = false;
+        btn.textContent = '✕ Cancel Tour Request';
+      }
+    }
 
     // Check logged in customer session & prefill / restore pending request
     (function checkCustomerSession() {

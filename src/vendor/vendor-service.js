@@ -119,9 +119,12 @@ class VendorService {
         if (existingOffer) return { idempotent: true, offer: existingOffer };
       }
 
-      // Prevent accept if rejected or expired
+      // Prevent accept if rejected, cancelled, or expired
       if (recipient.response_status === 'rejected') {
         throw new Error('Cannot accept a request that has already been rejected');
+      }
+      if (recipient.response_status === 'cancelled' || recipient.req_status === 'cancelled') {
+        throw new Error('This tour request has been cancelled by the customer');
       }
       if (new Date(recipient.expires_at) < new Date()) {
         tx.execute('UPDATE booking_request_recipients SET response_status = "expired" WHERE id = ?', [recipientId]);

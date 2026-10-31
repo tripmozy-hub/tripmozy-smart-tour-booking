@@ -412,6 +412,29 @@ const appHandler = async (req, res) => {
     return;
   }
 
+  if (pathname.startsWith('/api/requests/') && pathname.endsWith('/cancel') && method === 'POST') {
+    const parts = pathname.split('/');
+    const id = parts[3];
+    readBody(async (err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      try {
+        const result = reqService.cancelRequest({
+          requestId: id,
+          reason: body && body.reason,
+          notes: body && body.notes,
+          customerId: body && body.customerId
+        });
+        if (notifService && notifService.waitForPendingDispatches) {
+          await notifService.waitForPendingDispatches();
+        }
+        sendJson(200, result);
+      } catch (e) {
+        sendJson(400, { error: e.message });
+      }
+    });
+    return;
+  }
+
   if (pathname.startsWith('/api/requests/') && method === 'GET') {
     const id = pathname.replace('/api/requests/', '');
     const details = reqService.getRequestDetails(id);

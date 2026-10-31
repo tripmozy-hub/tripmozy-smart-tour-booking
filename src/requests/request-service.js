@@ -370,6 +370,82 @@ class RequestService {
       booking
     };
   }
+
+  // Cancel tour request by Customer
+  cancelRequest({ requestId, reason = 'customer_requested', notes = null, customerId = null }) {
+    if (!requestId) throw new Error('Request ID is required');
+
+    const req = this.db.queryOne(
+      'SELECT * FROM hotel_booking_requests WHERE id = ? OR request_reference = ?',
+      [requestId, requestId]
+    );
+
+    if (!req) {
+      throw new Error(`Tour request '${requestId}' not found`);
+    }
+
+    if (req.status === 'booked') {
+      throw new Error('Cannot cancel a tour request that has already been confirmed and booked');
+    }
+
+    if (req.status === 'cancelled') {
+      return {
+        success: true,
+        message: 'This tour request is already cancelled.',
+        id: req.id,
+        reference: req.request_reference,
+        status: 'cancelled'
+      };
+    }
+
+    return this.db.transaction((tx) => {
+      // 1. Update request status to cancelled
+      tx.execute(`
+        UPDATE hotel_booking_requests
+        SET status = 'cancelled', updated_at = datetime('now')
+        WHERE id = ?
+      `, [req.id]);
+
+      // 2. Mark pending recipients as cancelled so operators know not to respond
+      tx.execute(`
+        UPDATE booking_request_recipients
+        SET response_status = 'cancelled'
+        WHERE request_id = ? AND response_status = 'pending'
+      `, [req.id]);
+
+      // 3. Release any active room/tour inventory holds
+      tx.execute(`
+        UPDATE inventory_holds
+        SET status = 'released'
+        WHERE offer_id IN (SELECT id FROM hotel_offers WHERE request_id = ?) AND status = 'active'
+      `, [req.id]);
+
+      // 4. Mark active offers as withdrawn
+      tx.execute(`
+        UPDATE hotel_offers
+        SET status = 'withdrawn'
+        WHERE request_id = ? AND status = 'valid'
+      `, [req.id]);
+
+      // 5. Log audit trail
+      tx.logAudit({
+        actorId: customerId || req.customer_id,
+        actorRole: 'customer',
+        action: 'request.cancel',
+        entityType: 'hotel_booking_request',
+        entityId: req.id,
+        afterState: { status: 'cancelled', reason, notes }
+      });
+
+      return {
+        success: true,
+        message: 'Tour request has been successfully cancelled.',
+        id: req.id,
+        reference: req.request_reference,
+        status: 'cancelled'
+      };
+    });
+  }
 }
 
 module.exports = { RequestService };
