@@ -63,17 +63,22 @@ class NotificationService {
     if (templateCode === 'hotel_offer_received') {
       const advINR = payload.advancePayableINR || Math.round((payload.totalAmountINR || 0) * 0.315);
       const balINR = payload.remainingBalanceINR || Math.round((payload.totalAmountINR || 0) * 0.70);
-      return `🎒 *TripMozy Tour Quote Received!*\n` +
-        `Hi ${payload.guestName || 'Traveler'}, great news!\n` +
-        `*${payload.propertyName}* in ${payload.destination} has accepted your tour request and sent you an official quote:\n\n` +
-        `🎒 Package: ${payload.roomTypeName || 'All-Inclusive Tour Package'}\n` +
-        `🍽️ Inclusions: ${payload.mealPlan || 'Sightseeing & Transfers Included'}\n` +
-        `💰 Total Tour Price: ₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}\n` +
-        `💳 Payable Now (30% Advance + 5% GST): ₹${advINR.toLocaleString('en-IN')} (to TripMozy Account)\n` +
-        `🏨 Remaining 70% Balance: ₹${balINR.toLocaleString('en-IN')} (pay at hotel on arrival or online)\n` +
-        `🛡️ Terms: ${payload.cancellationTerms || 'Free cancellation up to 48 hours before departure'}\n\n` +
-        `⚡ Review quote and secure your tour:\n` +
-        `👉 View & Book Now: ${payload.bookingUrl || 'http://localhost:8080/booking'}`;
+      const days = payload.nights ? `${payload.nights + 1} Days / ${payload.nights} Nights` : '';
+      const payLink = payload.paymentUrl || payload.bookingUrl || 'http://localhost:8080/booking';
+      return `🎉 *Your Tour is Confirmed by ${payload.propertyName}!*\n` +
+        `Hi ${payload.guestName || 'Traveler'}, great news! Tour Operator *${payload.propertyName}* has accepted and confirmed your tour to *${payload.destination}*.\n\n` +
+        `📋 *Confirmed Tour Details:*\n` +
+        `• Destination: *${payload.destination}*\n` +
+        (payload.checkInDate ? `• Tour Dates: ${payload.checkInDate} → ${payload.checkOutDate} (${days})\n` : '') +
+        (payload.numAdults ? `• Travelers: ${payload.numAdults} Adult(s) · ${payload.numRooms || 1} Vehicle(s)\n` : '') +
+        `• Package: ${payload.roomTypeName || 'All-Inclusive Tour Package'}\n` +
+        `• Inclusions: ${payload.mealPlan || 'Daily Sightseeing, Dedicated Vehicle & Transfers'}\n\n` +
+        `💳 *Payment Details:*\n` +
+        `• Total Tour Package: ₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}\n` +
+        `• ⚡ *Advance Payable Now (30% + 5% GST):* ₹${advINR.toLocaleString('en-IN')}\n` +
+        `• 💵 *Remaining Balance (70%):* ₹${balINR.toLocaleString('en-IN')} (Pay on arrival / during tour)\n\n` +
+        `🔒 *Click Here to Pay Advance & Guarantee Booking:*\n` +
+        `${payLink}`;
     }
 
     if (templateCode === 'booking_confirmed') {
@@ -143,59 +148,128 @@ class NotificationService {
   // Generate formatted HTML email template
   generateEmailHtml(templateCode, payload) {
     if (templateCode === 'hotel_offer_received') {
+      const advINR = payload.advancePayableINR || Math.round((payload.totalAmountINR || 0) * 0.315);
+      const balINR = payload.remainingBalanceINR || Math.round((payload.totalAmountINR || 0) * 0.70);
+      const payLink = payload.paymentUrl || payload.bookingUrl || 'http://localhost:8080/booking';
+      const daysText = payload.nights ? `${payload.nights + 1} Days / ${payload.nights} Nights` : '';
       return `
-        <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif; max-width:580px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
-          <div style="background:#0f172a; padding:24px; text-align:center;">
-            <div style="font-size:24px; font-weight:800; color:#ffffff;">Trip<span style="color:#f59e0b;">Mozy</span></div>
-            <div style="color:#94a3b8; font-size:12px; margin-top:4px;">Memories Begin With a Booking</div>
+        <div style="font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:600px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; box-shadow:0 12px 35px rgba(0,0,0,0.06);">
+          <div style="background:#0f172a; padding:28px 24px; text-align:center;">
+            <div style="font-size:26px; font-weight:800; color:#ffffff; letter-spacing:-0.5px;">Trip<span style="color:#f59e0b;">Mozy</span></div>
+            <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.5px; text-transform:uppercase; font-weight:600;">Memories Begin With a Booking</div>
           </div>
-          <div style="padding:28px 24px;">
-            <div style="display:inline-block; background:#d1fae5; color:#065f46; font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; margin-bottom:12px;">✓ Verified Partner Tour Quote</div>
-            <h2 style="color:#0f172a; margin:0 0 8px; font-size:20px;">New Tour Quote from ${payload.propertyName}!</h2>
-            <p style="color:#64748b; font-size:14px; margin:0 0 20px;">Hi ${payload.guestName || 'Traveler'}, a verified tour operator has accepted your tour request and sent you an official quote.</p>
+          
+          <div style="background:#10b981; color:#ffffff; padding:14px 24px; text-align:center; font-weight:700; font-size:13px; letter-spacing:0.3px;">
+            🎉 TOUR REQUEST CONFIRMED BY OPERATOR PARTNER
+          </div>
+
+          <div style="padding:32px 28px;">
+            <div style="display:inline-block; background:#dcfce7; color:#15803d; font-size:12px; font-weight:800; padding:5px 14px; border-radius:20px; margin-bottom:14px; border:1px solid #bbf7d0;">
+              ✓ Tour Confirmed by ${payload.propertyName}
+            </div>
             
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px; margin-bottom:24px;">
-              <div style="margin-bottom:8px;">
-                <span style="color:#64748b; font-size:13px;">Tour Operator / Base:</span>
-                <strong style="color:#0f172a; font-size:14px; margin-left:8px;">${payload.propertyName} (${payload.destination})</strong>
+            <h1 style="color:#0f172a; margin:0 0 10px; font-size:22px; font-weight:800; line-height:1.3;">
+              Your Tour to ${payload.destination} has been Confirmed!
+            </h1>
+            
+            <p style="color:#475569; font-size:14px; line-height:1.6; margin:0 0 24px;">
+              Hi <strong>${payload.guestName || 'Traveler'}</strong>,<br>
+              Great news! Tour Operator Partner <strong>${payload.propertyName}</strong> has accepted and confirmed your tour request. Please review your confirmed tour details and payment breakdown below, and complete the 30% advance payment to lock in your booking.
+            </p>
+
+            <!-- CARD 1: TOUR DETAILS -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:20px; margin-bottom:20px;">
+              <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; margin-bottom:14px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+                📋 Confirmed Tour Details
               </div>
-              <div style="margin-bottom:8px;">
-                <span style="color:#64748b; font-size:13px;">Tour Package:</span>
-                <strong style="color:#0f172a; font-size:14px; margin-left:8px;">${payload.roomTypeName || 'All-Inclusive Tour Package'}</strong>
+              
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                <span style="color:#64748b;">Destination:</span>
+                <strong style="color:#0f172a;">${payload.destination}</strong>
               </div>
-              <div style="margin-bottom:8px;">
-                <span style="color:#64748b; font-size:13px;">Inclusions:</span>
-                <strong style="color:#059669; font-size:14px; margin-left:8px;">${payload.mealPlan || 'Sightseeing &amp; Transfers Included'}</strong>
+
+              ${payload.checkInDate ? `
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                <span style="color:#64748b;">Tour Dates:</span>
+                <strong style="color:#0f172a;">${payload.checkInDate} → ${payload.checkOutDate} (${daysText})</strong>
+              </div>` : ''}
+
+              ${payload.numAdults ? `
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                <span style="color:#64748b;">Travelers &amp; Vehicle:</span>
+                <strong style="color:#0f172a;">${payload.numAdults} Adult(s) · ${payload.numRooms || 1} Vehicle(s)</strong>
+              </div>` : ''}
+
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                <span style="color:#64748b;">Tour Package:</span>
+                <strong style="color:#0f172a;">${payload.roomTypeName || 'All-Inclusive Custom Tour Package'}</strong>
               </div>
-              <div style="margin-bottom:8px;">
-                <span style="color:#64748b; font-size:13px;">Cancellation:</span>
-                <span style="color:#0f172a; font-size:13px; margin-left:8px;">${payload.cancellationTerms || 'Free cancellation up to 48 hours before departure'}</span>
+
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                <span style="color:#64748b;">Inclusions:</span>
+                <strong style="color:#059669;">${payload.mealPlan || 'Daily Sightseeing, Transfers &amp; Breakfast Included'}</strong>
               </div>
-              <div style="padding-top:12px; border-top:1.5px solid #e2e8f0; margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="color:#0f172a; font-weight:700; font-size:15px;">Total Tour Package:</span>
-                <strong style="color:#2563eb; font-size:20px;">₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}</strong>
+
+              <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
+                <span style="color:#64748b;">Confirmed Operator:</span>
+                <strong style="color:#2563eb;">${payload.propertyName}</strong>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:13px;">
-                <span style="color:#065f46; font-weight:700;">Payable Now (30% Advance + 5% GST):</span>
-                <strong style="color:#059669;">₹${(payload.advancePayableINR || Math.round((payload.totalAmountINR || 0) * 0.315)).toLocaleString('en-IN')}</strong>
+
+              <div style="display:flex; justify-content:space-between; font-size:13px; color:#64748b; padding-top:6px;">
+                <span>Cancellation:</span>
+                <span>${payload.cancellationTerms || 'Free cancellation up to 48 hours before departure'}</span>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:12px; color:#64748b;">
-                <span>Remaining 70% Balance Due:</span>
-                <span style="font-weight:600;">₹${(payload.remainingBalanceINR || Math.round((payload.totalAmountINR || 0) * 0.70)).toLocaleString('en-IN')} (pay at hotel or online)</span>
-              </div>
-              <div style="text-align:right; font-size:11px; color:#94a3b8; margin-top:4px;">Advance secured in TripMozy Escrow</div>
             </div>
 
-            <div style="text-align:center; margin-bottom:24px;">
-              <a href="${payload.bookingUrl || 'http://localhost:8080/booking'}" style="display:inline-block; background:#2563eb; color:#ffffff; font-weight:700; font-size:15px; padding:14px 32px; border-radius:10px; text-decoration:none; box-shadow:0 4px 14px rgba(37,99,235,0.3);">
-                ⚡ View Tour Quote &amp; Book Now
+            <!-- CARD 2: PAYMENT DETAILS -->
+            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:14px; padding:20px; margin-bottom:24px;">
+              <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:#1e40af; margin-bottom:14px; border-bottom:1px solid #dbeafe; padding-bottom:8px;">
+                💳 Payment Breakdown &amp; Schedule
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="color:#1e3a8a; font-size:14px;">Total Tour Package Cost:</span>
+                <strong style="color:#1e293b; font-size:17px;">₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}</strong>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#ffffff; padding:12px 14px; border-radius:10px; border:1px solid #93c5fd;">
+                <div>
+                  <div style="color:#047857; font-weight:800; font-size:14px;">⚡ Payable Now (30% Advance + 5% GST):</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px;">Secures inventory &amp; locks package tariff</div>
+                </div>
+                <strong style="color:#059669; font-size:20px;">₹${advINR.toLocaleString('en-IN')}</strong>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#475569; padding:4px 0;">
+                <span>Remaining 70% Balance Due:</span>
+                <strong style="color:#0f172a; font-size:14px;">₹${balINR.toLocaleString('en-IN')}</strong>
+              </div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px; text-align:right;">(Payable upon arrival at destination or online before trip)</div>
+
+              <div style="margin-top:14px; padding-top:10px; border-top:1px dashed #93c5fd; font-size:11px; color:#1e40af; display:flex; align-items:center; gap:6px;">
+                <span>🛡️</span>
+                <span><strong>100% Escrow Protection:</strong> Advance is held safely by TripMozy until tour commences.</span>
+              </div>
+            </div>
+
+            <!-- CARD 3: DIRECT PAYMENT LINK -->
+            <div style="text-align:center; margin-bottom:26px;">
+              <a href="${payLink}" style="display:inline-block; background:#2563eb; color:#ffffff; font-weight:800; font-size:16px; padding:16px 36px; border-radius:12px; text-decoration:none; box-shadow:0 6px 20px rgba(37,99,235,0.35); letter-spacing:0.3px;">
+                💳 Proceed to Pay Advance (₹${advINR.toLocaleString('en-IN')}) &amp; Guarantee Tour →
               </a>
+              <div style="margin-top:12px; font-size:12px; color:#64748b;">
+                Direct Payment Link: <a href="${payLink}" style="color:#2563eb; word-break:break-all;">${payLink}</a>
+              </div>
             </div>
             
-            <p style="color:#94a3b8; font-size:12px; text-align:center; margin:0;">Quotes are limited. Place an exclusive 15-minute hold to lock this tour package tariff.</p>
+            <p style="color:#94a3b8; font-size:12px; text-align:center; margin:0; line-height:1.5;">
+              To protect customer schedules, rates are held for a limited period. Complete your advance payment to receive your instant travel voucher.
+            </p>
           </div>
-          <div style="background:#f1f5f9; padding:16px; text-align:center; font-size:12px; color:#64748b;">
-            TripMozy Marketplace · Powered by tripmozy.com
+
+          <div style="background:#f1f5f9; padding:18px 24px; text-align:center; font-size:12px; color:#64748b; border-top:1px solid #e2e8f0;">
+            <div style="font-weight:700; color:#334155; margin-bottom:4px;">TripMozy Smart Tour Marketplace</div>
+            <div>Questions? Contact our 24/7 Concierge Support at <a href="mailto:tripmozy@gmail.com" style="color:#2563eb; text-decoration:none;">tripmozy@gmail.com</a></div>
           </div>
         </div>
       `;
@@ -650,7 +724,7 @@ class NotificationService {
         this.sendLiveWhatsAppMessage(destination, payload.messageText).catch(() => {});
       } else if (channel === 'email') {
         const subject = templateCode === 'hotel_offer_received'
-          ? `🎒 New Tour Quote: ${payload.propertyName} (${payload.destination}) - TripMozy`
+          ? `🎉 Tour Confirmed by ${payload.propertyName}! Complete Payment for ${payload.destination} - TripMozy`
           : templateCode === 'booking_confirmed' || templateCode === 'booking_confirmed_vendor'
           ? `🎉 Tour Booking Confirmed: ${payload.bookingReference} - ${payload.propertyName}`
           : templateCode === 'hotel_request_received_guest'

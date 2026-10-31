@@ -716,6 +716,15 @@ async function loadRequest() {
     const data = await res.json();
     requestData = data;
     renderPortal(data);
+
+    // Auto-open checkout modal if customer arrived via direct payment link (?payNow=1 or ?autoPay=1)
+    const urlParams = new URLSearchParams(window.location.search);
+    if ((urlParams.get('payNow') === '1' || urlParams.get('autoPay') === '1') && data.offers && data.offers.length > 0 && data.request.status !== 'booked') {
+      const targetOffer = data.offers[0];
+      setTimeout(() => {
+        openCheckoutModal(targetOffer.id);
+      }, 350);
+    }
   } catch (err) {
     renderErrorScreen('Cannot connect to TripMozy servers: ' + err.message);
   }
@@ -951,7 +960,7 @@ async function openCheckoutModal(offerId) {
   if (!offer) return;
 
   // 1. Call API to lock inventory hold
-  const btn = event?.currentTarget;
+  const btn = (typeof event !== 'undefined' && event) ? event.currentTarget : null;
   if (btn) { btn.disabled = true; btn.innerHTML = '🔒 Holding Tour Package...'; }
 
   try {

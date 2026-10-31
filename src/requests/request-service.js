@@ -243,11 +243,16 @@ class RequestService {
             }
           });
 
-          // 2. Main Email alert to vendor: ensure both tripmozy@gmail.com and partner inboxes receive it
+          // 2. Email alert to vendor: only to verified vendor contact email or partner desk
+          const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
           const targetEmails = new Set();
-          if (vendor && vendor.contact_email) targetEmails.add(vendor.contact_email);
-          targetEmails.add('tripmozy@gmail.com');
-          targetEmails.add('sujansutradhar2004@gmail.com');
+          if (vendor && vendor.contact_email) targetEmails.add(vendor.contact_email.trim());
+          if (targetEmails.size === 0) targetEmails.add('tripmozy@gmail.com');
+
+          // CRITICAL: Ensure the customer/traveler NEVER receives vendor dispatch alerts or vendor action links!
+          if (guestEmail) {
+            targetEmails.delete(guestEmail.trim().toLowerCase());
+          }
 
           for (const destEmail of targetEmails) {
             try {
@@ -272,9 +277,9 @@ class RequestService {
                   numAdults,
                   totalBudgetINR: budgetNum,
                   rawToken,
-                  actionUrl: `http://localhost:8080/action?token=${rawToken}&action=accept`,
-                  rejectUrl: `http://localhost:8080/action?token=${rawToken}&action=reject`,
-                  dashboardUrl: `http://localhost:8080/partner/dashboard?vendorId=${m.property.vendorId}`
+                  actionUrl: `${baseUrl}/action?token=${rawToken}&action=accept`,
+                  rejectUrl: `${baseUrl}/action?token=${rawToken}&action=reject`,
+                  dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${m.property.vendorId}`
                 }
               });
             } catch (err) {
@@ -284,54 +289,8 @@ class RequestService {
         }
       }
 
-      // Automated Confirmation to Customer via Email & WhatsApp
-      if (this.notifService) {
-        const bookingUrl = `http://localhost:8080/booking?id=${requestId}`;
-        if (guestEmail) {
-          try {
-            this.notifService.send({
-              destination: guestEmail,
-              channel: 'email',
-              templateCode: 'hotel_request_received_guest',
-              eventType: 'request.created',
-              payload: {
-                guestName,
-                requestReference: reference,
-                destination,
-                checkInDate,
-                checkOutDate,
-                nights,
-                numRooms,
-                numAdults,
-                totalBudgetINR: budgetNum,
-                bookingUrl
-              }
-            });
-          } catch (_) {}
-        }
-        if (guestPhone) {
-          try {
-            this.notifService.send({
-              destination: guestPhone,
-              channel: 'whatsapp',
-              templateCode: 'hotel_request_received_guest',
-              eventType: 'request.created',
-              payload: {
-                guestName,
-                requestReference: reference,
-                destination,
-                checkInDate,
-                checkOutDate,
-                nights,
-                numRooms,
-                numAdults,
-                totalBudgetINR: budgetNum,
-                bookingUrl
-              }
-            });
-          } catch (_) {}
-        }
-      }
+      // NOTE: Customer only receives an email when the tour operator partner CONFIRMS their tour
+      // (per requirements: no premature dispatch email to the customer; customer gets confirmation + payment link upon vendor acceptance).
 
       tx.logAudit({
         actorId: finalCustomerId,

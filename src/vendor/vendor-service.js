@@ -94,7 +94,8 @@ class VendorService {
     return this.db.transaction((tx) => {
       // 1. Fetch recipient and request
       const recipient = tx.queryOne(`
-        SELECT r.*, req.status as request_status, req.nights, req.num_rooms, req.total_budget_paise,
+        SELECT r.*, req.status as request_status, req.nights, req.num_rooms, req.num_adults,
+               req.check_in_date, req.check_out_date, req.request_reference, req.total_budget_paise,
                req.guest_name, req.guest_phone, req.guest_email, req.destination,
                p.id as prop_id, p.vendor_id as prop_vendor_id, p.name as prop_name
         FROM booking_request_recipients r
@@ -128,15 +129,21 @@ class VendorService {
       }
 
       // 2. Room Type & Pricing
+      let targetRoomTypeId = roomTypeId;
+      if (!targetRoomTypeId) {
+        const defaultRoom = tx.queryOne('SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1', [recipient.property_id]);
+        if (defaultRoom) targetRoomTypeId = defaultRoom.id;
+      }
+
       const room = tx.queryOne(`
         SELECT rt.*, rr.base_nightly_rate_paise, rr.tax_rate_basis_points
         FROM room_types rt
         JOIN room_rates rr ON rt.id = rr.room_type_id
         WHERE rt.id = ? AND rt.property_id = ?
-      `, [roomTypeId, recipient.property_id]);
+      `, [targetRoomTypeId, recipient.property_id]);
 
       if (!room) {
-        throw new Error(`Room type ${roomTypeId} does not belong to property ${recipient.property_id}`);
+        throw new Error(`Room type ${targetRoomTypeId} does not belong to property ${recipient.property_id}`);
       }
 
       let pricing;
@@ -197,7 +204,7 @@ class VendorService {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'valid', ?)
       `, [
         offerId, offerReference, recipient.request_id, recipient.property_id, recipientId,
-        roomTypeId, nightlyBasePaise, recipient.nights, recipient.num_rooms,
+        targetRoomTypeId, nightlyBasePaise, recipient.nights, recipient.num_rooms,
         pricing.subtotalPaise, pricing.taxPaise, pricing.totalPayablePaise,
         isBudgetMatch ? 1 : 0, mealPlan, cancellationTerms,
         JSON.stringify(inclusionsData), validUntil
@@ -226,10 +233,36 @@ class VendorService {
         afterState: { offerReference, totalPayablePaise: pricing.totalPayablePaise, isBudgetMatch }
       });
 
-      // 6. Notify Customer via WhatsApp & Email
+      // 6. Notify Customer via WhatsApp & Email (Vendor Confirmation & Payment Link)
       if (this.notifService) {
         const totalINR = pricing.totalPayablePaise / 100;
-        const bookingUrl = `/booking?id=${recipient.request_id}`;
+        const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
+        const paymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&payNow=1`;
+
+        const notifPayload = {
+          guestName: recipient.guest_name,
+          propertyName: recipient.prop_name,
+          destination: recipient.destination,
+          checkInDate: recipient.check_in_date,
+          checkOutDate: recipient.check_out_date,
+          nights: recipient.nights,
+          numAdults: recipient.num_adults,
+          numRooms: recipient.num_rooms,
+          requestReference: recipient.request_reference,
+          roomTypeName: room.name,
+          mealPlan,
+          cancellationTerms,
+          totalAmountINR: totalINR,
+          advanceBaseINR: tourPricing.advanceBaseINR,
+          advanceGstINR: tourPricing.advanceGstINR,
+          advancePayableINR: tourPricing.payableNowINR,
+          remainingBalanceINR: tourPricing.remainingBalanceINR,
+          offerReference,
+          offerId,
+          requestId: recipient.request_id,
+          bookingUrl: paymentUrl,
+          paymentUrl
+        };
 
         // 6a. WhatsApp alert to Customer
         if (recipient.guest_phone) {
@@ -239,19 +272,7 @@ class VendorService {
               channel: 'whatsapp',
               templateCode: 'hotel_offer_received',
               eventType: 'offer.received',
-              payload: {
-                guestName: recipient.guest_name,
-                propertyName: recipient.prop_name,
-                destination: recipient.destination,
-                roomTypeName: room.name,
-                mealPlan,
-                cancellationTerms,
-                totalAmountINR: totalINR,
-                advancePayableINR: tourPricing.payableNowINR,
-                remainingBalanceINR: tourPricing.remainingBalanceINR,
-                offerReference,
-                bookingUrl: `http://localhost:8080${bookingUrl}`
-              }
+              payload: notifPayload
             });
           } catch (_) {}
         }
@@ -264,19 +285,7 @@ class VendorService {
               channel: 'email',
               templateCode: 'hotel_offer_received',
               eventType: 'offer.received',
-              payload: {
-                guestName: recipient.guest_name,
-                propertyName: recipient.prop_name,
-                destination: recipient.destination,
-                roomTypeName: room.name,
-                mealPlan,
-                cancellationTerms,
-                totalAmountINR: totalINR,
-                advancePayableINR: tourPricing.payableNowINR,
-                remainingBalanceINR: tourPricing.remainingBalanceINR,
-                offerReference,
-                bookingUrl: `http://localhost:8080${bookingUrl}`
-              }
+              payload: notifPayload
             });
           } catch (_) {}
         }

@@ -100,7 +100,7 @@ if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
 // Path to static assets directory
 const TRIP_PLANNER_DIR = process.env.TRIP_PLANNER_DIR || path.join(__dirname, 'public');
 
-const appHandler = (req, res) => {
+const appHandler = async (req, res) => {
   const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   let pathname = reqUrl.searchParams.get('__url') || req.headers['x-matched-path'] || reqUrl.pathname;
   if (pathname.includes('?')) {
@@ -258,6 +258,7 @@ const appHandler = (req, res) => {
           customTotalPaise: recipient.total_budget_paise,
           actorContext: null
         });
+        await notifService.waitForPendingDispatches();
 
         const tourP = result.tourPricing || PricingEngine.calculateTourPricing(recipient.total_budget_paise);
 
@@ -280,6 +281,7 @@ const appHandler = (req, res) => {
           note: 'Declined via WhatsApp 1-Click Action',
           actorContext: null
         });
+        await notifService.waitForPendingDispatches();
 
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Request Declined | TripMozy</title><style>body{font-family:-apple-system,sans-serif;padding:24px 16px;background:#fef2f2;color:#0f172a;margin:0}.card{background:#fff;border-radius:16px;padding:32px 24px;max-width:440px;margin:30px auto;box-shadow:0 12px 30px rgba(0,0,0,.08);text-align:center;border-top:6px solid #ef4444}.icon{font-size:52px;margin-bottom:12px}h2{color:#991b1b;margin:0 0 6px;font-size:22px}.ref{font-family:monospace;font-size:12px;color:#64748b;margin-bottom:20px}p{color:#64748b;font-size:14px;line-height:1.5}</style></head><body><div class="card"><div class="icon">❌</div><h2>Tour Request Declined</h2><div class="ref">${recipient.request_reference} · ${recipient.property_name}</div><p>You have declined this tour request for <strong>${recipient.destination}</strong>. It has been removed from your active queue without affecting your partner score.</p></div></body></html>`);
