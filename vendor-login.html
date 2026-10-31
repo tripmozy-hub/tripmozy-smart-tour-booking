@@ -238,7 +238,7 @@
       <div id="step2" class="step-2">
         <div class="badge-pill">🔐 Partner Verification</div>
         <h1>Enter 6-Digit Code</h1>
-        <p class="subtitle">Dispatched code to <strong id="sentTarget" style="color:#fff;">—</strong> via registered WhatsApp &amp; Email. Please check your inbox and enter the code below:</p>
+        <p class="subtitle" id="step2Subtitle">Dispatched code to <strong id="sentTarget" style="color:#fff;">—</strong>. Please enter the code below:</p>
 
         <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
           <div class="form-group">
@@ -287,6 +287,14 @@
         if (res.ok && data.success) {
           currentIdentifier = data.identifier;
           document.getElementById('sentTarget').textContent = input;
+          const subEl = document.getElementById('step2Subtitle');
+          if (subEl) {
+            if (input.includes('@')) {
+              subEl.innerHTML = `Dispatched code to <strong id="sentTarget" style="color:#fff;">${input}</strong> via email. Please check your inbox and enter the code below:`;
+            } else {
+              subEl.innerHTML = `Dispatched code to <strong id="sentTarget" style="color:#fff;">${input}</strong> via <strong>SMS text message</strong>. Please check your SMS messages and enter the code below:`;
+            }
+          }
           document.getElementById('otpCode').value = '';
 
           document.getElementById('step1').style.display = 'none';

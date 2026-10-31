@@ -592,7 +592,7 @@
         if (val.includes('@')) {
           step2Subtitle.innerHTML = `We have sent a 6-digit verification code to your email <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your inbox (and spam folder) and enter the code below:</span>`;
         } else {
-          step2Subtitle.innerHTML = `We have sent a 6-digit verification code to your mobile / WhatsApp <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your messages and enter the code below:</span>`;
+          step2Subtitle.innerHTML = `We have sent a 6-digit verification code via <strong>SMS</strong> to your mobile <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your text messages (SMS) and enter the 6-digit code below:</span>`;
         }
 
         step1.style.display = 'none';

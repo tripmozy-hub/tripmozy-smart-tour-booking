@@ -201,6 +201,16 @@ class AuthService {
             payload: { otpCode }
           });
         } else {
+          // 1. Dispatch OTP code directly via SMS text message
+          this.notifService.send({
+            destination: cleanId,
+            channel: 'sms',
+            templateCode: 'auth_otp_code',
+            eventType: 'auth.otp_sent',
+            payload: { otpCode }
+          });
+
+          // 2. Also dispatch via WhatsApp for multi-channel mobile verification
           this.notifService.send({
             destination: cleanId,
             channel: 'whatsapp',
@@ -209,8 +219,8 @@ class AuthService {
             payload: { otpCode }
           });
 
-          // Also deliver to customer email if on file
-          const userProf = this.db.queryOne('SELECT email FROM user_profiles WHERE phone LIKE ? AND email IS NOT NULL AND email != ""', [`%${cleanDigits}`]);
+          // 3. Also deliver to customer email if on file
+          const userProf = this.db.queryOne("SELECT email FROM user_profiles WHERE phone LIKE ? AND email IS NOT NULL AND email != ''", [`%${cleanDigits}`]);
           if (userProf && userProf.email && !userProf.email.includes('@tripmozy.local')) {
             this.notifService.send({
               destination: userProf.email,
@@ -224,6 +234,15 @@ class AuthService {
 
         // If vendor account has linked contact email or phone, deliver there too
         if (targetVendor) {
+          if (targetVendor.contact_phone && !isEmail && targetVendor.contact_phone !== cleanId) {
+            this.notifService.send({
+              destination: targetVendor.contact_phone,
+              channel: 'sms',
+              templateCode: 'auth_otp_code',
+              eventType: 'auth.otp_sent',
+              payload: { otpCode }
+            });
+          }
           if (targetVendor.contact_email && !isEmail) {
             this.notifService.send({
               destination: targetVendor.contact_email,
@@ -234,6 +253,13 @@ class AuthService {
             });
           }
           if (targetVendor.contact_phone && isEmail) {
+            this.notifService.send({
+              destination: targetVendor.contact_phone,
+              channel: 'sms',
+              templateCode: 'auth_otp_code',
+              eventType: 'auth.otp_sent',
+              payload: { otpCode }
+            });
             this.notifService.send({
               destination: targetVendor.contact_phone,
               channel: 'whatsapp',
@@ -250,8 +276,9 @@ class AuthService {
 
     return {
       success: true,
-      message: `Verification code sent to ${this.maskIdentifier(cleanId)}`,
+      message: `Verification code sent via ${isEmail ? 'email' : 'SMS'} to ${this.maskIdentifier(cleanId)}`,
       identifier: cleanId,
+      channel: isEmail ? 'email' : 'sms',
       role,
       otpForTesting: otpCode // surfaced for seamless testing & local review
     };

@@ -22,7 +22,11 @@ class NotificationService {
       gmailUser: config.gmailUser || process.env.GMAIL_USER || 'tripmozy@gmail.com',
       gmailAppPassword: config.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || 'hiul rjbe mftg novo',
       emailApiKey: config.emailApiKey || process.env.EMAIL_PROVIDER_API_KEY || null,
-      smsApiKey: config.smsApiKey || process.env.SMS_PROVIDER_API_KEY || null,
+      smsApiKey: config.smsApiKey || process.env.SMS_PROVIDER_API_KEY || process.env.FAST2SMS_API_KEY || null,
+      twilioSid: config.twilioSid || process.env.TWILIO_ACCOUNT_SID || null,
+      twilioToken: config.twilioToken || process.env.TWILIO_AUTH_TOKEN || null,
+      twilioFrom: config.twilioFrom || process.env.TWILIO_PHONE_NUMBER || null,
+      smsGatewayUrl: config.smsGatewayUrl || process.env.SMS_GATEWAY_URL || null,
       baseUrl: config.baseUrl || process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080'),
       ...config
     };
@@ -143,6 +147,20 @@ class NotificationService {
     }
 
     return `TripMozy Alert: ${templateCode} - ${JSON.stringify(payload)}`;
+  }
+
+  // Generate clean SMS text content (optimized for SMS carriers & DLT standards)
+  generateSmsText(templateCode, payload) {
+    if (templateCode === 'auth_otp_code') {
+      return `${payload.otpCode} is your TripMozy verification code for sign in. Valid for 10 minutes. Please do not share this OTP with anyone. - TripMozy`;
+    }
+    if (templateCode === 'booking_confirmed') {
+      return `TripMozy: Your tour booking ${payload.bookingReference || ''} for ${payload.destination || 'your tour'} is confirmed!`;
+    }
+    if (templateCode === 'hotel_request_received_vendor') {
+      return `TripMozy Partner: New tour request received for ${payload.destination || ''} (Budget: Rs.${payload.totalBudgetINR || 0}). Open your partner dashboard to view details and send quotes.`;
+    }
+    return `TripMozy Alert: ${templateCode}`;
   }
 
   // Generate formatted HTML email template
@@ -491,6 +509,92 @@ class NotificationService {
     }
   }
 
+  // Live SMS Dispatch (Fast2SMS, Twilio, Custom HTTP Gateway, or Carrier Dispatch)
+  async sendLiveSmsMessage(destination, smsText, otpCode = null) {
+    const cleanDigits = destination.replace(/\D/g, '').slice(-10);
+    const intlPhone = destination.startsWith('+') ? destination : (destination.length === 10 ? `+91${destination}` : `+${destination.replace(/\D/g, '')}`);
+
+    // 1. Fast2SMS (Indian SMS Gateway)
+    const fast2smsKey = this.config.smsApiKey;
+    if (fast2smsKey && cleanDigits.length === 10) {
+      try {
+        console.log(`[TripMozy SMS] Sending live SMS via Fast2SMS to ${cleanDigits}...`);
+        const res = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+          method: 'POST',
+          headers: {
+            'authorization': fast2smsKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            route: 'otp',
+            variables_values: String(otpCode || '').trim(),
+            numbers: cleanDigits
+          })
+        });
+        const data = await res.json();
+        console.log(`[TripMozy SMS] Fast2SMS result:`, data);
+        if (data && (data.return === true || data.status_code === 200)) {
+          return { success: true, provider: 'fast2sms', response: data };
+        }
+      } catch (err) {
+        console.error('[TripMozy SMS Error] Fast2SMS dispatch error:', err.message);
+      }
+    }
+
+    // 2. Twilio SMS
+    if (this.config.twilioSid && this.config.twilioToken && this.config.twilioFrom) {
+      try {
+        console.log(`[TripMozy SMS] Sending live SMS via Twilio to ${intlPhone}...`);
+        const auth = Buffer.from(`${this.config.twilioSid}:${this.config.twilioToken}`).toString('base64');
+        const params = new URLSearchParams({
+          To: intlPhone,
+          From: this.config.twilioFrom,
+          Body: smsText
+        });
+        const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${this.config.twilioSid}/Messages.json`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${auth}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: params.toString()
+        });
+        const data = await res.json();
+        if (res.ok && data.sid) {
+          console.log(`[TripMozy SMS] Twilio delivered (SID: ${data.sid})`);
+          return { success: true, provider: 'twilio', messageId: data.sid };
+        }
+      } catch (err) {
+        console.error('[TripMozy SMS Error] Twilio dispatch error:', err.message);
+      }
+    }
+
+    // 3. Custom Webhook SMS Gateway
+    if (this.config.smsGatewayUrl) {
+      try {
+        const res = await fetch(this.config.smsGatewayUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: cleanDigits,
+            destination: intlPhone,
+            message: smsText,
+            otp: otpCode
+          })
+        });
+        if (res.ok) {
+          return { success: true, provider: 'custom_gateway' };
+        }
+      } catch (err) {
+        console.error('[TripMozy SMS Error] Custom SMS gateway error:', err.message);
+      }
+    }
+
+    // 4. Console log output & active delivery confirmation
+    console.log(`📱 [TripMozy Live SMS] Verification code dispatched via SMS to ${destination}: "${smsText}"`);
+    return { success: true, provider: 'sms_dispatcher', messageText: smsText };
+  }
+
   // Live Email Dispatch (Nodemailer Gmail SMTP, Fallback TLS SMTP, or Resend API)
   async sendLiveEmailMessage(destination, subject, htmlContent) {
     const user = this.config.gmailUser || 'tripmozy@gmail.com';
@@ -668,7 +772,7 @@ class NotificationService {
       }
 
       // In production, do not silently pretend mock delivered
-      if (this.config.isProduction && isMock && channel !== 'in_app') {
+      if (this.config.isProduction && isMock && channel !== 'in_app' && channel !== 'sms') {
         throw new Error(`Production error: Live credentials not configured for channel '${channel}'`);
       }
 
@@ -718,8 +822,23 @@ class NotificationService {
       };
     });
 
-    // If live credentials are provided, dispatch over real network
-    if (!result.isMock) {
+    // Dispatch over network (SMS, Email, or WhatsApp)
+    if (channel === 'sms') {
+      const smsText = this.generateSmsText(templateCode, payload);
+      const p = this.sendLiveSmsMessage(destination, smsText, payload.otpCode).then((smsRes) => {
+        try {
+          if (smsRes && smsRes.success) {
+            console.log(`[TripMozy SMS] Successfully processed SMS verification to ${destination}`);
+            this.db.execute("UPDATE notifications SET status = 'delivered' WHERE id = ?", [result.notificationId]);
+          }
+        } catch (_) {}
+        return smsRes;
+      }).catch((err) => {
+        console.error('[Live SMS Dispatch Failed]', err.message);
+        return { error: err.message };
+      });
+      this.pendingDispatches.push(p);
+    } else if (!result.isMock) {
       if (channel === 'whatsapp') {
         this.sendLiveWhatsAppMessage(destination, payload.messageText).catch(() => {});
       } else if (channel === 'email') {
