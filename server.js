@@ -633,8 +633,9 @@ const appHandler = async (req, res) => {
           totalBudgetINR: r.total_budget_inr,
           rawToken: r.recipient_id
         });
-        const cleanPhone = '917478290140';
-        const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+        const vInfo = db.queryOne('SELECT contact_phone FROM vendor_accounts WHERE id = ?', [vendorId]);
+        const cleanPhone = (vInfo && vInfo.contact_phone) ? vInfo.contact_phone.replace(/\D/g, '') : '';
+        const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}` : '#';
         return {
           ...r,
           waDirectLink: waLink

@@ -49,8 +49,7 @@ class AuthService {
     const cleanDigits = cleanId.replace(/\D/g, '').slice(-10);
 
     // 1. Check known primary/verified partner credentials
-    const isKnownPartner = cleanId.includes('7478290140') ||
-                           cleanId.toLowerCase().includes('tripmozy@gmail.com') ||
+    const isKnownPartner = cleanId.toLowerCase().includes('tripmozy@gmail.com') ||
                            cleanId.toLowerCase().includes('sujansutradhar2004@gmail.com');
     if (isKnownPartner) return 'vendor';
 
@@ -153,8 +152,7 @@ class AuthService {
     let targetUser = null;
 
     if (role === 'vendor') {
-      const isKnownPartner = cleanId.includes('7478290140') ||
-                             cleanId.toLowerCase().includes('tripmozy@gmail.com') ||
+      const isKnownPartner = cleanId.toLowerCase().includes('tripmozy@gmail.com') ||
                              cleanId.toLowerCase().includes('sujansutradhar2004@gmail.com');
 
       if (isKnownPartner) {
@@ -383,8 +381,7 @@ class AuthService {
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
 
     if (role === 'vendor') {
-      const isKnownPartner = cleanId.includes('7478290140') ||
-                             cleanId.toLowerCase().includes('tripmozy@gmail.com') ||
+      const isKnownPartner = cleanId.toLowerCase().includes('tripmozy@gmail.com') ||
                              cleanId.toLowerCase().includes('sujansutradhar2004@gmail.com');
 
       let vendor = null;
@@ -601,7 +598,7 @@ class AuthService {
         const vendorId = tx.uuid();
         const businessName = `${displayName} Tours & Travels`;
         const contactEmail = isEmail ? cleanId : (user.email && !user.email.includes('@tripmozy.local') ? user.email : 'tripmozy@gmail.com');
-        const contactPhone = !isEmail ? cleanId : (user.phone || '+917478290140');
+        const contactPhone = !isEmail ? cleanId : (user.phone || null);
 
         tx.execute(`
           INSERT INTO vendor_accounts (

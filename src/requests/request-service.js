@@ -219,29 +219,31 @@ class RequestService {
           const vendor = tx.queryOne('SELECT contact_phone, contact_email, contact_person, business_name FROM vendor_accounts WHERE id = ?', [m.property.vendorId]);
           
           // 1. WhatsApp alert to vendor.contact_phone
-          const vendorPhone = (vendor && vendor.contact_phone) || '+917478290140';
-          this.notifService.send({
-            recipientUserId: null,
-            destination: vendorPhone,
-            channel: 'whatsapp',
-            templateCode: 'hotel_request_received',
-            eventType: 'request.dispatched',
-            payload: {
-              recipientId,
-              propertyId: m.property.id,
-              propertyName: m.property.name,
-              requestReference: reference,
-              destination,
-              checkInDate,
-              checkOutDate,
-              nights,
-              numRooms,
-              numAdults,
-              totalBudgetINR: budgetNum,
-              rawToken,
-              actionUrl: `/action?token=${rawToken}`
-            }
-          });
+          const vendorPhone = vendor && vendor.contact_phone;
+          if (vendorPhone) {
+            this.notifService.send({
+              recipientUserId: null,
+              destination: vendorPhone,
+              channel: 'whatsapp',
+              templateCode: 'hotel_request_received',
+              eventType: 'request.dispatched',
+              payload: {
+                recipientId,
+                propertyId: m.property.id,
+                propertyName: m.property.name,
+                requestReference: reference,
+                destination,
+                checkInDate,
+                checkOutDate,
+                nights,
+                numRooms,
+                numAdults,
+                totalBudgetINR: budgetNum,
+                rawToken,
+                actionUrl: `/action?token=${rawToken}`
+              }
+            });
+          }
 
           // 2. Email alert to vendor: only to verified vendor contact email or partner desk
           const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
