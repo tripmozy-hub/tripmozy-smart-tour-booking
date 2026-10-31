@@ -23,6 +23,9 @@ class NotificationService {
       gmailAppPassword: config.gmailAppPassword || process.env.GMAIL_APP_PASSWORD || 'hiul rjbe mftg novo',
       emailApiKey: config.emailApiKey || process.env.EMAIL_PROVIDER_API_KEY || null,
       smsApiKey: config.smsApiKey || process.env.SMS_PROVIDER_API_KEY || process.env.FAST2SMS_API_KEY || null,
+      twoFactorApiKey: config.twoFactorApiKey || process.env.TWO_FACTOR_API_KEY || null,
+      msg91AuthKey: config.msg91AuthKey || process.env.MSG91_AUTH_KEY || null,
+      textlocalApiKey: config.textlocalApiKey || process.env.TEXTLOCAL_API_KEY || null,
       twilioSid: config.twilioSid || process.env.TWILIO_ACCOUNT_SID || null,
       twilioToken: config.twilioToken || process.env.TWILIO_AUTH_TOKEN || null,
       twilioFrom: config.twilioFrom || process.env.TWILIO_PHONE_NUMBER || null,
@@ -36,7 +39,7 @@ class NotificationService {
 
   // Check if a real telecom SMS gateway is configured
   isSmsConfigured() {
-    return !!(this.config.smsApiKey || this.config.twilioSid || this.config.smsGatewayUrl);
+    return !!(this.config.smsApiKey || this.config.twoFactorApiKey || this.config.msg91AuthKey || this.config.textlocalApiKey || this.config.twilioSid || this.config.smsGatewayUrl);
   }
 
   // Verify Meta WhatsApp Cloud API HMAC-SHA256 signature
@@ -570,7 +573,40 @@ class NotificationService {
       }
     }
 
-    // 2. Twilio SMS
+    // 2. 2Factor.in SMS Gateway (Indian OTP provider)
+    if (this.config.twoFactorApiKey && cleanDigits.length === 10) {
+      try {
+        console.log(`[TripMozy SMS] Sending live SMS via 2Factor to ${cleanDigits}...`);
+        const tfUrl = `https://2factor.in/v1/API/V1/${this.config.twoFactorApiKey}/SMS/${cleanDigits}/${encodeURIComponent(otpCode || '')}/TripMozy`;
+        const res = await fetch(tfUrl);
+        const data = await res.json();
+        console.log(`[TripMozy SMS] 2Factor response:`, data);
+        if (data && data.Status === 'Success') {
+          return { success: true, provider: '2factor', response: data };
+        }
+      } catch (err) {
+        console.error('[TripMozy SMS Error] 2Factor dispatch error:', err.message);
+      }
+    }
+
+    // 3. MSG91 SMS Gateway
+    if (this.config.msg91AuthKey && cleanDigits.length === 10) {
+      try {
+        console.log(`[TripMozy SMS] Sending live SMS via MSG91 to ${cleanDigits}...`);
+        const res = await fetch(`https://control.msg91.com/api/v5/otp?template_id=${process.env.MSG91_TEMPLATE_ID || ''}&mobile=91${cleanDigits}&authkey=${this.config.msg91AuthKey}&otp=${encodeURIComponent(otpCode || '')}`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        console.log(`[TripMozy SMS] MSG91 response:`, data);
+        if (data && (data.type === 'success' || res.ok)) {
+          return { success: true, provider: 'msg91', response: data };
+        }
+      } catch (err) {
+        console.error('[TripMozy SMS Error] MSG91 dispatch error:', err.message);
+      }
+    }
+
+    // 4. Twilio SMS
     if (this.config.twilioSid && this.config.twilioToken && this.config.twilioFrom) {
       try {
         console.log(`[TripMozy SMS] Sending live SMS via Twilio to ${intlPhone}...`);
@@ -794,7 +830,7 @@ class NotificationService {
           providerMessageId = `mock_email_${Date.now()}`;
         }
       } else if (channel === 'sms') {
-        if (!this.config.smsApiKey) {
+        if (!this.isSmsConfigured()) {
           isMock = true;
           providerMessageId = `mock_sms_${Date.now()}`;
         }

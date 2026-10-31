@@ -240,24 +240,6 @@
         <h1>Enter 6-Digit Code</h1>
         <p class="subtitle" id="step2Subtitle">Dispatched code to <strong id="sentTarget" style="color:#fff;">—</strong>. Please enter the code below:</p>
 
-        <!-- SMS Gateway & Local Testing Code Helper -->
-        <div id="smsGatewayAlert" style="display:none; margin:14px 0 16px; padding:14px; background:rgba(245, 158, 11, 0.12); border:1.5px solid rgba(245, 158, 11, 0.4); border-radius:12px; font-size:12.5px; color:#fbbf24; text-align:left; line-height:1.5;">
-          <div style="font-weight:700; display:flex; align-items:center; gap:6px; margin-bottom:5px; color:#f59e0b;">
-            <span>📱</span>
-            <span>Cellular SMS Delivery Note</span>
-          </div>
-          <div style="color:#e2e8f0;">
-            Direct SMS to physical mobile phones requires a cellular telecom gateway (<a href="https://www.fast2sms.com" target="_blank" style="color:#f59e0b; text-decoration:underline; font-weight:700;">Fast2SMS</a> or Twilio). While your telecom API key is being added to <code style="background:#1e293b; color:#fbbf24; padding:2px 5px; border-radius:4px; font-weight:700;">.env</code>, use your generated code:
-          </div>
-          <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; background:#0f172a; padding:8px 12px; border-radius:8px; border:1px solid #d97706;">
-            <div>
-              <span style="font-size:10px; text-transform:uppercase; color:#94a3b8; font-weight:700; display:block;">Generated OTP Code:</span>
-              <span style="font-size:22px; font-weight:800; letter-spacing:4px; color:#fbbf24;" id="smsTestOtpCode">------</span>
-            </div>
-            <button type="button" onclick="autoFillOtp()" style="background:#f59e0b; color:#0f172a; border:none; padding:7px 14px; border-radius:6px; font-size:12px; font-weight:800; cursor:pointer;">⚡ Auto-Fill Code</button>
-          </div>
-        </div>
-
         <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
           <div class="form-group">
             <input type="text" id="otpCode" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="Enter 6-digit code" maxlength="6" style="text-align:center;font-size:26px;font-weight:800;letter-spacing:8px;font-family:monospace;background:#0f172a;color:#fbbf24;" required>
@@ -314,20 +296,6 @@
             }
           }
 
-          if (data.otpForTesting) {
-            window.testCodeReceived = String(data.otpForTesting);
-            const alertEl = document.getElementById('smsGatewayAlert');
-            const codeEl = document.getElementById('smsTestOtpCode');
-            if (alertEl && codeEl) {
-              codeEl.textContent = window.testCodeReceived;
-              alertEl.style.display = 'block';
-            }
-          } else {
-            window.testCodeReceived = '';
-            const alertEl = document.getElementById('smsGatewayAlert');
-            if (alertEl) alertEl.style.display = 'none';
-          }
-
           document.getElementById('otpCode').value = '';
 
           document.getElementById('step1').style.display = 'none';
@@ -342,15 +310,6 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Send Partner Verification Code';
-      }
-    }
-
-    function autoFillOtp() {
-      if (!window.testCodeReceived) return;
-      const inp = document.getElementById('otpCode');
-      if (inp) {
-        inp.value = window.testCodeReceived;
-        inp.focus();
       }
     }
 

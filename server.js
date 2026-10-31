@@ -337,14 +337,8 @@ const appHandler = async (req, res) => {
       try {
         const result = authService.sendOtp(body);
         await notifService.waitForPendingDispatches();
-        // If telecom SMS gateway is not configured for physical SMS delivery,
-        // provide the test code in the response so local testing is never blocked.
-        if (!result.smsGatewayConfigured && result.otpForTesting) {
-          sendJson(200, result);
-        } else {
-          const { otpForTesting, ...safeResult } = result;
-          sendJson(200, safeResult);
-        }
+        const { otpForTesting, ...safeResult } = result;
+        sendJson(200, safeResult);
       } catch (e) {
         sendJson(400, { error: e.message });
       }
