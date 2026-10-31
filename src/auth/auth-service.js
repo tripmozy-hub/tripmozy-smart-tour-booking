@@ -274,13 +274,19 @@ class AuthService {
       }
     }
 
+    const isSmsActive = this.notifService ? this.notifService.isSmsConfigured() : false;
     return {
       success: true,
-      message: `Verification code sent via ${isEmail ? 'email' : 'SMS'} to ${this.maskIdentifier(cleanId)}`,
+      message: isEmail
+        ? `Verification code sent to ${this.maskIdentifier(cleanId)}`
+        : (isSmsActive
+            ? `Verification code sent via SMS to ${this.maskIdentifier(cleanId)}`
+            : `Verification code generated for ${this.maskIdentifier(cleanId)}`),
       identifier: cleanId,
       channel: isEmail ? 'email' : 'sms',
+      smsGatewayConfigured: isEmail || isSmsActive,
       role,
-      otpForTesting: otpCode // surfaced for seamless testing & local review
+      otpForTesting: (!isSmsActive && !isEmail) ? otpCode : undefined
     };
   }
 

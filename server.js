@@ -10,9 +10,28 @@ const crypto = require('node:crypto');
 
 // Load environment variables from .env
 const envPath = path.join(__dirname, '.env');
-if (fs.existsSync(envPath) && typeof process.loadEnvFile === 'function') {
-  process.loadEnvFile(envPath);
+if (fs.existsSync(envPath)) {
+  if (typeof process.loadEnvFile === 'function') {
+    try { process.loadEnvFile(envPath); } catch (_) {}
+  }
+  try {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    envContent.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let val = (match[2] || '').trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    });
+  } catch (_) {}
 }
+
 
 const { TripMozyDatabase } = require('./src/db/database');
 const { ROLES, SecurityContext } = require('./src/auth/roles');
@@ -318,9 +337,14 @@ const appHandler = async (req, res) => {
       try {
         const result = authService.sendOtp(body);
         await notifService.waitForPendingDispatches();
-        // Do not expose verification code in HTTP response - sent to user's email/phone only
-        const { otpForTesting, ...safeResult } = result;
-        sendJson(200, safeResult);
+        // If telecom SMS gateway is not configured for physical SMS delivery,
+        // provide the test code in the response so local testing is never blocked.
+        if (!result.smsGatewayConfigured && result.otpForTesting) {
+          sendJson(200, result);
+        } else {
+          const { otpForTesting, ...safeResult } = result;
+          sendJson(200, safeResult);
+        }
       } catch (e) {
         sendJson(400, { error: e.message });
       }

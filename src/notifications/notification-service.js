@@ -34,6 +34,11 @@ class NotificationService {
     this.pendingDispatches = [];
   }
 
+  // Check if a real telecom SMS gateway is configured
+  isSmsConfigured() {
+    return !!(this.config.smsApiKey || this.config.twilioSid || this.config.smsGatewayUrl);
+  }
+
   // Verify Meta WhatsApp Cloud API HMAC-SHA256 signature
   verifyWhatsAppSignature(payloadBuffer, signatureHeader) {
     if (!signatureHeader || !signatureHeader.startsWith('sha256=')) {
@@ -519,7 +524,8 @@ class NotificationService {
     if (fast2smsKey && cleanDigits.length === 10) {
       try {
         console.log(`[TripMozy SMS] Sending live SMS via Fast2SMS to ${cleanDigits}...`);
-        const res = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        // Primary attempt: Fast2SMS Quick OTP route
+        let res = await fetch('https://www.fast2sms.com/dev/bulkV2', {
           method: 'POST',
           headers: {
             'authorization': fast2smsKey,
@@ -531,10 +537,33 @@ class NotificationService {
             numbers: cleanDigits
           })
         });
-        const data = await res.json();
-        console.log(`[TripMozy SMS] Fast2SMS result:`, data);
+        let data = await res.json();
+        console.log(`[TripMozy SMS] Fast2SMS OTP route response:`, data);
         if (data && (data.return === true || data.status_code === 200)) {
           return { success: true, provider: 'fast2sms', response: data };
+        }
+
+        // Secondary fallback: Fast2SMS Quick Transactional route 'q'
+        if (data && data.return === false) {
+          console.log(`[TripMozy SMS] Trying Fast2SMS Quick route 'q'...`);
+          res = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+            method: 'POST',
+            headers: {
+              'authorization': fast2smsKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              route: 'q',
+              message: smsText,
+              language: 'english',
+              numbers: cleanDigits
+            })
+          });
+          data = await res.json();
+          console.log(`[TripMozy SMS] Fast2SMS Quick route response:`, data);
+          if (data && (data.return === true || data.status_code === 200)) {
+            return { success: true, provider: 'fast2sms', response: data };
+          }
         }
       } catch (err) {
         console.error('[TripMozy SMS Error] Fast2SMS dispatch error:', err.message);

@@ -441,6 +441,24 @@
             We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong>. Please check your inbox and enter the code below:
           </p>
 
+          <!-- SMS Gateway & Local Testing Code Helper -->
+          <div id="smsGatewayAlert" style="display:none; margin:14px 0 16px; padding:12px 14px; background:#fffbeb; border:1.5px solid #fde68a; border-radius:12px; font-size:12.5px; color:#92400e; text-align:left; line-height:1.5;">
+            <div style="font-weight:700; display:flex; align-items:center; gap:6px; margin-bottom:5px; color:#b45309;">
+              <span>📱</span>
+              <span>Cellular SMS Delivery Note</span>
+            </div>
+            <div>
+              Direct SMS to physical mobile phones requires a cellular telecom gateway (<a href="https://www.fast2sms.com" target="_blank" style="color:#b45309; text-decoration:underline; font-weight:700;">Fast2SMS</a> or Twilio). While your telecom API key is being added to <code style="background:#fef3c7; padding:2px 5px; border-radius:4px; font-weight:700;">.env</code>, use your generated code:
+            </div>
+            <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; background:#ffffff; padding:8px 12px; border-radius:8px; border:1px solid #fcd34d;">
+              <div>
+                <span style="font-size:10px; text-transform:uppercase; color:#78350f; font-weight:700; display:block;">Generated OTP Code:</span>
+                <span style="font-size:20px; font-weight:800; letter-spacing:4px; color:#b45309;" id="smsTestOtpCode">------</span>
+              </div>
+              <button type="button" id="smsAutoFillBtn" onclick="autoFillOtp()" style="background:#d97706; color:#ffffff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">⚡ Auto-Fill Code</button>
+            </div>
+          </div>
+
           <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
             <div class="otp-inputs">
               <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autofocus>
@@ -595,6 +613,20 @@
           step2Subtitle.innerHTML = `We have sent a 6-digit verification code via <strong>SMS</strong> to your mobile <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12px;color:#64748b;">Please check your text messages (SMS) and enter the 6-digit code below:</span>`;
         }
 
+        if (data.otpForTesting) {
+          testCodeReceived = String(data.otpForTesting);
+          const alertEl = document.getElementById('smsGatewayAlert');
+          const codeEl = document.getElementById('smsTestOtpCode');
+          if (alertEl && codeEl) {
+            codeEl.textContent = testCodeReceived;
+            alertEl.style.display = 'block';
+          }
+        } else {
+          testCodeReceived = '';
+          const alertEl = document.getElementById('smsGatewayAlert');
+          if (alertEl) alertEl.style.display = 'none';
+        }
+
         step1.style.display = 'none';
         step2.style.display = 'block';
 
@@ -610,6 +642,15 @@
         sendBtn.disabled = false;
         sendBtn.innerHTML = `<span>Send Verification Code</span>`;
       }
+    }
+
+    function autoFillOtp() {
+      if (!testCodeReceived) return;
+      const digits = testCodeReceived.split('');
+      otpBoxes.forEach((box, i) => {
+        box.value = digits[i] || '';
+      });
+      if (otpBoxes[5]) otpBoxes[5].focus();
     }
 
     function backToStep1() {

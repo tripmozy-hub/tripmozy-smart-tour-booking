@@ -2,3 +2,4 @@ node_modules/
 *.log
 .system_generated/
 .vercel/
+.env
