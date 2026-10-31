@@ -688,6 +688,9 @@
         <button type="submit" id="submitBtn" class="submit-btn">
           <span>🚀 Request Tour Quotes Now</span>
         </button>
+        <div id="authSubmitHint" style="display:none; text-align:center; margin-top:12px; font-size:12px; color:#64748b; line-height:1.5;">
+          🔒 <strong>Verification required:</strong> You can customize tour details freely. Signing in verifies your identity so operators can send genuine quotes.
+        </div>
 
       </form>
     </div>
@@ -777,14 +780,17 @@
       setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
+    function isCustomerLoggedIn() {
+      const token = localStorage.getItem('tm_session_token');
+      const role = localStorage.getItem('tm_user_role');
+      return !!(token && role === 'customer');
+    }
+
     // Submit Request
     document.getElementById('tourRequestForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span>⚡ Dispatching to Verified Tour Operators...</span>';
-
       const facilities = Array.from(document.querySelectorAll('.facility-checkbox:checked')).map(cb => cb.value);
 
       const payload = {
@@ -792,10 +798,10 @@
         propertyTypePreference: document.getElementById('propertyType').value,
         checkInDate: checkInInput.value,
         checkOutDate: checkOutInput.value,
-        numRooms: parseInt(document.getElementById('numRooms').value),
-        numAdults: parseInt(document.getElementById('numAdults').value),
-        numChildren: parseInt(document.getElementById('numChildren').value),
-        totalBudgetINR: parseInt(slider.value),
+        numRooms: parseInt(document.getElementById('numRooms').value) || 1,
+        numAdults: parseInt(document.getElementById('numAdults').value) || 2,
+        numChildren: parseInt(document.getElementById('numChildren').value) || 0,
+        totalBudgetINR: parseInt(slider.value) || 15000,
         roomPreference: document.getElementById('roomPreference').value,
         requiredFacilities: facilities,
         guestName: document.getElementById('guestName').value,
@@ -805,7 +811,37 @@
         termsAccepted: document.getElementById('termsAccept').checked
       };
 
+      // REQUIREMENT: Without login, users can fill details, but requesting tour quotes requires sign in.
+      if (!isCustomerLoggedIn()) {
+        // Save current form inputs in localStorage so no progress is lost
+        localStorage.setItem('tm_pending_tour_request', JSON.stringify(payload));
+        if (payload.guestEmail || payload.guestPhone) {
+          localStorage.setItem('tm_prefill_identifier', payload.guestEmail || payload.guestPhone);
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span>🔒 Taking you to Sign In to dispatch quotes...</span>';
+        showToast('Please sign in to verify your identity before requesting quotes. Redirecting to sign in...');
+
+        setTimeout(() => {
+          const returnTarget = encodeURIComponent('/smart-tour-booking?action=submit');
+          window.location.href = `/login?category=customer&returnUrl=${returnTarget}&reason=auth_required`;
+        }, 600);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⚡ Dispatching to Verified Tour Operators...</span>';
+
       try {
+        const rawUser = localStorage.getItem('tm_user_info');
+        if (rawUser) {
+          try {
+            const u = JSON.parse(rawUser);
+            if (u.id) payload.customerId = u.id;
+          } catch (_) {}
+        }
+
         const res = await fetch('/api/requests', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -842,12 +878,18 @@
       }
     });
 
-    // Check logged in customer session & prefill
+    // Check logged in customer session & prefill / restore pending request
     (function checkCustomerSession() {
       try {
         const raw = localStorage.getItem('tm_user_info');
         const role = localStorage.getItem('tm_user_role');
-        if (raw && role === 'customer') {
+        const token = localStorage.getItem('tm_session_token');
+        const isLoggedIn = !!(token && role === 'customer');
+
+        const btn = document.getElementById('submitBtn');
+        const authHint = document.getElementById('authSubmitHint');
+
+        if (isLoggedIn && raw) {
           const u = JSON.parse(raw);
           if (u.displayName && u.displayName !== 'Traveler') {
             document.getElementById('guestName').value = u.displayName;
@@ -862,6 +904,51 @@
           if (item) {
             item.innerHTML = `<span style="font-size:13px;color:#cbd5e1;">👤 ${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
           }
+
+          if (btn) btn.innerHTML = '<span>🚀 Request Tour Quotes Now</span>';
+          if (authHint) authHint.style.display = 'none';
+
+          // Restore pending tour request if returning from login
+          const pendingRaw = localStorage.getItem('tm_pending_tour_request');
+          const s = new URLSearchParams(window.location.search);
+          if (pendingRaw) {
+            try {
+              const p = JSON.parse(pendingRaw);
+              if (p.destination) document.getElementById('destination').value = p.destination;
+              if (p.propertyTypePreference) document.getElementById('propertyType').value = p.propertyTypePreference;
+              if (p.checkInDate) { checkInInput.value = p.checkInDate; checkOutInput.min = p.checkInDate; }
+              if (p.checkOutDate) checkOutInput.value = p.checkOutDate;
+              updateNights();
+              if (p.numRooms) document.getElementById('numRooms').value = p.numRooms;
+              if (p.numAdults) document.getElementById('numAdults').value = p.numAdults;
+              if (p.numChildren !== undefined) document.getElementById('numChildren').value = p.numChildren;
+              if (p.totalBudgetINR) setBudget(p.totalBudgetINR);
+              if (p.roomPreference) document.getElementById('roomPreference').value = p.roomPreference;
+              if (p.guestName && !document.getElementById('guestName').value) document.getElementById('guestName').value = p.guestName;
+              if (p.guestEmail && !document.getElementById('guestEmail').value) document.getElementById('guestEmail').value = p.guestEmail;
+              if (p.guestPhone && !document.getElementById('guestPhone').value) document.getElementById('guestPhone').value = p.guestPhone;
+              if (p.requiredFacilities && Array.isArray(p.requiredFacilities)) {
+                document.querySelectorAll('.facility-checkbox').forEach(cb => {
+                  cb.checked = p.requiredFacilities.includes(cb.value);
+                });
+              }
+              document.getElementById('termsAccept').checked = true;
+
+              localStorage.removeItem('tm_pending_tour_request');
+              showToast('Welcome back! Your tour details have been restored.');
+
+              if (s.get('action') === 'submit') {
+                window.history.replaceState({}, '', '/smart-tour-booking');
+                setTimeout(() => {
+                  document.getElementById('tourRequestForm').requestSubmit();
+                }, 600);
+              }
+            } catch (_) {}
+          }
+        } else {
+          // Guest User (Not logged in)
+          if (btn) btn.innerHTML = '<span>🔒 Sign In to Request Tour Quotes</span>';
+          if (authHint) authHint.style.display = 'block';
         }
       } catch (_) {}
     })();

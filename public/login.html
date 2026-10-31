@@ -857,6 +857,19 @@
       } else {
         switchCategory('customer');
       }
+
+      // Check prefill identifier
+      const prefill = s.get('identifier') || localStorage.getItem('tm_prefill_identifier');
+      if (prefill && identifierInput) {
+        identifierInput.value = prefill;
+        localStorage.removeItem('tm_prefill_identifier');
+      }
+
+      // Check auth required notice
+      const reason = s.get('reason');
+      if (reason === 'auth_required') {
+        showAlert('Please sign in or enter your mobile/email to verify your account and dispatch your tour request.', 'info');
+      }
     })();
   </script>
 </body>
