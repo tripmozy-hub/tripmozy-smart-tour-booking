@@ -522,7 +522,34 @@ class NotificationService {
     const cleanDigits = destination.replace(/\D/g, '').slice(-10);
     const intlPhone = destination.startsWith('+') ? destination : (destination.length === 10 ? `+91${destination}` : `+${destination.replace(/\D/g, '')}`);
 
-    // 1. Fast2SMS (Indian SMS Gateway)
+    // 1. 2Factor.in SMS Gateway (Verified Active Indian Telecom Provider)
+    const twoFactorKey = this.config.twoFactorApiKey || process.env.TWO_FACTOR_API_KEY;
+    if (twoFactorKey && cleanDigits.length === 10) {
+      try {
+        console.log(`[TripMozy SMS] Sending live SMS via 2Factor to 91${cleanDigits}...`);
+        const tfUrl = `https://2factor.in/API/V1/${twoFactorKey}/SMS/91${cleanDigits}/${encodeURIComponent(otpCode || '')}`;
+        const res = await fetch(tfUrl);
+        const data = await res.json();
+        console.log(`[TripMozy SMS] 2Factor result:`, data);
+        if (data && data.Status === 'Success') {
+          return { success: true, provider: '2factor', sessionId: data.Details, response: data };
+        }
+
+        // Fallback without 91 prefix
+        if (data && data.Status !== 'Success') {
+          const fallbackUrl = `https://2factor.in/API/V1/${twoFactorKey}/SMS/${cleanDigits}/${encodeURIComponent(otpCode || '')}`;
+          const fRes = await fetch(fallbackUrl);
+          const fData = await fRes.json();
+          if (fData && fData.Status === 'Success') {
+            return { success: true, provider: '2factor', sessionId: fData.Details, response: fData };
+          }
+        }
+      } catch (err) {
+        console.error('[TripMozy SMS Error] 2Factor dispatch error:', err.message);
+      }
+    }
+
+    // 2. Fast2SMS (Indian SMS Gateway)
     const fast2smsKey = this.config.smsApiKey;
     if (fast2smsKey && cleanDigits.length === 10) {
       try {
@@ -570,22 +597,6 @@ class NotificationService {
         }
       } catch (err) {
         console.error('[TripMozy SMS Error] Fast2SMS dispatch error:', err.message);
-      }
-    }
-
-    // 2. 2Factor.in SMS Gateway (Indian OTP provider)
-    if (this.config.twoFactorApiKey && cleanDigits.length === 10) {
-      try {
-        console.log(`[TripMozy SMS] Sending live SMS via 2Factor to ${cleanDigits}...`);
-        const tfUrl = `https://2factor.in/v1/API/V1/${this.config.twoFactorApiKey}/SMS/${cleanDigits}/${encodeURIComponent(otpCode || '')}/TripMozy`;
-        const res = await fetch(tfUrl);
-        const data = await res.json();
-        console.log(`[TripMozy SMS] 2Factor response:`, data);
-        if (data && data.Status === 'Success') {
-          return { success: true, provider: '2factor', response: data };
-        }
-      } catch (err) {
-        console.error('[TripMozy SMS Error] 2Factor dispatch error:', err.message);
       }
     }
 
