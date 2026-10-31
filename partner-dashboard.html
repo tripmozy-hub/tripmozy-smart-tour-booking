@@ -9,34 +9,38 @@
   <style>
     :root {
       --primary: #2563eb;
+      --primary-dark: #1d4ed8;
       --navy: #0f172a;
+      --navy-light: #1e293b;
       --accent: #f59e0b;
-      --bg: #f1f5f9;
+      --bg: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --success: #10b981;
+      --success: #059669;
       --danger: #ef4444;
       --warning: #f59e0b;
-      --radius: 12px;
+      --radius: 14px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
       --shadow: 0 4px 20px rgba(15,23,42,0.07);
+      --shadow-lg: 0 25px 60px -15px rgba(15,23,42,0.15);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
 
     /* ── Header ── */
-    header { background: var(--navy); color: #fff; padding: 0 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+    header { background: var(--navy); color: #fff; padding: 0 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.18); }
     .header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 62px; }
     .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
     .brand-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
     .brand-logo span { color: var(--accent); }
-    .brand-badge { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); color: var(--accent); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
-    .header-right { display: flex; align-items: center; gap: 14px; }
+    .brand-badge { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.28); color: var(--accent); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
     .vendor-name-display { font-size: 13px; font-weight: 700; color: #fff; }
     .vendor-status-display { font-size: 11px; color: #94a3b8; }
-    .refresh-btn { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: background .2s; font-family: inherit; }
-    .refresh-btn:hover { background: rgba(255,255,255,.2); }
+    .refresh-btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: #fff; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: background .2s; font-family: inherit; }
+    .refresh-btn:hover { background: rgba(255,255,255,.16); }
     .live-dot { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
     .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
@@ -56,7 +60,6 @@
     }
     .page-tab:hover { color: var(--text); }
     .page-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .tab-icon { font-size: 16px; }
     .tab-count {
       display: inline-flex; align-items: center; justify-content: center;
       min-width: 22px; height: 22px; padding: 0 6px;
@@ -74,14 +77,14 @@
 
     /* ── Stats Bar ── */
     .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 28px; }
-    .stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border-left: 4px solid var(--border); cursor: pointer; transition: transform .15s, box-shadow .15s; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(15,23,42,.12); }
+    .stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); border-left: 4px solid var(--border); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(15,23,42,.1); }
     .stat-card.pending  { border-left-color: var(--warning); }
     .stat-card.accepted { border-left-color: var(--success); }
     .stat-card.rejected { border-left-color: var(--danger); }
     .stat-card.all      { border-left-color: var(--primary); }
-    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-    .stat-value { font-size: 30px; font-weight: 800; }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .stat-value { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
 
     /* ── Page Header ── */
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
@@ -144,7 +147,7 @@
     }
     .outcome-banner.accepted { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
     .outcome-banner.rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    .outcome-icon { font-size: 20px; }
+    .outcome-icon { font-size: 18px; line-height: 1; }
     .outcome-text { display: flex; flex-direction: column; gap: 2px; }
     .outcome-title { font-weight: 700; }
     .outcome-sub { font-size: 12px; font-weight: 500; opacity: .8; }
@@ -153,14 +156,14 @@
     .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all .18s; }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn-accept { background: var(--success); color: #fff; }
-    .btn-accept:hover:not(:disabled) { background: #059669; transform: translateY(-1px); }
+    .btn-accept:hover:not(:disabled) { background: #047857; transform: translateY(-1px); }
     .btn-reject { background: #fff; color: var(--danger); border: 2px solid var(--danger); }
     .btn-reject:hover:not(:disabled) { background: var(--danger); color: #fff; }
     .btn-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
 
     /* ── Empty / Loading / Error ── */
-    .empty-state { text-align: center; padding: 80px 32px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); }
-    .empty-icon  { font-size: 56px; margin-bottom: 14px; }
+    .empty-state { text-align: center; padding: 80px 32px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .empty-icon  { font-size: 48px; margin-bottom: 14px; }
     .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
     .empty-desc  { font-size: 14px; color: var(--text-muted); max-width: 380px; margin: 0 auto 18px; }
     .empty-cta   { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--primary); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; }
@@ -169,14 +172,14 @@
     .error-banner { background: #fee2e2; border: 1px solid #fca5a5; border-radius: var(--radius); padding: 18px 20px; color: #991b1b; font-weight: 600; }
 
     /* ── Reject Modal ── */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px); }
     .modal-overlay.hidden { display: none; }
-    .modal { background: #fff; border-radius: 16px; padding: 28px; max-width: 460px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,.25); }
+    .modal { background: #fff; border-radius: 18px; padding: 30px; max-width: 460px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,.2); }
     .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
     .modal-ref { font-size: 12px; color: var(--text-muted); font-family: monospace; margin-bottom: 20px; }
     .form-label { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: block; color: var(--text); }
     .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 14px; }
-    .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+    .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
     .btn-cancel  { background: #f1f5f9; color: var(--text-muted); }
     .btn-cancel:hover { background: var(--border); }
@@ -216,7 +219,6 @@
         font-size: 13px;
         gap: 6px;
       }
-      .tab-icon { font-size: 14px; }
 
       .container { padding: 14px 10px 80px; }
 
@@ -259,7 +261,7 @@
 <!-- Reject Modal -->
 <div class="modal-overlay hidden" id="rejectModal">
   <div class="modal">
-    <div class="modal-title">❌ Decline Request</div>
+    <div class="modal-title">Decline Request</div>
     <div class="modal-ref" id="modalRef">—</div>
     <label class="form-label">Reason *</label>
     <select class="form-select" id="rejectReason">
@@ -281,7 +283,7 @@
 <!-- Operator Contact Settings Modal -->
 <div class="modal-overlay hidden" id="contactModal">
   <div class="modal">
-    <div class="modal-title">⚙️ Operator Contact Settings</div>
+    <div class="modal-title">Operator Contact Settings</div>
     <div class="modal-ref">Configure phone &amp; email for WhatsApp alerts and main email notifications</div>
     
     <label class="form-label">WhatsApp Contact Number *</label>
@@ -297,7 +299,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeContactSettingsModal()">Cancel</button>
-      <button class="btn btn-accept" onclick="saveContactSettings(this)">💾 Save Contact Settings</button>
+      <button class="btn btn-accept" onclick="saveContactSettings(this)">Save Contact Settings</button>
     </div>
   </div>
 </div>
@@ -316,12 +318,12 @@
       </div>
       <div style="text-align:right">
         <div class="vendor-name-display" id="vendorName">Loading…</div>
-        <div class="vendor-status-display" id="vendorMeta">Verified Partner ✓</div>
-        <div style="font-size:11px;color:#cbd5e1;margin-top:2px;" id="vendorContactMeta">📞 <span id="vPhone">...</span> · ✉️ <span id="vEmail">...</span></div>
+        <div class="vendor-status-display" id="vendorMeta">Verified Partner</div>
+        <div style="font-size:11px;color:#cbd5e1;margin-top:2px;" id="vendorContactMeta"><span id="vPhone">...</span> · <span id="vEmail">...</span></div>
       </div>
-      <button class="refresh-btn" onclick="openContactSettingsModal()" title="Update Notification Contacts">⚙️ Contacts</button>
-      <button class="refresh-btn" onclick="loadDashboard()">🔄</button>
-      <button class="refresh-btn" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.4);color:#fca5a5;" onclick="logout()">🚪 Sign Out</button>
+      <button class="refresh-btn" onclick="openContactSettingsModal()" title="Update Notification Contacts">Settings</button>
+      <button class="refresh-btn" onclick="loadDashboard()">Refresh</button>
+      <button class="refresh-btn" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.35);color:#fca5a5;" onclick="logout()">Sign Out</button>
     </div>
   </div>
 </header>
@@ -330,19 +332,19 @@
 <nav class="page-nav">
   <div class="page-nav-inner">
     <button class="page-tab active" data-page="pending" onclick="switchPage('pending')">
-      <span class="tab-icon">⏳</span> Pending
+      Pending
       <span class="tab-count" id="cnt-pending">0</span>
     </button>
     <button class="page-tab" data-page="accepted" onclick="switchPage('accepted')">
-      <span class="tab-icon">✅</span> Accepted
+      Accepted
       <span class="tab-count" id="cnt-accepted">0</span>
     </button>
     <button class="page-tab" data-page="rejected" onclick="switchPage('rejected')">
-      <span class="tab-icon">❌</span> Declined
+      Declined
       <span class="tab-count" id="cnt-rejected">0</span>
     </button>
     <button class="page-tab" data-page="all" onclick="switchPage('all')">
-      <span class="tab-icon">📋</span> All Requests
+      All Requests
       <span class="tab-count" id="cnt-all">0</span>
     </button>
   </div>
@@ -354,19 +356,19 @@
   <!-- Stats Bar (clickable → switches page) -->
   <div class="stats-bar">
     <div class="stat-card pending"  onclick="switchPage('pending')"  title="View pending requests">
-      <div class="stat-label">⏳ Awaiting Response</div>
+      <div class="stat-label">Awaiting Response</div>
       <div class="stat-value" id="s-pending">—</div>
     </div>
     <div class="stat-card accepted" onclick="switchPage('accepted')" title="View accepted requests">
-      <div class="stat-label">✅ Offers Sent</div>
+      <div class="stat-label">Offers Sent</div>
       <div class="stat-value" id="s-accepted">—</div>
     </div>
     <div class="stat-card rejected" onclick="switchPage('rejected')" title="View declined requests">
-      <div class="stat-label">❌ Declined</div>
+      <div class="stat-label">Declined</div>
       <div class="stat-value" id="s-rejected">—</div>
     </div>
     <div class="stat-card all" onclick="switchPage('all')" title="View all requests">
-      <div class="stat-label">📋 Total Received</div>
+      <div class="stat-label">Total Received</div>
       <div class="stat-value" id="s-all">—</div>
     </div>
   </div>
@@ -377,7 +379,7 @@
       <div class="page-title" id="pageTitle">Pending Requests</div>
       <div class="page-meta" id="pageMeta">Loading…</div>
     </div>
-    <span class="section-badge pending" id="pageBadge">⏳ Awaiting Response</span>
+    <span class="section-badge pending" id="pageBadge">Awaiting Response</span>
   </div>
 
   <!-- Cards -->
@@ -405,10 +407,10 @@ let cdSec          = 30;
 
 // ─── Page config ─────────────────────────────────────────────────────────────
 const PAGE_CONFIG = {
-  pending:  { title: 'Pending Tour Requests',  badge: '⏳ Awaiting Response', badgeCls: 'pending',  emptyIcon: '📭', emptyTitle: 'No pending tour requests', emptyDesc: 'All clear! When travelers submit tour requests matching your destination, they will appear here.' },
-  accepted: { title: 'Accepted Tour Quotes',   badge: '✅ Quotes Sent',       badgeCls: 'accepted', emptyIcon: '🤝', emptyTitle: 'No accepted tour quotes yet', emptyDesc: 'Quotes you send to travelers will move here. Start accepting pending requests to send quotes.' },
-  rejected: { title: 'Declined Tour Requests', badge: '❌ Declined',          badgeCls: 'rejected', emptyIcon: '📁', emptyTitle: 'No declined requests', emptyDesc: 'Requests you decline will be archived here for your records.' },
-  all:      { title: 'All Tour Requests',      badge: '📋 All',               badgeCls: 'all',      emptyIcon: '📂', emptyTitle: 'No tour requests received', emptyDesc: 'No tour requests have been dispatched to your packages yet.' }
+  pending:  { title: 'Pending Tour Requests',  badge: 'Awaiting Response', badgeCls: 'pending',  emptyIcon: '📭', emptyTitle: 'No pending tour requests', emptyDesc: 'All clear! When travelers submit tour requests matching your destination, they will appear here.' },
+  accepted: { title: 'Accepted Tour Quotes',   badge: 'Quotes Sent',       badgeCls: 'accepted', emptyIcon: '🤝', emptyTitle: 'No accepted tour quotes yet', emptyDesc: 'Quotes you send to travelers will move here. Start accepting pending requests to send quotes.' },
+  rejected: { title: 'Declined Tour Requests', badge: 'Declined',          badgeCls: 'rejected', emptyIcon: '📁', emptyTitle: 'No declined requests', emptyDesc: 'Requests you decline will be archived here for your records.' },
+  all:      { title: 'All Tour Requests',      badge: 'All',               badgeCls: 'all',      emptyIcon: '📂', emptyTitle: 'No tour requests received', emptyDesc: 'No tour requests have been dispatched to your packages yet.' }
 };
 
 let currentVendorData = null;
@@ -477,15 +479,15 @@ async function saveContactSettings(btn) {
       document.getElementById('vPhone').textContent = d.vendor.contact_phone;
       document.getElementById('vEmail').textContent = d.vendor.contact_email;
       closeContactSettingsModal();
-      showToast('✅ Contact settings updated! WhatsApp & Email alerts updated.', 'success');
+      showToast('Contact settings updated! WhatsApp & Email alerts updated.', 'success');
     } else {
-      showToast('⚠️ ' + (d.error || 'Could not update settings'), 'error');
+      showToast((d.error || 'Could not update settings'), 'error');
     }
   } catch (err) {
     showToast('Network error: ' + err.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `💾 Save Contact Settings`;
+    btn.innerHTML = `Save Contact Settings`;
   }
 }
 
@@ -579,7 +581,7 @@ function renderPage() {
         <div class="empty-icon">${cfg.emptyIcon}</div>
         <div class="empty-title">${cfg.emptyTitle}</div>
         <div class="empty-desc">${cfg.emptyDesc}</div>
-        ${activePage !== 'pending' ? `<button class="empty-cta" onclick="switchPage('pending')">⏳ View Pending Requests</button>` : ''}
+        ${activePage !== 'pending' ? `<button class="empty-cta" onclick="switchPage('pending')">View Pending Requests</button>` : ''}
       </div>`;
     document.getElementById('pageMeta').textContent =
       `${filtered.length} request(s) · Last updated ${new Date().toLocaleTimeString('en-IN')}`;
@@ -602,19 +604,19 @@ function buildCard(r) {
 
   // Status badge
   const badgeMap = {
-    accepted: `<span class="badge badge-accepted">✅ Offer Sent</span>`,
-    rejected: `<span class="badge badge-rejected">❌ Declined</span>`,
-    cancelled: `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">🚫 Cancelled by Traveler</span>`,
+    accepted: `<span class="badge badge-accepted">Offer Sent</span>`,
+    rejected: `<span class="badge badge-rejected">Declined</span>`,
+    cancelled: `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`,
   };
   const statusBadge = isCancelled
-    ? `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">🚫 Cancelled by Traveler</span>`
-    : (badgeMap[status] || (expired ? `<span class="badge badge-expired">⌛ Expired</span>` : `<span class="badge badge-pending">⏳ Action Required</span>`));
+    ? `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`
+    : (badgeMap[status] || (expired ? `<span class="badge badge-expired">Expired</span>` : `<span class="badge badge-pending">Action Required</span>`));
 
   // Countdown
   let cdHtml = '';
   if (isPend) {
     const mins = Math.max(0, Math.round((expires - now) / 60000));
-    cdHtml = `<span class="countdown ${mins > 30 ? 'safe' : ''}">⏱ ${mins > 60 ? Math.round(mins/60)+'h' : mins+'m'} left</span>`;
+    cdHtml = `<span class="countdown ${mins > 30 ? 'safe' : ''}">${mins > 60 ? Math.round(mins/60)+'h' : mins+'m'} left</span>`;
   }
 
   const totalTourINR = r.total_budget_paise / 100;
@@ -634,7 +636,6 @@ function buildCard(r) {
   if (isCancelled) {
     footer = `
       <div class="outcome-banner rejected" style="background:#fef2f2;border-color:#fecaca;">
-        <div class="outcome-icon">🚫</div>
         <div class="outcome-text">
           <div class="outcome-title" style="color:#991b1b;">Cancelled by Traveler</div>
           <div class="outcome-sub" style="color:#b91c1c;">The customer has cancelled this tour request. No response or quote is required.</div>
@@ -643,43 +644,41 @@ function buildCard(r) {
   } else if (status === 'accepted') {
     footer = `
       <div class="outcome-banner accepted">
-        <div class="outcome-icon">✅</div>
         <div class="outcome-text">
-          <div class="outcome-title">Tour quote of ₹${budgetINR} sent successfully</div>
-          <div class="outcome-sub">TripMozy Advance (30%+5% GST): ₹${payableNowINR.toLocaleString('en-IN')} · Balance Collected: ₹${remainingBalanceINR.toLocaleString('en-IN')}. Traveler is reviewing.</div>
+          <div class="outcome-title">Tour quote of &#8377;${budgetINR} sent successfully</div>
+          <div class="outcome-sub">TripMozy Advance (30%+5% GST): &#8377;${payableNowINR.toLocaleString('en-IN')} · Balance Collected: &#8377;${remainingBalanceINR.toLocaleString('en-IN')}. Traveler is reviewing.</div>
         </div>
       </div>`;
   } else if (status === 'rejected') {
     const reason = r.rejection_reason ? r.rejection_reason.replace(/_/g,' ') : 'reason not specified';
     footer = `
       <div class="outcome-banner rejected">
-        <div class="outcome-icon">❌</div>
         <div class="outcome-text">
           <div class="outcome-title">Declined · ${esc(reason)}</div>
           <div class="outcome-sub">This request has been declined and removed from your active queue.</div>
         </div>
       </div>`;
   } else if (expired) {
-    footer = `<span style="color:var(--text-muted);font-size:13px;padding:4px 0">⌛ This request expired without a response.</span>`;
+    footer = `<span style="color:var(--text-muted);font-size:13px;padding:4px 0">This request expired without a response.</span>`;
   } else {
     footer = `
       <div style="display:flex; flex-direction:column; gap:6px; width:100%; margin-bottom:10px; background:#eff6ff; padding:10px 12px; border-radius:10px; border:1px solid #bfdbfe;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <span style="font-size:12px; font-weight:700; color:#1e40af;">Tour Package Quote:</span>
           <div style="display:flex; align-items:center; gap:4px;">
-            <span style="font-size:15px; font-weight:800; color:#1e40af;">₹</span>
+            <span style="font-size:15px; font-weight:800; color:#1e40af;">&#8377;</span>
             <input type="number" id="quote-${r.recipient_id}" value="${totalTourINR}" min="1000" step="500" style="padding:6px 10px; border:1.5px solid #93c5fd; border-radius:8px; font-size:16px; font-weight:800; width:130px; font-family:inherit; color:#0f172a;" oninput="updateCardPricing('${r.recipient_id}')">
           </div>
         </div>
         <div id="split-info-${r.recipient_id}" style="font-size:11px; color:#1d4ed8; font-weight:600; line-height:1.4;">
-          TripMozy Advance: ₹${payableNowINR.toLocaleString('en-IN')} (30%+5% GST) · Operator Balance: ₹${remainingBalanceINR.toLocaleString('en-IN')}
+          TripMozy Advance: &#8377;${payableNowINR.toLocaleString('en-IN')} (30%+5% GST) · Operator Balance: &#8377;${remainingBalanceINR.toLocaleString('en-IN')}
         </div>
       </div>
       <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
-        <button class="btn btn-accept" style="width:100%; justify-content:center; padding:12px; font-size:14px;" onclick="acceptRequest('${r.recipient_id}', this)">✅ Accept &amp; Send Tour Quote</button>
+        <button class="btn btn-accept" style="width:100%; justify-content:center; padding:12px; font-size:14px;" onclick="acceptRequest('${r.recipient_id}', this)">Accept &amp; Send Tour Quote</button>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; width:100%;">
-          <button class="btn btn-reject" style="width:100%; justify-content:center; padding:10px; font-size:13px;" onclick="openRejectModal('${r.recipient_id}', '${esc(r.request_reference)}')">❌ Decline</button>
-          ${r.waDirectLink ? `<a href="${r.waDirectLink}" target="_blank" class="btn" style="background:#25D366; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; font-size:13px; padding:10px; border-radius:8px; width:100%;" title="Open pre-filled WhatsApp tour request alert">💬 WhatsApp</a>` : ''}
+          <button class="btn btn-reject" style="width:100%; justify-content:center; padding:10px; font-size:13px;" onclick="openRejectModal('${r.recipient_id}', '${esc(r.request_reference)}')">Decline</button>
+          ${r.waDirectLink ? `<a href="${r.waDirectLink}" target="_blank" class="btn" style="background:#25D366; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; font-size:13px; padding:10px; border-radius:8px; width:100%;" title="Open pre-filled WhatsApp tour request alert">WhatsApp</a>` : ''}
         </div>
       </div>`;
   }
@@ -690,7 +689,7 @@ function buildCard(r) {
         <div>
           <div class="request-ref">${esc(r.request_reference)}</div>
           <div class="prop-name">${esc(r.property_name)}</div>
-          <div class="prop-loc">📍 ${esc(r.property_city || '')}</div>
+          <div class="prop-loc">${esc(r.property_city || '')}</div>
         </div>
         <div class="card-right">
           ${statusBadge}
@@ -699,31 +698,31 @@ function buildCard(r) {
       </div>
       <div class="card-body">
         <div>
-          <div class="detail-label">🗺 Destination Requested</div>
+          <div class="detail-label">Destination Requested</div>
           <div class="detail-value">${esc(r.destination)}</div>
           ${r.destination_locality ? `<div class="detail-sub">${esc(r.destination_locality)}</div>` : ''}
         </div>
         <div>
-          <div class="detail-label">💰 Traveler Budget</div>
-          <div class="detail-value big">₹${budgetINR}</div>
+          <div class="detail-label">Traveler Budget</div>
+          <div class="detail-value big">&#8377;${budgetINR}</div>
           <div class="detail-sub">Total tour budget</div>
         </div>
         <div>
-          <div class="detail-label">📅 Tour Dates</div>
+          <div class="detail-label">Tour Dates</div>
           <div class="detail-value">${fmtDate(r.check_in_date)} → ${fmtDate(r.check_out_date)}</div>
           <div class="detail-sub">${r.nights + 1} Days / ${r.nights} Night${r.nights>1?'s':''}</div>
         </div>
         <div>
-          <div class="detail-label">👥 Travelers & Setup</div>
+          <div class="detail-label">Travelers &amp; Setup</div>
           <div class="detail-value">${r.num_adults} Adult${r.num_adults>1?'s':''}${r.num_children>0?' · '+r.num_children+' Child':''} · ${r.num_rooms} Vehicle${r.num_rooms>1?'s':''}</div>
           ${r.room_preference && r.room_preference!=='any' ? `<div class="detail-sub">Style: ${esc(r.room_preference.toUpperCase())}</div>` : ''}
         </div>
         <div>
-          <div class="detail-label">🛎 Tour Inclusions</div>
+          <div class="detail-label">Tour Inclusions</div>
           ${facsHtml}
         </div>
         <div>
-          <div class="detail-label">🎒 Operator / Base</div>
+          <div class="detail-label">Operator / Base</div>
           <div class="detail-value" style="font-size:14px">${esc(r.property_name)}</div>
           <div class="detail-sub">${esc(r.property_city||'')}</div>
         </div>
@@ -777,16 +776,16 @@ async function acceptRequest(recipientId, btn) {
       animateCardOut(recipientId, () => {
         renderPage();      // re-render current (pending) page — card gone
         // Brief flash notification
-        showToast('✅ Tour quote sent! View it in the Accepted tab.', 'success');
+        showToast('Tour quote sent! View it in the Accepted tab.', 'success');
       });
     } else {
       btn.disabled = false;
-      btn.innerHTML = `✅ Accept &amp; Send Tour Quote`;
+      btn.innerHTML = `Accept &amp; Send Tour Quote`;
       showToast(`Error: ${data.error || 'Could not accept'}`, 'error');
     }
   } catch (e) {
     btn.disabled = false;
-    btn.innerHTML = `✅ Accept &amp; Send Tour Quote`;
+    btn.innerHTML = `Accept &amp; Send Tour Quote`;
     showToast(`Network error: ${e.message}`, 'error');
   }
 }
@@ -824,7 +823,7 @@ async function confirmReject() {
 
       animateCardOut(targetId, () => {
         renderPage();
-        showToast('❌ Request declined and moved to Declined tab.', 'info');
+        showToast('Request declined and moved to Declined tab.', 'info');
       });
     } else {
       showToast(`Error: ${data.error || 'Could not decline'}`, 'error');
@@ -887,7 +886,7 @@ function resetCountdown() {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function showError(msg) {
   document.getElementById('cardsArea').innerHTML =
-    `<div class="error-banner">⚠️ ${esc(msg)}</div>`;
+    `<div class="error-banner">${esc(msg)}</div>`;
 }
 function esc(s) {
   if (!s) return '';

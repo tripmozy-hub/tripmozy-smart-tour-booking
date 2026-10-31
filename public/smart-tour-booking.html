@@ -15,14 +15,16 @@
       --navy-light: #1e293b;
       --accent: #f59e0b;
       --accent-hover: #d97706;
-      --bg: #f8fafc;
+      --bg: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --success: #10b981;
-      --radius: 14px;
-      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --success: #059669;
+      --radius: 16px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 20px rgba(15,23,42,0.08), 0 1px 4px rgba(15,23,42,0.04);
+      --shadow-lg: 0 25px 60px -15px rgba(15,23,42,0.15);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,7 +44,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
     }
     .header-inner {
       max-width: 1200px;
@@ -76,8 +78,8 @@
     .nav-link { color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
     .nav-link:hover { color: #ffffff; }
     .partner-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       color: #ffffff;
       padding: 8px 16px;
       border-radius: 9999px;
@@ -86,13 +88,13 @@
       text-decoration: none;
       transition: all 0.2s;
     }
-    .partner-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .partner-btn:hover { background: rgba(255, 255, 255, 0.16); }
 
     /* Hero Banner */
     .hero {
       background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
       color: #ffffff;
-      padding: 48px 24px 64px;
+      padding: 52px 24px 68px;
       text-align: center;
     }
     .hero-container { max-width: 820px; margin: 0 auto; }
@@ -100,35 +102,36 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.28);
       color: #fbbf24;
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 9999px;
       font-size: 13px;
       font-weight: 700;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      letter-spacing: 0.2px;
     }
-    .hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+    .hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 14px; }
     @media (min-width: 768px) { .hero h1 { font-size: 42px; } }
-    .hero p { font-size: 16px; color: #cbd5e1; line-height: 1.6; }
+    .hero p { font-size: 16px; color: #cbd5e1; line-height: 1.7; max-width: 680px; margin: 0 auto; }
 
     /* Main Container & Form */
     .main-wrap { max-width: 900px; margin: -32px auto 0; padding: 0 16px; }
     .form-card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px 28px;
+      box-shadow: var(--shadow-lg);
+      padding: 36px 32px;
       border: 1px solid var(--border);
     }
-    @media (min-width: 640px) { .form-card { padding: 40px; } }
+    @media (min-width: 640px) { .form-card { padding: 44px 40px; } }
 
     .section-title {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       color: var(--navy);
-      margin: 28px 0 16px;
+      margin: 30px 0 16px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -145,6 +148,7 @@
       justify-content: center;
       font-size: 13px;
       font-weight: 800;
+      flex-shrink: 0;
     }
 
     .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -157,16 +161,17 @@
     .form-group { margin-bottom: 16px; }
     label {
       display: block;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       color: #334155;
-      margin-bottom: 6px;
+      margin-bottom: 7px;
+      letter-spacing: 0.1px;
     }
     .form-control {
       width: 100%;
       padding: 12px 14px;
       border: 1.5px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 14px;
       font-family: inherit;
       color: var(--text);
@@ -176,27 +181,28 @@
     .form-control:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     /* Budget Range Slider Box */
     .budget-box {
       background: #f8fafc;
       border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 14px;
+      padding: 22px;
       margin-bottom: 20px;
     }
     .budget-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .budget-amount {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 800;
       color: var(--primary);
+      letter-spacing: -0.5px;
     }
     .budget-disclosure {
       font-size: 11px;
@@ -240,12 +246,13 @@
       background: #f8fafc;
       border: 1px solid var(--border);
       padding: 10px 14px;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 600;
       user-select: none;
       transition: all 0.15s;
+      color: #334155;
     }
     .facility-checkbox { display: none; }
     .facility-checkbox:checked + .facility-label {
@@ -279,12 +286,12 @@
       background: var(--primary);
       color: #ffffff;
       padding: 16px 24px;
-      font-size: 16px;
+      font-size: 15.5px;
       font-weight: 800;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
       transition: all 0.2s;
       margin-top: 24px;
       display: flex;
@@ -292,11 +299,12 @@
       align-items: center;
       gap: 10px;
       font-family: inherit;
+      letter-spacing: 0.1px;
     }
     .submit-btn:hover {
       background: var(--primary-dark);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.38);
     }
     .submit-btn:disabled {
       background: #94a3b8;
@@ -310,32 +318,32 @@
       display: none;
       background: var(--card-bg);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      padding: 48px 40px;
       text-align: center;
       border: 1px solid var(--border);
     }
     .success-icon {
-      width: 64px;
-      height: 64px;
+      width: 68px;
+      height: 68px;
       background: #d1fae5;
-      color: #059669;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      margin: 0 auto 16px;
+      margin: 0 auto 18px;
     }
-    .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    .success-icon svg { width: 32px; height: 32px; }
+    .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: var(--navy); }
     .result-ref {
       font-family: monospace;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--primary);
       background: #eff6ff;
       padding: 4px 12px;
       border-radius: 6px;
+      border: 1px solid #bfdbfe;
       display: inline-block;
       margin-bottom: 16px;
     }
@@ -343,8 +351,8 @@
       font-size: 14px;
       color: var(--text-muted);
       max-width: 520px;
-      margin: 0 auto 24px;
-      line-height: 1.6;
+      margin: 0 auto 28px;
+      line-height: 1.65;
     }
     .action-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .btn-secondary {
@@ -352,19 +360,22 @@
       color: var(--text);
       text-decoration: none;
       padding: 12px 20px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 700;
       font-size: 14px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-family: inherit;
     }
     .btn-primary-link {
       background: var(--primary);
       color: #ffffff;
       text-decoration: none;
       padding: 12px 24px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 700;
       font-size: 14px;
       display: inline-flex;
@@ -463,7 +474,7 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-container">
-      <div class="badge">✨ Real-Time Tour &amp; Holiday Package Marketplace</div>
+      <div class="badge">Real-Time Tour &amp; Holiday Package Marketplace</div>
       <h1>Plan Your Dream Tour. Set Your Budget.</h1>
       <p>Submit your destination, dates, and total group budget. TripMozy instantly contacts eligible verified tour operators across India to send you customized tour packages &amp; competitive quotes within your budget.</p>
     </div>
@@ -583,19 +594,19 @@
           <div class="budget-header">
             <div>
               <div style="font-size: 13px; font-weight: 700; color: #475569;">Maximum Tour Budget (INR)</div>
-              <div class="budget-disclosure">💡 Must cover complete tour package including stays, transfers, and taxes</div>
+              <div class="budget-disclosure">Must cover complete tour package including stays, transfers, and taxes</div>
             </div>
-            <div class="budget-amount" id="budgetDisplay">₹15,000</div>
+            <div class="budget-amount" id="budgetDisplay">&#8377;15,000</div>
           </div>
 
           <input type="range" id="budgetSlider" min="3000" max="150000" step="1000" value="15000" style="width: 100%; accent-color: var(--primary);">
 
           <div class="budget-chips">
-            <div class="chip" onclick="setBudget(8000)">₹8,000 (Budget Explorer)</div>
-            <div class="chip active" onclick="setBudget(15000)">₹15,000 (Standard Tour)</div>
-            <div class="chip" onclick="setBudget(25000)">₹25,000 (Comfort Tour)</div>
-            <div class="chip" onclick="setBudget(50000)">₹50,000 (Deluxe Tour)</div>
-            <div class="chip" onclick="setBudget(85000)">₹85,000+ (Luxury Private Tour)</div>
+            <div class="chip" onclick="setBudget(8000)">&#8377;8,000 (Budget Explorer)</div>
+            <div class="chip active" onclick="setBudget(15000)">&#8377;15,000 (Standard Tour)</div>
+            <div class="chip" onclick="setBudget(25000)">&#8377;25,000 (Comfort Tour)</div>
+            <div class="chip" onclick="setBudget(50000)">&#8377;50,000 (Deluxe Tour)</div>
+            <div class="chip" onclick="setBudget(85000)">&#8377;85,000+ (Luxury Private Tour)</div>
           </div>
         </div>
 
@@ -628,27 +639,27 @@
         <div class="facilities-grid">
           <div>
             <input type="checkbox" id="fac_wifi" class="facility-checkbox" value="wifi" checked>
-            <label for="fac_wifi" class="facility-label">📶 Wi-Fi in Stays</label>
+            <label for="fac_wifi" class="facility-label">Wi-Fi in Stays</label>
           </div>
           <div>
             <input type="checkbox" id="fac_parking" class="facility-checkbox" value="parking" checked>
-            <label for="fac_parking" class="facility-label">🚗 Dedicated Cab &amp; Transfers</label>
+            <label for="fac_parking" class="facility-label">Dedicated Cab &amp; Transfers</label>
           </div>
           <div>
             <input type="checkbox" id="fac_breakfast" class="facility-checkbox" value="breakfast" checked>
-            <label for="fac_breakfast" class="facility-label">🍳 Daily Breakfast &amp; Meals</label>
+            <label for="fac_breakfast" class="facility-label">Daily Breakfast &amp; Meals</label>
           </div>
           <div>
             <input type="checkbox" id="fac_mountain_view" class="facility-checkbox" value="mountain_view">
-            <label for="fac_mountain_view" class="facility-label">🏔️ Scenic Viewpoints &amp; Excursions</label>
+            <label for="fac_mountain_view" class="facility-label">Scenic Viewpoints &amp; Excursions</label>
           </div>
           <div>
             <input type="checkbox" id="fac_pool" class="facility-checkbox" value="pool">
-            <label for="fac_pool" class="facility-label">🏊 Pool / Leisure Resort Access</label>
+            <label for="fac_pool" class="facility-label">Pool / Leisure Resort Access</label>
           </div>
           <div>
             <input type="checkbox" id="fac_accessible" class="facility-checkbox" value="accessible">
-            <label for="fac_accessible" class="facility-label">♿ Elderly / Accessible Friendly</label>
+            <label for="fac_accessible" class="facility-label">Elderly / Accessible Friendly</label>
           </div>
         </div>
 
@@ -686,10 +697,10 @@
         </div>
 
         <button type="submit" id="submitBtn" class="submit-btn">
-          <span>🚀 Request Tour Quotes Now</span>
+          <span>Request Tour Quotes Now</span>
         </button>
         <div id="authSubmitHint" style="display:none; text-align:center; margin-top:12px; font-size:12px; color:#64748b; line-height:1.5;">
-          🔒 <strong>Verification required:</strong> You can customize tour details freely. Signing in verifies your identity so operators can send genuine quotes.
+          <strong>Verification required:</strong> You can customize tour details freely. Signing in verifies your identity so operators can send genuine quotes.
         </div>
 
       </form>
@@ -697,15 +708,19 @@
 
     <!-- Result / Success View -->
     <div class="result-card" id="resultCard">
-      <div class="success-icon">🎒</div>
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
       <h2 class="result-title">Tour Request Dispatched!</h2>
       <div class="result-ref" id="resultRef">TM-REQ-20261029-XXXX</div>
       <p class="result-desc" id="resultMsg">
         Verified local tour operators in your destination have been contacted. You will receive customized tour quotes in your email and WhatsApp shortly.
       </p>
       <div class="action-links">
-        <a href="#" id="viewOffersBtn" class="btn-primary-link">⚡ View Live Tour Offers</a>
-        <button type="button" id="cancelFromResultBtn" onclick="cancelFromSuccessCard()" class="btn-secondary" style="border:1.5px solid #fecaca; color:#dc2626; background:#fff; cursor:pointer;">✕ Cancel Tour Request</button>
+        <a href="#" id="viewOffersBtn" class="btn-primary-link">View Live Tour Offers</a>
+        <button type="button" id="cancelFromResultBtn" onclick="cancelFromSuccessCard()" class="btn-secondary" style="border:1.5px solid #fecaca; color:#dc2626; background:#fff; cursor:pointer;">Cancel Tour Request</button>
         <a href="/smart-tour-booking" class="btn-secondary">Submit Another Request</a>
       </div>
     </div>
@@ -821,7 +836,7 @@
         }
 
         btn.disabled = true;
-        btn.innerHTML = '<span>🔒 Taking you to Sign In to dispatch quotes...</span>';
+        btn.innerHTML = '<span>Taking you to Sign In to dispatch quotes...</span>';
         showToast('Please sign in to verify your identity before requesting quotes. Redirecting to sign in...');
 
         setTimeout(() => {
@@ -832,7 +847,7 @@
       }
 
       btn.disabled = true;
-      btn.innerHTML = '<span>⚡ Dispatching to Verified Tour Operators...</span>';
+      btn.innerHTML = '<span>Dispatching to Verified Tour Operators...</span>';
 
       try {
         const rawUser = localStorage.getItem('tm_user_info');
@@ -878,7 +893,7 @@
       } catch (err) {
         showToast(err.message);
         btn.disabled = false;
-        btn.innerHTML = '<span>🚀 Request Tour Quotes Now</span>';
+        btn.innerHTML = '<span>Request Tour Quotes Now</span>';
       }
     });
 
@@ -907,7 +922,7 @@
       } catch (err) {
         showToast(err.message);
         btn.disabled = false;
-        btn.textContent = '✕ Cancel Tour Request';
+        btn.textContent = 'Cancel Tour Request';
       }
     }
 
@@ -935,10 +950,10 @@
           }
           const item = document.getElementById('authHeaderItem');
           if (item) {
-            item.innerHTML = `<span style="font-size:13px;color:#cbd5e1;">👤 ${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
+            item.innerHTML = `<span style="font-size:13px;color:#cbd5e1;">${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
           }
 
-          if (btn) btn.innerHTML = '<span>🚀 Request Tour Quotes Now</span>';
+          if (btn) btn.innerHTML = '<span>Request Tour Quotes Now</span>';
           if (authHint) authHint.style.display = 'none';
 
           // Restore pending tour request if returning from login
@@ -980,7 +995,7 @@
           }
         } else {
           // Guest User (Not logged in)
-          if (btn) btn.innerHTML = '<span>🔒 Sign In to Request Tour Quotes</span>';
+          if (btn) btn.innerHTML = '<span>Sign In to Request Tour Quotes</span>';
           if (authHint) authHint.style.display = 'block';
         }
       } catch (_) {}
