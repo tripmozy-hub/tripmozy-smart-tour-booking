@@ -28,7 +28,10 @@ class BookingService {
                o.total_payable_paise, o.meal_plan, o.cancellation_terms, o.request_id,
                req.guest_name, req.guest_phone, req.guest_email, req.nights,
                req.num_adults, req.num_children, req.customer_id as req_customer_id,
+               req.destination,
                p.vendor_id, p.name as property_name, p.city as property_city,
+               v.business_name as vendor_business_name, v.contact_person as vendor_contact_person,
+               v.contact_phone as vendor_contact_phone, v.contact_email as vendor_contact_email,
                v.commission_rate_basis_points
         FROM inventory_holds h
         JOIN hotel_offers o ON h.offer_id = o.id
@@ -84,18 +87,33 @@ class BookingService {
       const tourPricing = PricingEngine.calculateTourPricing(hold.total_payable_paise);
 
       // Create immutable booking record with terms snapshot
+      const advanceBaseINR = Math.round(tourPricing.payableNowINR / 1.05);
+      const advanceGstINR = tourPricing.payableNowINR - advanceBaseINR;
+
       const termsSnapshot = {
         mealPlan: hold.meal_plan,
         cancellationTerms: hold.cancellation_terms,
         propertySnapshot: { name: hold.property_name, city: hold.property_city },
         guestSnapshot: { name: hold.guest_name, phone: hold.guest_phone, email: hold.guest_email },
+        vendorSnapshot: {
+          vendorId: hold.vendor_id,
+          businessName: hold.vendor_business_name || hold.property_name,
+          contactPerson: hold.vendor_contact_person || 'Tour Manager',
+          contactPhone: hold.vendor_contact_phone || '',
+          contactEmail: hold.vendor_contact_email || ''
+        },
         tourPricing,
+        totalTourINR: hold.total_payable_paise / 100,
         advancePaidINR: tourPricing.payableNowINR,
         advancePaidPaise: tourPricing.payableNowPaise,
+        advanceBaseINR,
+        advanceGstINR,
         remainingBalanceINR: tourPricing.remainingBalanceINR,
         remainingBalancePaise: tourPricing.remainingBalancePaise,
         remainingPaymentOption: remainingPaymentOption || 'hotel_arrival',
         paymentReference,
+        paymentStatus: 'SUCCESS_RECEIVED_BY_TRIPMOZY',
+        paymentGateway: 'tripmozy.com',
         confirmedAt: new Date().toISOString()
       };
 
@@ -162,14 +180,27 @@ class BookingService {
         bookingReference,
         status: 'confirmed',
         propertyName: hold.property_name,
+        destination: hold.destination || hold.property_city,
+        vendor: {
+          vendorId: hold.vendor_id,
+          businessName: hold.vendor_business_name || hold.property_name,
+          contactPerson: hold.vendor_contact_person || 'Tour Manager',
+          contactPhone: hold.vendor_contact_phone || '',
+          contactEmail: hold.vendor_contact_email || ''
+        },
         checkInDate: hold.check_in_date,
         checkOutDate: hold.check_out_date,
         nights: hold.nights,
         numRooms: hold.quantity,
         totalAmountINR: hold.total_payable_paise / 100,
         advancePaidINR: tourPricing.payableNowINR,
+        advanceBaseINR,
+        advanceGstINR,
         remainingBalanceINR: tourPricing.remainingBalanceINR,
         remainingPaymentOption: remainingPaymentOption || 'hotel_arrival',
+        paymentReference,
+        paymentStatus: 'SUCCESS_RECEIVED_BY_TRIPMOZY',
+        paymentGateway: 'tripmozy.com',
         tourPricing,
         guest: {
           name: hold.guest_name,

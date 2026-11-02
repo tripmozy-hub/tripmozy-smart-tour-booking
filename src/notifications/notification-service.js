@@ -96,15 +96,25 @@ class NotificationService {
     if (templateCode === 'booking_confirmed') {
       const advINR = payload.advancePaidINR || Math.round((payload.totalAmountINR || 0) * 0.315);
       const balINR = payload.remainingBalanceINR || Math.round((payload.totalAmountINR || 0) * 0.70);
-      const remText = payload.remainingPaymentOption === 'tripmozy_online' ? 'Online via TripMozy before departure' : 'To Hotel / Driver on arrival';
-      return `🎉 *TripMozy Tour Booking Confirmed!*\n` +
-        `Tour Booking Ref: *${payload.bookingReference}*\n` +
-        `Tour Operator: *${payload.propertyName}*\n` +
-        `Tour Dates: ${payload.checkInDate} to ${payload.checkOutDate}\n` +
-        `Total Package Price: ₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}\n` +
-        `Advance Paid to TripMozy (30% + 5% GST): ₹${advINR.toLocaleString('en-IN')} (Paid & Guaranteed)\n` +
-        `Remaining 70% Balance: ₹${balINR.toLocaleString('en-IN')} (${remText})\n\n` +
-        `Your tour voucher is ready. Present your booking reference upon arrival / pickup!`;
+      const remText = payload.remainingPaymentOption === 'tripmozy_online' ? 'Online via TripMozy before departure' : 'To Tour Operator on arrival';
+      const vendorName = payload.vendorName || payload.propertyName || 'Verified Tour Operator';
+      const vendorPhoneText = payload.vendorPhone ? `\n• Tour Operator Phone: *${payload.vendorPhone}*` : '';
+
+      return `*TripMozy Official Payment Receipt & Bill*\n` +
+        `Website: tripmozy.com\n\n` +
+        `Hi ${payload.guestName || 'Traveler'}, your payment has been *SUCCESSFULLY RECEIVED* by TripMozy!\n\n` +
+        `*Payment Summary & Bill:*\n` +
+        `• Booking Reference: *${payload.bookingReference}*\n` +
+        `• Payment Status: *PAID & CONFIRMED*\n` +
+        `• Total Tour Package Price: ₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}\n` +
+        `• Advance Received by TripMozy: ₹${advINR.toLocaleString('en-IN')} (30% + 5% GST Guaranteed)\n` +
+        `• Remaining 70% Balance Due: ₹${balINR.toLocaleString('en-IN')} (${remText})\n` +
+        `• Payment Ref: ${payload.paymentReference || 'DIRECT_VERIFIED'}\n\n` +
+        `*Assigned Tour Operator (Accepted Request):*\n` +
+        `• Tour Operator: *${vendorName}*${vendorPhoneText}\n` +
+        `• Tour Dates: ${payload.checkInDate} to ${payload.checkOutDate}\n\n` +
+        `View & download your official bill on tripmozy.com:\n` +
+        `${payload.bookingUrl || 'https://tripmozy-smart-tour-booking.vercel.app/booking'}`;
     }
 
     if (templateCode === 'hotel_request_received_guest') {
@@ -302,22 +312,118 @@ class NotificationService {
     }
 
     if (templateCode === 'booking_confirmed') {
+      const advINR = payload.advancePaidINR || Math.round((payload.totalAmountINR || 0) * 0.315);
+      const advBase = payload.advanceBaseINR || Math.round(advINR / 1.05);
+      const advGst = payload.advanceGstINR || (advINR - advBase);
+      const balINR = payload.remainingBalanceINR || Math.round((payload.totalAmountINR || 0) * 0.70);
+      const remText = payload.remainingPaymentOption === 'tripmozy_online' ? 'Online via TripMozy before departure' : 'Pay directly to Tour Operator upon arrival';
+      const vendorName = payload.vendorName || payload.propertyName || 'Verified Tour Operator';
+      const vendorPhone = payload.vendorPhone || 'Available on portal';
+      const vendorEmail = payload.vendorEmail || 'partners@tripmozy.com';
+      const bookingUrl = payload.bookingUrl || 'https://tripmozy-smart-tour-booking.vercel.app/booking';
+
       return `
-        <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif; max-width:580px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden;">
-          <div style="background:#065f46; color:#ffffff; padding:28px 24px; text-align:center;">
-            <div style="font-size:40px; margin-bottom:8px;">🎉</div>
-            <h1 style="margin:0; font-size:22px; font-weight:800;">Tour Booking Confirmed &amp; Guaranteed!</h1>
-            <p style="margin:6px 0 0; opacity:0.9; font-size:13px;">Your tour with ${payload.propertyName} is locked.</p>
+        <div style="font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,Roboto,sans-serif; max-width:620px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; box-shadow:0 12px 35px rgba(0,0,0,0.08);">
+          <!-- TripMozy Header -->
+          <div style="background:#0f172a; padding:28px 24px; text-align:center;">
+            <div style="font-size:26px; font-weight:800; color:#ffffff; letter-spacing:-0.5px;">Trip<span style="color:#f59e0b;">Mozy</span>.com</div>
+            <div style="color:#94a3b8; font-size:12px; margin-top:4px; letter-spacing:0.5px; text-transform:uppercase; font-weight:700;">Official Payment Receipt &amp; Tax Bill</div>
           </div>
+
+          <!-- Status Banner -->
+          <div style="background:#10b981; color:#ffffff; padding:12px 24px; text-align:center; font-weight:700; font-size:14px; letter-spacing:0.3px;">
+            Payment Received Successfully · Advance Received by TripMozy Escrow
+          </div>
+
           <div style="padding:28px 24px;">
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px; margin-bottom:20px;">
-              <div style="margin-bottom:8px;"><span style="color:#64748b; font-size:12px;">TOUR BOOKING REFERENCE:</span> <strong style="font-family:monospace; font-size:16px; color:#2563eb;">${payload.bookingReference}</strong></div>
-              <div style="margin-bottom:8px;"><strong>Tour Dates:</strong> ${payload.checkInDate} to ${payload.checkOutDate}</div>
-              <div style="margin-bottom:8px;"><strong>Total Package Price:</strong> ₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}</div>
-              <div style="margin-bottom:8px;"><strong style="color:#059669;">Advance Paid to TripMozy (30% + 5% GST):</strong> ₹${(payload.advancePaidINR || Math.round((payload.totalAmountINR || 0) * 0.315)).toLocaleString('en-IN')} (Guaranteed)</div>
-              <div><strong style="color:#1e40af;">Remaining 70% Balance Due:</strong> ₹${(payload.remainingBalanceINR || Math.round((payload.totalAmountINR || 0) * 0.70)).toLocaleString('en-IN')} (${payload.remainingPaymentOption === 'tripmozy_online' ? 'Online before departure' : 'To driver / hotel upon arrival'})</div>
+            <!-- Receipt Meta -->
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:20px; font-size:12px; color:#64748b;">
+              <div><strong>Receipt Ref:</strong> TM-INV-${(payload.bookingReference || '').replace('TM-REQ-', '')}</div>
+              <div><strong>Booking Ref:</strong> <span style="color:#2563eb; font-weight:700; font-family:monospace;">${payload.bookingReference}</span></div>
+              <div><strong>Payment Status:</strong> <span style="color:#059669; font-weight:700;">PAID IN FULL</span></div>
             </div>
-            <p style="font-size:13px; color:#475569;">Please present your government ID and this booking reference upon pickup / arrival with your tour representative.</p>
+
+            <!-- Two-Column Parties Box -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+              <!-- Customer -->
+              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:6px;">Billed To (Customer)</div>
+                <div style="font-size:15px; font-weight:800; color:#0f172a;">${payload.guestName || 'Traveler'}</div>
+                <div style="font-size:12px; color:#475569; margin-top:4px;">Phone: <strong>${payload.guestPhone || ''}</strong></div>
+                <div style="font-size:12px; color:#475569;">Email: ${payload.guestEmail || ''}</div>
+                <div style="font-size:12px; color:#0f172a; margin-top:4px;">Destination: <strong>${payload.destination || ''}</strong></div>
+              </div>
+
+              <!-- Vendor who accepted the request -->
+              <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:16px;">
+                <div style="font-size:11px; font-weight:700; color:#1e40af; text-transform:uppercase; margin-bottom:6px;">Assigned Tour Operator (Accepted)</div>
+                <div style="font-size:15px; font-weight:800; color:#0f172a;">${vendorName}</div>
+                <div style="background:#ffffff; border:1px solid #93c5fd; border-radius:8px; padding:6px 10px; margin-top:6px;">
+                  <div style="font-size:10px; font-weight:700; color:#1e40af; text-transform:uppercase;">Operator Contact Number:</div>
+                  <div style="font-size:14px; font-weight:800; color:#2563eb;">${vendorPhone}</div>
+                </div>
+                <div style="font-size:11px; color:#64748b; margin-top:6px;">Email: ${vendorEmail}</div>
+                <div style="font-size:11px; color:#15803d; font-weight:700; margin-top:4px;">TripMozy Verified Tour Operator Partner ✓</div>
+              </div>
+            </div>
+
+            <!-- Itemized Financial Breakdown Table -->
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px; font-size:13px;">
+              <thead>
+                <tr style="background:#f1f5f9; border-bottom:1.5px solid #cbd5e1;">
+                  <th style="text-align:left; padding:10px 12px; font-weight:700; color:#0f172a;">Description</th>
+                  <th style="text-align:right; padding:10px 12px; font-weight:700; color:#0f172a;">Amount (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                  <td style="padding:10px 12px;">
+                    <strong>Custom Tour Package (${payload.destination || 'Selected Destination'})</strong><br>
+                    <span style="font-size:11px; color:#64748b;">Dates: ${payload.checkInDate} to ${payload.checkOutDate}</span>
+                  </td>
+                  <td style="text-align:right; padding:10px 12px; font-weight:700; color:#0f172a;">₹${(payload.totalAmountINR || 0).toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0; color:#475569;">
+                  <td style="padding:8px 12px 8px 24px;">30% Tour Advance Deposit (Base)</td>
+                  <td style="text-align:right; padding:8px 12px;">₹${advBase.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0; color:#475569;">
+                  <td style="padding:8px 12px 8px 24px;">5% GST on Advance (Govt. of India)</td>
+                  <td style="text-align:right; padding:8px 12px;">₹${advGst.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="background:#ecfdf5; border-bottom:1.5px solid #a7f3d0;">
+                  <td style="padding:12px; font-weight:800; color:#065f46;">
+                    Total Payment Received by TripMozy.com
+                    <div style="font-size:11px; font-weight:500; color:#047857;">Status: RECEIVED &amp; SECURED IN ESCROW</div>
+                  </td>
+                  <td style="text-align:right; padding:12px; font-weight:800; font-size:16px; color:#059669;">₹${advINR.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                  <td style="padding:10px 12px; font-weight:700; color:#0f172a;">
+                    Remaining 70% Balance Due
+                    <div style="font-size:11px; font-weight:normal; color:#64748b;">${remText}</div>
+                  </td>
+                  <td style="text-align:right; padding:10px 12px; font-weight:700; font-size:14px; color:#0f172a;">₹${balINR.toLocaleString('en-IN')}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Escrow Trust Notice -->
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; font-size:12px; color:#1e40af; line-height:1.5; margin-bottom:24px;">
+              <strong>TripMozy Buyer Protection &amp; Escrow Guarantee:</strong><br>
+              Your advance payment of ₹${advINR.toLocaleString('en-IN')} has been safely received into the official TripMozy Account. It is safeguarded until your tour commences. For tour coordination or pickup changes, please contact your tour operator directly at <strong>${vendorPhone}</strong>.
+            </div>
+
+            <!-- View Bill Button -->
+            <div style="text-align:center;">
+              <a href="${bookingUrl}" style="display:inline-block; background:#2563eb; color:#ffffff; font-weight:800; font-size:14px; padding:14px 30px; border-radius:10px; text-decoration:none;">
+                View &amp; Print Official Bill on TripMozy →
+              </a>
+            </div>
+          </div>
+
+          <div style="background:#f1f5f9; padding:16px; text-align:center; font-size:11px; color:#64748b; border-top:1px solid #e2e8f0;">
+            TripMozy Technologies · Official Bill from tripmozy.com · 24/7 Concierge: tripmozy@gmail.com
           </div>
         </div>
       `;
@@ -921,7 +1027,7 @@ class NotificationService {
         const subject = templateCode === 'hotel_offer_received'
           ? `🎉 Tour Confirmed by ${payload.propertyName}! Complete Payment for ${payload.destination} - TripMozy`
           : templateCode === 'booking_confirmed' || templateCode === 'booking_confirmed_vendor'
-          ? `🎉 Tour Booking Confirmed: ${payload.bookingReference} - ${payload.propertyName}`
+          ? `Payment Received: Official Tour Bill & Receipt - ${payload.bookingReference} (tripmozy.com)`
           : templateCode === 'hotel_request_received_guest'
           ? `🎒 Tour Request Dispatched: ${payload.requestReference} - TripMozy`
           : templateCode === 'hotel_request_received_vendor'

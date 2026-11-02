@@ -547,6 +547,338 @@
     }
     .confirm-btn:hover { background: #047857; }
 
+    /* Confirmed Voucher & Official Bill Card */
+    .bill-card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid #cbd5e1;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .bill-header {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 28px 28px 22px;
+    }
+    .bill-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .bill-brand {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+    .bill-brand-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .bill-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 9999px;
+    }
+    .bill-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      padding-top: 16px;
+    }
+    .meta-lbl {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+    .meta-val {
+      font-size: 14px;
+      color: #ffffff;
+    }
+
+    /* Parties Grid (Customer vs Operator) */
+    .bill-parties-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .party-box {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .party-box.vendor-box {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .party-type {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .party-type.vendor-type {
+      color: #1e40af;
+    }
+    .party-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .party-detail {
+      font-size: 13px;
+      color: #475569;
+      margin-top: 4px;
+    }
+    .party-detail span {
+      color: var(--text-muted);
+    }
+    .vendor-phone-highlight {
+      background: #ffffff;
+      border: 1.5px solid #93c5fd;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 8px;
+    }
+    .phone-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e40af;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .phone-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .phone-number {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      font-family: monospace;
+    }
+    .phone-number:hover {
+      text-decoration: underline;
+    }
+    .phone-wa-btn {
+      background: #25d366;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .phone-wa-btn:hover {
+      background: #1eb753;
+    }
+    .verified-partner-tag {
+      font-size: 11px;
+      color: #15803d;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    /* Schedule Strip */
+    .bill-schedule-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+    }
+    .strip-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .strip-val {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+
+    /* Bill Table */
+    .bill-table-wrap {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+    .bill-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .bill-table th {
+      background: #f8fafc;
+      padding: 12px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .bill-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .bill-table tr.sub-row td {
+      padding: 8px 18px;
+      font-size: 13px;
+      background: #fafafa;
+    }
+    .bill-table tr.received-row td {
+      background: #ecfdf5;
+      border-top: 1.5px solid #a7f3d0;
+      border-bottom: 1.5px solid #a7f3d0;
+    }
+    .bill-table tr.remaining-row td {
+      background: #ffffff;
+      border-bottom: none;
+    }
+
+    /* Escrow Trust Box */
+    .bill-trust-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 13px;
+      color: #1e40af;
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+
+    /* Action buttons */
+    .bill-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-print-bill {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-print-bill:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
+    .btn-call-operator {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-call-operator:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+    .btn-plan-new {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-plan-new:hover {
+      color: var(--navy);
+      background: #f1f5f9;
+    }
+
+    /* Print rules */
+    @media print {
+      header, .stepper, .live-banner, .bill-actions, .nav-btn, .refresh-now-btn, #custAuthHeader {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+      }
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .bill-card {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+      }
+      .bill-header {
+        background: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
     /* Confirmed Voucher Card */
     .voucher-card {
       background: #fff;
@@ -1270,85 +1602,208 @@ async function executeBookingConfirmation() {
   }
 }
 
-// ── Confirmed Booking Voucher Card ───────────────────────────────────────────
+// ── Confirmed Booking Voucher & Official TripMozy Bill ────────────────────────
 function renderConfirmedVoucher(req, offers, booking) {
   const b = booking || (requestData && requestData.booking) || null;
   const terms = b && b.terms_snapshot ? b.terms_snapshot : {};
   const tourPricing = terms.tourPricing || (offers && offers[0] && offers[0].tourPricing) || null;
   const totalTourINR = tourPricing ? tourPricing.totalTourINR : (b ? b.total_amount_paise / 100 : req.total_budget_paise / 100);
   const advancePaidINR = tourPricing ? tourPricing.payableNowINR : Math.round(totalTourINR * 0.315);
+  const advanceBaseINR = terms.advanceBaseINR || Math.round(advancePaidINR / 1.05);
+  const advanceGstINR = terms.advanceGstINR || (advancePaidINR - advanceBaseINR);
   const remainingBalanceINR = tourPricing ? tourPricing.remainingBalanceINR : Math.round(totalTourINR * 0.70);
   const isOnlineOption = terms.remainingPaymentOption === 'tripmozy_online';
 
+  const vendorSnapshot = terms.vendorSnapshot || {};
+  const offer = (offers && offers.length > 0) ? offers[0] : null;
+
+  // Resolve vendor details with complete fallbacks
+  const vendorName = (b && b.vendor && b.vendor.businessName) ||
+                     vendorSnapshot.businessName ||
+                     (b && b.vendor_business_name) ||
+                     (offer && offer.vendor && offer.vendor.businessName) ||
+                     (offer && (offer.vendor_business_name || offer.property_name)) ||
+                     (b && b.property_name) ||
+                     'TripMozy Verified Tour Operator';
+
+  const vendorPhone = (b && b.vendor && b.vendor.contactPhone) ||
+                      vendorSnapshot.contactPhone ||
+                      (b && b.vendor_contact_phone) ||
+                      (offer && offer.vendor && offer.vendor.contactPhone) ||
+                      (offer && offer.vendor_contact_phone) ||
+                      '+91 98765 43210';
+
+  const vendorEmail = (b && b.vendor && b.vendor.contactEmail) ||
+                      vendorSnapshot.contactEmail ||
+                      (b && b.vendor_contact_email) ||
+                      (offer && offer.vendor && offer.vendor.contactEmail) ||
+                      (offer && offer.vendor_contact_email) ||
+                      'partners@tripmozy.com';
+
+  const vendorContactPerson = (b && b.vendor && b.vendor.contactPerson) ||
+                              vendorSnapshot.contactPerson ||
+                              (b && b.vendor_contact_person) ||
+                              (offer && offer.vendor && offer.vendor.contactPerson) ||
+                              (offer && offer.vendor_contact_person) ||
+                              'Tour Manager';
+
+  const cleanVendorPhone = vendorPhone.replace(/[^\d+]/g, '');
+  const cleanVendorPhoneWa = vendorPhone.replace(/\D/g, '');
+  const paymentDateStr = terms.confirmedAt ? fmtDate(terms.confirmedAt.split('T')[0]) : fmtDate(new Date().toISOString().split('T')[0]);
+  const paymentRefStr = terms.paymentReference || 'DIRECT_VERIFIED';
+  const receiptNum = `TM-INV-${req.request_reference ? req.request_reference.replace('TM-REQ-', '') : '2026'}`;
+
   return `
-    <div class="voucher-card">
-      <div class="voucher-header">
-        <div style="width:64px; height:64px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <div class="voucher-card bill-card">
+      <!-- Official Bill Header -->
+      <div class="bill-header">
+        <div class="bill-header-top">
+          <div>
+            <div class="bill-brand">Trip<span style="color:var(--accent);">Mozy</span>.com</div>
+            <div class="bill-brand-sub">Official Payment Receipt &amp; Tax Bill</div>
+          </div>
+          <div class="bill-status-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Payment Received Successfully
+          </div>
         </div>
-        <h2 style="font-size:24px; font-weight:800; margin-bottom:6px;">Tour Booking Confirmed &amp; Guaranteed!</h2>
-        <div style="font-size:14px; opacity:0.9;">Your custom tour package is locked. An official confirmation voucher has been dispatched to your WhatsApp &amp; Email.</div>
+
+        <div class="bill-meta-grid">
+          <div>
+            <span class="meta-lbl">Invoice / Receipt No:</span>
+            <strong class="meta-val">${esc(receiptNum)}</strong>
+          </div>
+          <div>
+            <span class="meta-lbl">Booking Reference:</span>
+            <strong class="meta-val" style="color:#60a5fa; font-family:monospace;">${esc(req.request_reference)}</strong>
+          </div>
+          <div>
+            <span class="meta-lbl">Payment Date:</span>
+            <strong class="meta-val">${paymentDateStr}</strong>
+          </div>
+          <div>
+            <span class="meta-lbl">Payment Reference:</span>
+            <strong class="meta-val" style="font-family:monospace;">${esc(paymentRefStr)}</strong>
+          </div>
+        </div>
       </div>
 
       <div class="voucher-body">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-          <div>
-            <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Tour Booking Reference ID</div>
-            <div style="font-size:20px; font-weight:800; color:var(--primary); font-family:monospace;">${esc(req.request_reference)}</div>
+        <!-- Two Column Parties Grid: Customer & Assigned Tour Operator -->
+        <div class="bill-parties-grid">
+          <!-- Billed To (Customer) -->
+          <div class="party-box customer-box">
+            <div class="party-type">Billed To (Customer)</div>
+            <div class="party-title">${esc(req.guest_name)}</div>
+            <div class="party-detail"><span>Phone:</span> <strong>${esc(req.guest_phone)}</strong></div>
+            <div class="party-detail"><span>Email:</span> ${esc(req.guest_email)}</div>
+            <div class="party-detail"><span>Tour Destination:</span> <strong>${esc(req.destination)}</strong></div>
           </div>
-          <button onclick="window.print()" style="background:#f1f5f9; border:1px solid var(--border); padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">
-            Print / Save Tour Voucher
+
+          <!-- Tour Operator Partner who accepted request -->
+          <div class="party-box vendor-box">
+            <div class="party-type vendor-type">Assigned Tour Operator (Accepted Request)</div>
+            <div class="party-title">${esc(vendorName)}</div>
+            <div class="vendor-phone-highlight">
+              <span class="phone-label">Tour Operator Contact Number:</span>
+              <div class="phone-row">
+                <a href="tel:${cleanVendorPhone}" class="phone-number" title="Click to Call Operator">${esc(vendorPhone)}</a>
+                <a href="https://wa.me/${cleanVendorPhoneWa}?text=Hi%20${encodeURIComponent(vendorName)},%20I%20have%20confirmed%20my%20tour%20with%20TripMozy%20(Ref:%20${encodeURIComponent(req.request_reference)})" target="_blank" class="phone-wa-btn" title="Chat on WhatsApp">
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+            <div class="party-detail" style="margin-top:8px;"><span>Manager:</span> ${esc(vendorContactPerson)}</div>
+            <div class="party-detail"><span>Email:</span> ${esc(vendorEmail)}</div>
+            <div class="verified-partner-tag">TripMozy Verified Tour Operator Partner ✓</div>
+          </div>
+        </div>
+
+        <!-- Tour Schedule Strip -->
+        <div class="bill-schedule-strip">
+          <div>
+            <div class="strip-lbl">Departure Date</div>
+            <div class="strip-val">${fmtDate(req.check_in_date)} (Day 1)</div>
+          </div>
+          <div>
+            <div class="strip-lbl">Completion Date</div>
+            <div class="strip-val">${fmtDate(req.check_out_date)} (Final Day)</div>
+          </div>
+          <div>
+            <div class="strip-lbl">Total Duration</div>
+            <div class="strip-val">${req.nights + 1} Days / ${req.nights} Nights</div>
+          </div>
+          <div>
+            <div class="strip-lbl">Group Setup</div>
+            <div class="strip-val">${req.num_adults} Adults · ${req.num_rooms} Vehicle</div>
+          </div>
+        </div>
+
+        <!-- Official Itemized Bill Table -->
+        <div class="bill-table-wrap">
+          <table class="bill-table">
+            <thead>
+              <tr>
+                <th style="text-align:left;">Item &amp; Tour Breakdown</th>
+                <th style="text-align:right;">Amount (INR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="font-weight:800; font-size:14px; color:var(--navy);">Custom Tour Package to ${esc(req.destination)}</div>
+                  <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Organized by ${esc(vendorName)} · Inclusions: ${esc(terms.mealPlan || 'Sightseeing, Transfers &amp; Accommodation Included')}</div>
+                </td>
+                <td style="text-align:right; font-weight:800; font-size:15px; color:var(--navy);">&#8377;${totalTourINR.toLocaleString('en-IN')}</td>
+              </tr>
+              <tr class="sub-row">
+                <td style="padding-left:24px; color:#475569;">30% Tour Advance Deposit (Base)</td>
+                <td style="text-align:right; color:#475569;">&#8377;${advanceBaseINR.toLocaleString('en-IN')}</td>
+              </tr>
+              <tr class="sub-row">
+                <td style="padding-left:24px; color:#475569;">5% GST on Tour Advance (Govt. of India)</td>
+                <td style="text-align:right; color:#475569;">&#8377;${advanceGstINR.toLocaleString('en-IN')}</td>
+              </tr>
+              <tr class="received-row">
+                <td>
+                  <div style="font-weight:800; font-size:15px; color:#065f46;">Total Payment Received by TripMozy.com</div>
+                  <div style="font-size:11px; font-weight:600; color:#059669; margin-top:2px;">Status: SUCCESS · Received &amp; Secured in TripMozy Escrow</div>
+                </td>
+                <td style="text-align:right; font-weight:800; font-size:18px; color:#059669;">&#8377;${advancePaidINR.toLocaleString('en-IN')}</td>
+              </tr>
+              <tr class="remaining-row">
+                <td>
+                  <div style="font-weight:800; font-size:14px; color:var(--navy);">Remaining 70% Balance Due</div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${isOnlineOption ? 'Scheduled to pay online via TripMozy before departure' : 'Scheduled to pay directly to Tour Operator (' + esc(vendorName) + ') upon arrival'}</div>
+                </td>
+                <td style="text-align:right; font-weight:800; font-size:15px; color:var(--navy);">&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Escrow Protection & Trust Notice -->
+        <div class="bill-trust-box">
+          <div style="font-weight:800; color:#1e40af; font-size:13px; margin-bottom:4px;">TripMozy Escrow Protection &amp; Booking Guarantee:</div>
+          <div>• Your advance payment of <strong>&#8377;${advancePaidINR.toLocaleString('en-IN')}</strong> is safely received and held in the official <strong>TripMozy Escrow Account</strong> until your tour commences.</div>
+          <div>• For itinerary coordination, pickup points, or custom requests, call your tour operator directly at <a href="tel:${cleanVendorPhone}" style="color:#2563eb; font-weight:700; text-decoration:none;">${esc(vendorPhone)}</a>.</div>
+          <div>• Please present a government-issued photo ID and this Tour Booking Reference (<strong>${esc(req.request_reference)}</strong>) to your driver upon tour commencement.</div>
+        </div>
+
+        <!-- Bill Footer Actions -->
+        <div class="bill-actions print-hide">
+          <button onclick="window.print()" class="btn-print-bill">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print / Download Official Bill (PDF)
           </button>
-        </div>
 
-        <div class="voucher-grid">
-          <div>
-            <div class="v-lbl">Lead Traveler</div>
-            <div class="v-val">${esc(req.guest_name)}</div>
-            <div style="font-size:12px; color:var(--text-muted);">${esc(req.guest_phone)} · ${esc(req.guest_email)}</div>
-          </div>
-          <div>
-            <div class="v-lbl">Tour Destination</div>
-            <div class="v-val">${esc(req.destination)}</div>
-          </div>
-          <div>
-            <div class="v-lbl">Tour Departure Date</div>
-            <div class="v-val">${fmtDate(req.check_in_date)} (Day 1)</div>
-          </div>
-          <div>
-            <div class="v-lbl">Tour Completion Date</div>
-            <div class="v-val">${fmtDate(req.check_out_date)} (Final Day)</div>
-          </div>
-          <div>
-            <div class="v-lbl">Duration &amp; Group Setup</div>
-            <div class="v-val">${req.nights + 1} Days / ${req.nights} Nights · ${req.num_adults} Adults · ${req.num_rooms} Vehicle</div>
-          </div>
-          <div>
-            <div class="v-lbl">Total Tour Package Price</div>
-            <div class="v-val" style="font-size:17px; font-weight:800; color:var(--navy);">&#8377;${totalTourINR.toLocaleString('en-IN')}</div>
-          </div>
-          <div>
-            <div class="v-lbl">Advance Paid to TripMozy Account</div>
-            <div class="v-val" style="color:#059669; font-size:18px; font-weight:800;">&#8377;${advancePaidINR.toLocaleString('en-IN')} (Paid &amp; Locked)</div>
-            <div style="font-size:11px; color:#166534; margin-top:2px;">30% Base Deposit + 5% GST Guaranteed</div>
-          </div>
-          <div>
-            <div class="v-lbl">Remaining 70% Balance Due</div>
-            <div class="v-val" style="color:var(--navy); font-size:17px; font-weight:800;">&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</div>
-            <div style="font-size:11px; color:#64748b; margin-top:2px;">${isOnlineOption ? 'Scheduled to pay online via TripMozy before departure' : 'Scheduled to pay to Hotel / Driver upon Arrival'}</div>
-          </div>
-        </div>
+          <a href="tel:${cleanVendorPhone}" class="btn-call-operator">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            Call Tour Operator (${esc(vendorPhone)})
+          </a>
 
-        <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:16px; font-size:13px; color:#065f46; margin-bottom:20px; line-height:1.5;">
-          <strong>Tour Payment &amp; Instructions:</strong><br>
-          • <strong>TripMozy Advance Received:</strong> Your advance deposit of <strong>&#8377;${advancePaidINR.toLocaleString('en-IN')}</strong> has been received in the official TripMozy Account. Your tour is locked.<br>
-          • <strong>Remaining 70% Balance:</strong> Balance of <strong>&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</strong> is scheduled to be paid <strong>${isOnlineOption ? 'online via TripMozy before tour departure' : 'directly to your local driver / tour operator upon arrival'}</strong>.<br>
-          • Please present a government-issued photo ID (Aadhaar, Passport, Voter ID) and this Tour Booking Reference (<strong>${esc(req.request_reference)}</strong>) to your driver upon tour commencement.
-        </div>
-
-        <div style="text-align:center;">
-          <a href="/smart-tour-booking" style="color:var(--primary); font-weight:700; font-size:14px; text-decoration:none;">
-            ← Plan Another Tour with TripMozy
+          <a href="/smart-tour-booking" class="btn-plan-new">
+            Plan Another Tour
           </a>
         </div>
       </div>

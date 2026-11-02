@@ -327,18 +327,24 @@ class RequestService {
 
     const actualId = req.id;
     const recipients = this.db.query(`
-      SELECT r.*, p.name as property_name, p.city as property_city, p.star_rating
+      SELECT r.*, p.name as property_name, p.city as property_city, p.star_rating,
+             v.business_name as vendor_business_name, v.contact_person as vendor_contact_person,
+             v.contact_phone as vendor_contact_phone, v.contact_email as vendor_contact_email
       FROM booking_request_recipients r
       JOIN properties p ON r.property_id = p.id
+      JOIN vendor_accounts v ON p.vendor_id = v.id
       WHERE r.request_id = ?
     `, [actualId]);
 
     const offers = this.db.query(`
       SELECT o.*, p.name as property_name, p.city as property_city, p.star_rating,
-             rt.name as room_type_name
+             rt.name as room_type_name,
+             v.business_name as vendor_business_name, v.contact_person as vendor_contact_person,
+             v.contact_phone as vendor_contact_phone, v.contact_email as vendor_contact_email
       FROM hotel_offers o
       JOIN properties p ON o.property_id = p.id
       JOIN room_types rt ON o.room_type_id = rt.id
+      JOIN vendor_accounts v ON p.vendor_id = v.id
       WHERE o.request_id = ?
     `, [actualId]);
 
@@ -346,13 +352,31 @@ class RequestService {
       const tourPricing = PricingEngine.calculateTourPricing(o.total_payable_paise);
       return {
         ...o,
-        tourPricing
+        tourPricing,
+        vendor: {
+          businessName: o.vendor_business_name || o.property_name,
+          contactPerson: o.vendor_contact_person || 'Tour Manager',
+          contactPhone: o.vendor_contact_phone || '',
+          contactEmail: o.vendor_contact_email || ''
+        }
       };
     });
 
     let booking = null;
     if (req.status === 'booked') {
-      const b = this.db.queryOne('SELECT * FROM bookings WHERE request_id = ? ORDER BY created_at DESC LIMIT 1', [actualId]);
+      const b = this.db.queryOne(`
+        SELECT b.*,
+               p.name as property_name, p.city as property_city, p.address_line,
+               v.business_name as vendor_business_name,
+               v.contact_person as vendor_contact_person,
+               v.contact_phone as vendor_contact_phone,
+               v.contact_email as vendor_contact_email
+        FROM bookings b
+        JOIN properties p ON b.property_id = p.id
+        JOIN vendor_accounts v ON p.vendor_id = v.id
+        WHERE b.request_id = ?
+        ORDER BY b.created_at DESC LIMIT 1
+      `, [actualId]);
       if (b) {
         let terms = {};
         try {
@@ -360,7 +384,13 @@ class RequestService {
         } catch (_) {}
         booking = {
           ...b,
-          terms_snapshot: terms
+          terms_snapshot: terms,
+          vendor: {
+            businessName: b.vendor_business_name || b.property_name,
+            contactPerson: b.vendor_contact_person || 'Tour Manager',
+            contactPhone: b.vendor_contact_phone || '',
+            contactEmail: b.vendor_contact_email || ''
+          }
         };
       }
     }

@@ -477,47 +477,76 @@ const appHandler = async (req, res) => {
       try {
         const result = bookingService.confirmBooking(body);
 
-        // Automated WhatsApp & Email Notification: Booking Confirmed to Customer & Vendor
-        if (notifService && result.guest && result.guest.phone) {
-          try {
-            notifService.send({
-              destination: result.guest.phone,
-              channel: 'whatsapp',
-              templateCode: 'booking_confirmed',
-              eventType: 'booking.confirmed',
-              payload: {
-                bookingReference: result.bookingReference,
-                propertyName: result.propertyName,
-                checkInDate: result.checkInDate,
-                checkOutDate: result.checkOutDate,
-                totalAmountINR: result.totalAmountINR,
-                advancePaidINR: result.advancePaidINR,
-                remainingBalanceINR: result.remainingBalanceINR,
-                remainingPaymentOption: result.remainingPaymentOption
-              }
-            });
-          } catch (_) {}
-        }
+        // Automated WhatsApp & Email Notification: Official Bill & Booking Confirmation
+        if (notifService && result.guest) {
+          const vendorDisplayName = result.vendor ? (result.vendor.businessName || result.propertyName) : result.propertyName;
+          const vendorPhoneNum = result.vendor ? (result.vendor.contactPhone || '') : '';
+          const vendorEmailAddr = result.vendor ? (result.vendor.contactEmail || '') : '';
+          const bookingUrl = `${baseUrl}/booking?id=${result.bookingReference}`;
 
-        if (notifService && result.guest && result.guest.email) {
-          try {
-            notifService.send({
-              destination: result.guest.email,
-              channel: 'email',
-              templateCode: 'booking_confirmed',
-              eventType: 'booking.confirmed',
-              payload: {
-                bookingReference: result.bookingReference,
-                propertyName: result.propertyName,
-                checkInDate: result.checkInDate,
-                checkOutDate: result.checkOutDate,
-                totalAmountINR: result.totalAmountINR,
-                advancePaidINR: result.advancePaidINR,
-                remainingBalanceINR: result.remainingBalanceINR,
-                remainingPaymentOption: result.remainingPaymentOption
-              }
-            });
-          } catch (_) {}
+          // 1. WhatsApp Bill & Confirmation to Customer
+          if (result.guest.phone) {
+            try {
+              notifService.send({
+                destination: result.guest.phone,
+                channel: 'whatsapp',
+                templateCode: 'booking_confirmed',
+                eventType: 'booking.confirmed',
+                payload: {
+                  bookingReference: result.bookingReference,
+                  propertyName: result.propertyName,
+                  vendorName: vendorDisplayName,
+                  vendorPhone: vendorPhoneNum,
+                  vendorEmail: vendorEmailAddr,
+                  guestName: result.guest.name,
+                  destination: result.destination || result.propertyName,
+                  checkInDate: result.checkInDate,
+                  checkOutDate: result.checkOutDate,
+                  totalAmountINR: result.totalAmountINR,
+                  advancePaidINR: result.advancePaidINR,
+                  remainingBalanceINR: result.remainingBalanceINR,
+                  remainingPaymentOption: result.remainingPaymentOption,
+                  paymentReference: result.paymentReference || body.paymentReference,
+                  bookingUrl
+                }
+              });
+            } catch (_) {}
+          }
+
+          // 2. Official Email Bill & Tax Invoice to Customer from tripmozy.com
+          if (result.guest.email) {
+            try {
+              notifService.send({
+                destination: result.guest.email,
+                channel: 'email',
+                templateCode: 'booking_confirmed',
+                eventType: 'booking.confirmed',
+                payload: {
+                  bookingReference: result.bookingReference,
+                  propertyName: result.propertyName,
+                  vendorName: vendorDisplayName,
+                  vendorPhone: vendorPhoneNum,
+                  vendorEmail: vendorEmailAddr,
+                  guestName: result.guest.name,
+                  guestPhone: result.guest.phone,
+                  guestEmail: result.guest.email,
+                  destination: result.destination || result.propertyName,
+                  checkInDate: result.checkInDate,
+                  checkOutDate: result.checkOutDate,
+                  nights: result.nights,
+                  numRooms: result.numRooms,
+                  totalAmountINR: result.totalAmountINR,
+                  advancePaidINR: result.advancePaidINR,
+                  advanceBaseINR: result.advanceBaseINR,
+                  advanceGstINR: result.advanceGstINR,
+                  remainingBalanceINR: result.remainingBalanceINR,
+                  remainingPaymentOption: result.remainingPaymentOption,
+                  paymentReference: result.paymentReference || body.paymentReference,
+                  bookingUrl
+                }
+              });
+            } catch (_) {}
+          }
         }
 
         // Automated notification to Vendor via WhatsApp & Email
