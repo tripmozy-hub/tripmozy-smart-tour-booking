@@ -85,15 +85,22 @@ class AuthService {
   }
 
   // Send 6-digit OTP code to Customer or Tour Operator
-  sendOtp({ identifier, role = 'customer', mode = 'any', businessName = null }) {
-    const cleanId = this.normalizeIdentifier(identifier);
+  sendOtp({ identifier, email = null, phone = null, name = null, fullName = null, role = 'customer', mode = 'any', businessName = null }) {
+    const cleanId = this.normalizeIdentifier(identifier || email || phone);
     if (!cleanId) {
       throw new Error('Please enter a valid email address or mobile number');
     }
 
+    const inputEmail = email ? this.normalizeIdentifier(email) : (cleanId && cleanId.includes('@') ? cleanId : null);
+    const inputPhone = phone ? this.normalizeIdentifier(phone) : (cleanId && !cleanId.includes('@') ? cleanId : null);
+    const inputName = (name || fullName || '').trim();
+
     const isEmail = cleanId.includes('@');
-    const cleanDigits = cleanId.replace(/\D/g, '').slice(-10);
-    const existingRole = this.getExistingRole(cleanId);
+    const cleanDigits = (inputPhone || cleanId).replace(/\D/g, '').slice(-10);
+
+    let existingRole = this.getExistingRole(cleanId);
+    if (!existingRole && inputEmail) existingRole = this.getExistingRole(inputEmail);
+    if (!existingRole && inputPhone) existingRole = this.getExistingRole(inputPhone);
     let autoSwitchedToLogin = false;
 
     // 1. If mode === 'login' (user is logging into an existing account):
@@ -173,30 +180,53 @@ class AuthService {
 
       if (!targetVendor) {
         // Automatically register new vendor account & tour fleet profile so any vendor can register
-        targetVendor = this.registerNewVendor({ cleanId, isEmail, cleanDigits });
+        targetVendor = this.registerNewVendor({
+          cleanId,
+          isEmail,
+          cleanDigits,
+          name: inputName,
+          phone: inputPhone,
+          email: inputEmail,
+          businessName
+        });
       }
     } else {
       // Customer: find or prepare user profile
+      const userEmail = inputEmail || (isEmail ? cleanId : null);
+      const userPhone = inputPhone || (!isEmail ? cleanId : null);
+      const displayName = inputName || (userEmail ? userEmail.split('@')[0] : 'Traveler');
+
       targetUser = this.db.queryOne(
-        isEmail
-          ? "SELECT * FROM user_profiles WHERE email = ? AND role = 'customer'"
-          : "SELECT * FROM user_profiles WHERE phone = ? AND role = 'customer'",
-        [cleanId]
+        "SELECT * FROM user_profiles WHERE (email = ? OR phone = ? OR (length(?) >= 10 AND phone LIKE ?)) AND role = 'customer'",
+        [userEmail || '__none__', userPhone || '__none__', cleanDigits, `%${cleanDigits}%`]
       );
 
       if (!targetUser) {
         // Register new customer profile permanently locked to role 'customer'
         const newId = this.db.uuid();
-        const displayName = isEmail ? cleanId.split('@')[0] : 'Traveler';
         this.db.execute(`
           INSERT INTO user_profiles (id, email, phone, role, display_name, status)
           VALUES (?, ?, ?, 'customer', ?, 'active')
         `, [
           newId,
-          isEmail ? cleanId : `traveler_${cleanId.replace(/\D/g, '')}@tripmozy.local`,
-          isEmail ? null : cleanId,
+          userEmail || `traveler_${cleanDigits || Date.now()}@tripmozy.local`,
+          userPhone || null,
           displayName
         ]);
+        targetUser = this.db.queryOne('SELECT * FROM user_profiles WHERE id = ?', [newId]);
+      } else {
+        if (userPhone && (!targetUser.phone || targetUser.phone === '')) {
+          this.db.execute("UPDATE user_profiles SET phone = ? WHERE id = ?", [userPhone, targetUser.id]);
+          targetUser.phone = userPhone;
+        }
+        if (userEmail && (!targetUser.email || targetUser.email.includes('@tripmozy.local'))) {
+          this.db.execute("UPDATE user_profiles SET email = ? WHERE id = ?", [userEmail, targetUser.id]);
+          targetUser.email = userEmail;
+        }
+        if (inputName && (!targetUser.display_name || targetUser.display_name === 'Traveler')) {
+          this.db.execute("UPDATE user_profiles SET display_name = ? WHERE id = ?", [displayName, targetUser.id]);
+          targetUser.display_name = displayName;
+        }
       }
     }
 
@@ -204,112 +234,74 @@ class AuthService {
     const otpCode = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
-    // Invalidate prior unused OTPs for this identifier
-    this.db.execute('UPDATE auth_otps SET is_used = 1 WHERE identifier = ? AND is_used = 0', [cleanId]);
+    // Invalidate prior unused OTPs and record for all linked identifiers
+    const linkedIds = Array.from(new Set([cleanId, inputEmail, inputPhone].filter(Boolean)));
+    for (const lid of linkedIds) {
+      this.db.execute('UPDATE auth_otps SET is_used = 1 WHERE identifier = ? AND is_used = 0', [lid]);
+      const otpId = this.db.uuid();
+      this.db.execute(`
+        INSERT INTO auth_otps (id, identifier, otp_code, role, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+      `, [otpId, lid, otpCode, role, expiresAt]);
+    }
 
-    // Save new OTP
-    const otpId = this.db.uuid();
-    this.db.execute(`
-      INSERT INTO auth_otps (id, identifier, otp_code, role, expires_at)
-      VALUES (?, ?, ?, ?, ?)
-    `, [otpId, cleanId, otpCode, role, expiresAt]);
-
-    // Dispatch directly to the exact email address or phone number entered
+    // Dispatch directly to user's Gmail and/or mobile phone
     if (this.notifService) {
       try {
-        if (isEmail) {
+        const targetEmail = inputEmail || (isEmail ? cleanId : null) || (targetVendor && targetVendor.contact_email && !targetVendor.contact_email.includes('@tripmozy.local') ? targetVendor.contact_email : null) || (targetUser && targetUser.email && !targetUser.email.includes('@tripmozy.local') ? targetUser.email : null);
+        const targetPhone = inputPhone || (!isEmail ? cleanId : null) || (targetVendor && targetVendor.contact_phone ? targetVendor.contact_phone : null) || (targetUser && targetUser.phone ? targetUser.phone : null);
+
+        // 1. Deliver OTP directly to Gmail / Email whenever email is provided or linked
+        if (targetEmail && targetEmail.includes('@') && !targetEmail.includes('@tripmozy.local')) {
+          console.log(`[AuthService] Delivering OTP ${otpCode} to Gmail: ${targetEmail}`);
           this.notifService.send({
-            destination: cleanId,
+            destination: targetEmail,
             channel: 'email',
             templateCode: 'auth_otp_code',
             eventType: 'auth.otp_sent',
-            payload: { otpCode }
+            payload: { otpCode, destination: targetEmail }
           });
-        } else {
-          // 1. Dispatch OTP code directly via SMS text message
+        }
+
+        // 2. Deliver OTP via SMS and WhatsApp whenever mobile phone is provided
+        if (targetPhone && targetPhone.replace(/\D/g, '').length >= 10) {
+          console.log(`[AuthService] Delivering OTP ${otpCode} to Mobile: ${targetPhone}`);
           this.notifService.send({
-            destination: cleanId,
+            destination: targetPhone,
             channel: 'sms',
             templateCode: 'auth_otp_code',
             eventType: 'auth.otp_sent',
             payload: { otpCode }
           });
-
-          // 2. Also dispatch via WhatsApp for multi-channel mobile verification
           this.notifService.send({
-            destination: cleanId,
+            destination: targetPhone,
             channel: 'whatsapp',
             templateCode: 'auth_otp_code',
             eventType: 'auth.otp_sent',
             payload: { otpCode }
           });
-
-          // 3. Also deliver to customer email if on file
-          const userProf = this.db.queryOne("SELECT email FROM user_profiles WHERE phone LIKE ? AND email IS NOT NULL AND email != ''", [`%${cleanDigits}`]);
-          if (userProf && userProf.email && !userProf.email.includes('@tripmozy.local')) {
-            this.notifService.send({
-              destination: userProf.email,
-              channel: 'email',
-              templateCode: 'auth_otp_code',
-              eventType: 'auth.otp_sent',
-              payload: { otpCode }
-            });
-          }
-        }
-
-        // If vendor account has linked contact email or phone, deliver there too
-        if (targetVendor) {
-          if (targetVendor.contact_phone && !isEmail && targetVendor.contact_phone !== cleanId) {
-            this.notifService.send({
-              destination: targetVendor.contact_phone,
-              channel: 'sms',
-              templateCode: 'auth_otp_code',
-              eventType: 'auth.otp_sent',
-              payload: { otpCode }
-            });
-          }
-          if (targetVendor.contact_email && !isEmail) {
-            this.notifService.send({
-              destination: targetVendor.contact_email,
-              channel: 'email',
-              templateCode: 'auth_otp_code',
-              eventType: 'auth.otp_sent',
-              payload: { otpCode }
-            });
-          }
-          if (targetVendor.contact_phone && isEmail) {
-            this.notifService.send({
-              destination: targetVendor.contact_phone,
-              channel: 'sms',
-              templateCode: 'auth_otp_code',
-              eventType: 'auth.otp_sent',
-              payload: { otpCode }
-            });
-            this.notifService.send({
-              destination: targetVendor.contact_phone,
-              channel: 'whatsapp',
-              templateCode: 'auth_otp_code',
-              eventType: 'auth.otp_sent',
-              payload: { otpCode }
-            });
-          }
         }
       } catch (err) {
         console.error('[AuthService] Notification dispatch error:', err.message);
       }
     }
 
+    const hasEmail = !!(inputEmail || isEmail);
+    const primaryTarget = inputEmail || (isEmail ? cleanId : (inputPhone || cleanId));
+
     return {
       success: true,
       accountExists: !!existingRole,
       autoSwitchedToLogin,
       message: autoSwitchedToLogin
-        ? `An account is already registered with this ${isEmail ? 'email' : 'mobile'}. Automatically switched to Log In.`
-        : (isEmail
-            ? `Verification code sent to ${this.maskIdentifier(cleanId)}`
-            : `Verification code sent via SMS to ${this.maskIdentifier(cleanId)}`),
-      identifier: cleanId,
-      channel: isEmail ? 'email' : 'sms',
+        ? `An account is already registered. Automatically switched to Log In. Verification code sent to ${this.maskIdentifier(primaryTarget)}.`
+        : (hasEmail
+            ? `Verification code sent to your Gmail (${this.maskIdentifier(primaryTarget)})`
+            : `Verification code sent via SMS to ${this.maskIdentifier(primaryTarget)}`),
+      identifier: primaryTarget,
+      email: inputEmail || (isEmail ? cleanId : null),
+      phone: inputPhone || (!isEmail ? cleanId : null),
+      channel: hasEmail ? 'email' : 'sms',
       role
     };
   }
@@ -560,18 +552,19 @@ class AuthService {
   }
 
   // Register a new Tour Operator Partner account and initial nationwide tour fleet profile
-  registerNewVendor({ cleanId, isEmail, cleanDigits }) {
+  registerNewVendor({ cleanId, isEmail, cleanDigits, name = null, fullName = null, phone = null, email = null, businessName = null }) {
     return this.db.transaction((tx) => {
+      const inputName = (name || fullName || '').trim();
+      const userEmail = email || (isEmail ? cleanId : `partner_${cleanDigits || Date.now()}@tripmozy.local`);
+      const userPhone = phone || (!isEmail ? cleanId : '+91 98765 43210');
+      const rawName = inputName || (isEmail ? cleanId.split('@')[0] : (cleanDigits && cleanDigits.length >= 4 ? `Partner_${cleanDigits.slice(-4)}` : 'Partner'));
+      const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
       // 1. Check if user profile already exists
       let user = tx.queryOne(`
         SELECT * FROM user_profiles
         WHERE email = ? OR phone = ? OR (length(?) >= 10 AND phone LIKE ?)
-      `, [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]);
-
-      const rawName = isEmail ? cleanId.split('@')[0] : (cleanDigits && cleanDigits.length >= 4 ? `Partner_${cleanDigits.slice(-4)}` : 'Partner');
-      const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-      const userEmail = isEmail ? cleanId : `partner_${cleanDigits || Date.now()}@tripmozy.local`;
-      const userPhone = isEmail ? null : cleanId;
+      `, [userEmail, userPhone, cleanDigits, `%${cleanDigits}%`]);
 
       if (!user) {
         const userId = tx.uuid();
@@ -583,22 +576,37 @@ class AuthService {
           userEmail,
           userPhone,
           displayName,
-          isEmail ? 1 : 0,
-          isEmail ? 0 : 1
+          userEmail.includes('@') && !userEmail.includes('@tripmozy.local') ? 1 : 0,
+          userPhone && !userPhone.includes('98765 43210') ? 1 : 0
         ]);
         user = tx.queryOne('SELECT * FROM user_profiles WHERE id = ?', [userId]);
-      } else if (user.role !== 'vendor') {
-        tx.execute("UPDATE user_profiles SET role = 'vendor' WHERE id = ?", [user.id]);
-        user.role = 'vendor';
+      } else {
+        if (user.role !== 'vendor') {
+          tx.execute("UPDATE user_profiles SET role = 'vendor' WHERE id = ?", [user.id]);
+          user.role = 'vendor';
+        }
+        if (phone && (!user.phone || user.phone === '' || user.phone === '+91 98765 43210')) {
+          tx.execute("UPDATE user_profiles SET phone = ? WHERE id = ?", [phone, user.id]);
+          user.phone = phone;
+        }
+        if (email && (!user.email || user.email.includes('@tripmozy.local'))) {
+          tx.execute("UPDATE user_profiles SET email = ? WHERE id = ?", [email, user.id]);
+          user.email = email;
+        }
+        if (inputName && (!user.display_name || user.display_name === 'Partner' || user.display_name === 'Traveler')) {
+          tx.execute("UPDATE user_profiles SET display_name = ? WHERE id = ?", [displayName, user.id]);
+          user.display_name = displayName;
+        }
       }
 
       // 2. Check if vendor account already exists for this user
       let vendor = tx.queryOne('SELECT * FROM vendor_accounts WHERE user_id = ?', [user.id]);
       if (!vendor) {
         const vendorId = tx.uuid();
-        const businessName = `${displayName} Tours & Travels`;
-        const contactEmail = isEmail ? cleanId : (user.email && !user.email.includes('@tripmozy.local') ? user.email : 'tripmozy@gmail.com');
-        const contactPhone = !isEmail ? cleanId : (user.phone || null);
+        const bName = (businessName && businessName.trim()) || `${displayName} Tours & Travels`;
+        const contactEmail = (userEmail || 'tripmozy@gmail.com').trim();
+        // NEVER NULL: guarantees SQLite NOT NULL constraint is always satisfied
+        const contactPhone = (phone || (!isEmail ? cleanId : '') || (user && user.phone) || '+91 98765 43210').trim();
 
         tx.execute(`
           INSERT INTO vendor_accounts (
@@ -608,7 +616,7 @@ class AuthService {
         `, [
           vendorId,
           user.id,
-          businessName,
+          bName,
           displayName,
           contactPhone,
           contactEmail
