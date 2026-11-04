@@ -120,7 +120,11 @@ if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
 const TRIP_PLANNER_DIR = process.env.TRIP_PLANNER_DIR || path.join(__dirname, 'public');
 
 const appHandler = async (req, res) => {
-  const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const reqHost = req.headers['host'] || 'localhost:8080';
+  const reqProto = req.headers['x-forwarded-proto'] || (req.connection && req.connection.encrypted ? 'https' : 'http');
+  const baseUrl = process.env.BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${reqProto}://${reqHost}`);
+
+  const reqUrl = new URL(req.url, baseUrl);
   let pathname = reqUrl.searchParams.get('__url') || req.headers['x-matched-path'] || reqUrl.pathname;
   if (pathname.includes('?')) {
     pathname = pathname.split('?')[0];
@@ -577,7 +581,7 @@ const appHandler = async (req, res) => {
                   remainingPaymentOption: result.remainingPaymentOption,
                   guestName: result.guest ? result.guest.name : 'Traveler',
                   guestPhone: result.guest ? result.guest.phone : '',
-                  dashboardUrl: `http://localhost:8080/partner/dashboard?vendorId=${b.vendor_id}`
+                  dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${b.vendor_id}`
                 }
               });
             }
@@ -599,7 +603,7 @@ const appHandler = async (req, res) => {
                   remainingPaymentOption: result.remainingPaymentOption,
                   guestName: result.guest ? result.guest.name : 'Traveler',
                   guestPhone: result.guest ? result.guest.phone : '',
-                  dashboardUrl: `http://localhost:8080/partner/dashboard?vendorId=${b.vendor_id}`
+                  dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${b.vendor_id}`
                 }
               });
             }
