@@ -704,8 +704,9 @@ function buildCard(r) {
   const expires = new Date(r.recipient_expires_at);
   const expired = expires < now || r.is_expired;
   const status  = r.response_status;
+  const isAcceptedByOther = status === 'accepted_by_other' || r.rejection_reason === 'accepted_by_other';
   const isCancelled = r.request_status === 'cancelled' || status === 'cancelled';
-  const isPend  = status === 'pending' && !expired && !isCancelled;
+  const isPend  = status === 'pending' && !expired && !isCancelled && !isAcceptedByOther;
 
   // Status badge
   const badgeMap = {
@@ -713,9 +714,15 @@ function buildCard(r) {
     rejected: `<span class="badge badge-rejected">Declined</span>`,
     cancelled: `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`,
   };
-  const statusBadge = isCancelled
-    ? `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`
-    : (badgeMap[status] || (expired ? `<span class="badge badge-expired">Expired</span>` : `<span class="badge badge-pending">Action Required</span>`));
+
+  let statusBadge = '';
+  if (isAcceptedByOther) {
+    statusBadge = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-weight:800;">⚠️ Accepted by other partner</span>`;
+  } else if (isCancelled) {
+    statusBadge = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`;
+  } else {
+    statusBadge = badgeMap[status] || (expired ? `<span class="badge badge-expired">Expired</span>` : `<span class="badge badge-pending">Action Required</span>`);
+  }
 
   // Countdown
   let cdHtml = '';
@@ -738,7 +745,15 @@ function buildCard(r) {
 
   // Footer based on status
   let footer = '';
-  if (isCancelled) {
+  if (isAcceptedByOther) {
+    footer = `
+      <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
+        <div class="outcome-text">
+          <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Accepted by other partner</div>
+          <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;">This tour request has already been claimed by another partner. It is no longer available.</div>
+        </div>
+      </div>`;
+  } else if (isCancelled) {
     footer = `
       <div class="outcome-banner rejected" style="background:#fef2f2;border-color:#fecaca;">
         <div class="outcome-text">
@@ -883,6 +898,38 @@ async function acceptRequest(recipientId, btn) {
         // Brief flash notification
         showToast('Tour quote sent! View it in the Accepted tab.', 'success');
       });
+    } else if (data.acceptedByOther || (data.error && data.error.toLowerCase().includes('accepted by other'))) {
+      const partnerName = data.acceptedByName || 'Another Partner';
+      const card = document.getElementById(`card-${recipientId}`);
+      if (card) {
+        const badgeCol = card.querySelector('.card-right');
+        if (badgeCol) {
+          badgeCol.innerHTML = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-weight:800;">⚠️ Accepted by other partner</span>`;
+        }
+        const footerElem = card.querySelector('.card-footer');
+        if (footerElem) {
+          footerElem.innerHTML = `
+            <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
+              <div class="outcome-text">
+                <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Accepted by other partner</div>
+                <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;line-height:1.4;">This tour request has already been claimed by <strong>${esc(partnerName)}</strong> and is no longer available.</div>
+              </div>
+            </div>`;
+        }
+      }
+
+      showToast(`⚠️ Accepted by other partner (${partnerName}). Request is no longer available.`, 'error');
+
+      // Remove from local allRequests
+      allRequests = allRequests.filter(x => x.recipient_id !== recipientId);
+      updateCounts();
+
+      // Keep warning visible for 3.5s so operator clearly sees the message, then animate out
+      setTimeout(() => {
+        animateCardOut(recipientId, () => {
+          renderPage();
+        });
+      }, 3500);
     } else {
       btn.disabled = false;
       btn.innerHTML = `Accept &amp; Send Tour Quote`;

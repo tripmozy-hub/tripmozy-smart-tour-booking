@@ -49,12 +49,22 @@ class VendorService {
       WHERE r.vendor_id = ?
         AND (r.rejection_reason IS NULL OR r.rejection_reason != 'accepted_by_other')
         AND r.response_status != 'accepted_by_other'
-        AND NOT (r.response_status = 'pending' AND EXISTS (
-          SELECT 1 FROM booking_request_recipients other_r
-          WHERE other_r.request_id = r.request_id 
-            AND other_r.vendor_id != r.vendor_id 
-            AND other_r.response_status = 'accepted'
-        ))
+        AND NOT (
+          r.response_status != 'accepted' AND EXISTS (
+            SELECT 1 FROM booking_request_recipients other_r
+            WHERE other_r.request_id = r.request_id 
+              AND other_r.vendor_id != r.vendor_id 
+              AND other_r.response_status = 'accepted'
+          )
+        )
+        AND NOT (
+          r.response_status != 'accepted' AND EXISTS (
+            SELECT 1 FROM hotel_offers o
+            JOIN properties op ON o.property_id = op.id
+            WHERE o.request_id = r.request_id
+              AND op.vendor_id != r.vendor_id
+          )
+        )
       ORDER BY r.created_at DESC
     `, [vendorId]);
 
@@ -127,14 +137,35 @@ class VendorService {
         if (existingOffer) return { idempotent: true, offer: existingOffer };
       }
 
+      // 1b. Check if already accepted by another partner or marked as accepted_by_other
+      if (recipient.rejection_reason === 'accepted_by_other' || recipient.response_status === 'accepted_by_other') {
+        const otherWinner = tx.queryOne(`
+          SELECT v.business_name
+          FROM booking_request_recipients r
+          JOIN vendor_accounts v ON r.vendor_id = v.id
+          WHERE r.request_id = ? AND r.vendor_id != ? AND r.response_status = 'accepted'
+          LIMIT 1
+        `, [recipient.request_id, recipient.vendor_id]) || tx.queryOne(`
+          SELECT v.business_name
+          FROM hotel_offers o
+          JOIN properties p ON o.property_id = p.id
+          JOIN vendor_accounts v ON p.vendor_id = v.id
+          WHERE o.request_id = ? AND p.vendor_id != ?
+          LIMIT 1
+        `, [recipient.request_id, recipient.vendor_id]);
+
+        const partnerName = otherWinner?.business_name || 'Another Partner';
+        const err = new Error(`Accepted by other partner (${partnerName})`);
+        err.acceptedByOther = true;
+        err.acceptedByName = partnerName;
+        throw err;
+      }
+
       // Prevent accept if rejected, cancelled, or expired
       if (recipient.response_status === 'rejected') {
         throw new Error('Cannot accept a request that has already been rejected');
       }
       if (recipient.response_status === 'cancelled' || recipient.req_status === 'cancelled') {
-        if (recipient.rejection_reason === 'accepted_by_other') {
-          throw new Error('This tour request has already been accepted by another tour operator and is no longer available.');
-        }
         throw new Error('This tour request has been cancelled by the customer');
       }
       if (new Date(recipient.expires_at) < new Date()) {
@@ -152,7 +183,29 @@ class VendorService {
       `, [recipient.request_id, recipient.vendor_id]);
 
       if (otherAccepted) {
-        throw new Error(`This tour request has already been accepted by another tour operator (${otherAccepted.business_name || 'Partner Operator'}) and is no longer available.`);
+        const partnerName = otherAccepted.business_name || 'Another Partner';
+        const err = new Error(`Accepted by other partner (${partnerName})`);
+        err.acceptedByOther = true;
+        err.acceptedByName = partnerName;
+        throw err;
+      }
+
+      // Check if another vendor already created an offer for this request
+      const otherOffer = tx.queryOne(`
+        SELECT o.id, v.business_name
+        FROM hotel_offers o
+        JOIN properties p ON o.property_id = p.id
+        JOIN vendor_accounts v ON p.vendor_id = v.id
+        WHERE o.request_id = ? AND p.vendor_id != ?
+        LIMIT 1
+      `, [recipient.request_id, recipient.vendor_id]);
+
+      if (otherOffer) {
+        const partnerName = otherOffer.business_name || 'Another Partner';
+        const err = new Error(`Accepted by other partner (${partnerName})`);
+        err.acceptedByOther = true;
+        err.acceptedByName = partnerName;
+        throw err;
       }
 
       // 2. Room Type & Pricing
@@ -251,7 +304,7 @@ class VendorService {
             rejection_reason = 'accepted_by_other',
             rejection_note = 'Accepted by another tour operator',
             responded_at = datetime('now')
-        WHERE request_id = ? AND vendor_id != ? AND response_status = 'pending'
+        WHERE request_id = ? AND vendor_id != ? AND response_status != 'accepted'
       `, [recipient.request_id, recipient.vendor_id]);
 
       // 5. Update request status to 'offers_available'

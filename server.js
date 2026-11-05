@@ -289,6 +289,11 @@ const appHandler = async (req, res) => {
         res.end(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Quote Sent | TripMozy</title><style>body{font-family:-apple-system,sans-serif;padding:24px 16px;background:#f0fdf4;color:#0f172a;margin:0}.card{background:#fff;border-radius:16px;padding:32px 24px;max-width:440px;margin:30px auto;box-shadow:0 12px 30px rgba(0,0,0,.08);text-align:center;border-top:6px solid #10b981}.icon{font-size:52px;margin-bottom:12px}h2{color:#065f46;margin:0 0 6px;font-size:22px}.ref{font-family:monospace;font-size:12px;color:#64748b;margin-bottom:20px}.detail{background:#f8fafc;border-radius:10px;padding:16px;text-align:left;font-size:14px;margin-bottom:20px}.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0}.row:last-child{border:none}.lbl{color:#64748b}.val{font-weight:700}.btn{display:inline-block;background:#10b981;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:14px}</style></head><body><div class="card"><div class="icon">✅</div><h2>Tour Quote Sent to Traveler!</h2><div class="ref">${recipient.request_reference} · ${recipient.property_name}</div><div class="detail"><div class="row"><span class="lbl">Destination</span><span class="val">${recipient.destination}</span></div><div class="row"><span class="lbl">Tour Dates</span><span class="val">${recipient.check_in_date} → ${recipient.check_out_date} (${recipient.nights + 1}d / ${recipient.nights}n)</span></div><div class="row"><span class="lbl">Total Tour Package</span><span class="val" style="color:#059669">₹${tourP.totalTourINR.toLocaleString('en-IN')}</span></div><div class="row"><span class="lbl">TripMozy Advance (30% + 5% GST)</span><span class="val" style="color:#2563eb">₹${tourP.payableNowINR.toLocaleString('en-IN')}</span></div><div class="row"><span class="lbl">Remaining Balance (70%)</span><span class="val">₹${tourP.remainingBalanceINR.toLocaleString('en-IN')}</span></div><div class="row"><span class="lbl">Quote Validity</span><span class="val" style="color:#10b981">Valid for 4 Hours</span></div></div><p style="color:#64748b;font-size:13px;line-height:1.5">The customer has received your tour quote. You will receive an instant WhatsApp update when they pay the advance and confirm.</p></div></body></html>`);
         return;
       } catch (err) {
+        if (err.acceptedByOther) {
+          res.writeHead(409, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Accepted by Other Partner | TripMozy</title><style>body{font-family:-apple-system,sans-serif;padding:24px 16px;background:#fef2f2;color:#0f172a;margin:0}.card{background:#fff;border-radius:16px;padding:32px 24px;max-width:440px;margin:30px auto;box-shadow:0 12px 30px rgba(0,0,0,.08);text-align:center;border-top:6px solid #ef4444}.icon{font-size:52px;margin-bottom:12px}h2{color:#991b1b;margin:0 0 8px;font-size:22px}.badge{display:inline-block;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:16px}p{color:#64748b;font-size:14px;line-height:1.5}</style></head><body><div class="card"><div class="icon">🔒</div><div class="badge">Accepted by other partner</div><h2>Request Already Claimed</h2><p>This tour request has already been accepted by another tour operator partner (${err.acceptedByName || 'Another Partner'}) and is no longer available.</p><p style="margin-top:20px;font-size:12px;color:#94a3b8;">TripMozy Smart Matching automatically assigns requests to the first responding verified operator to guarantee lightning-fast turnaround.</p></div></body></html>`);
+          return;
+        }
         res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(`<!DOCTYPE html><html><body style="font-family:sans-serif;padding:30px;text-align:center;"><h2>Could Not Accept</h2><p>${err.message}</p></body></html>`);
         return;
@@ -344,7 +349,14 @@ const appHandler = async (req, res) => {
         const { otpForTesting, ...safeResult } = result;
         sendJson(200, safeResult);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -358,7 +370,14 @@ const appHandler = async (req, res) => {
         res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -400,7 +419,14 @@ const appHandler = async (req, res) => {
         const updated = authService.updateVendorProfile(vendorId, body);
         sendJson(200, { success: true, vendor: updated });
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -474,7 +500,14 @@ const appHandler = async (req, res) => {
         await notifService.waitForPendingDispatches();
         sendJson(201, result);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -497,7 +530,14 @@ const appHandler = async (req, res) => {
         }
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -658,7 +698,14 @@ const appHandler = async (req, res) => {
 
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -795,7 +842,14 @@ const appHandler = async (req, res) => {
         await notifService.waitForPendingDispatches();
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
@@ -815,7 +869,14 @@ const appHandler = async (req, res) => {
         });
         sendJson(200, result);
       } catch (e) {
-        sendJson(400, { error: e.message, needsSignup: !!e.needsSignup, accountExists: e.accountExists });
+        const statusCode = e.acceptedByOther ? 409 : 400;
+        sendJson(statusCode, {
+          error: e.message || 'Accepted by other partner',
+          acceptedByOther: !!e.acceptedByOther,
+          acceptedByName: e.acceptedByName || 'Another Partner',
+          needsSignup: !!e.needsSignup,
+          accountExists: e.accountExists
+        });
       }
     });
     return;
