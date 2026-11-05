@@ -158,48 +158,70 @@ class RequestService {
         initialStatus, expiresAt
       ]);
 
-      // 7. Queue recipients for matched properties and notify each vendor ONCE together
-      let topMatches = matchResult.matches.slice(0, 10);
+      // 7. BROADCAST TO ALL ACTIVE TOUR OPERATOR VENDORS SIMULTANEOUSLY
+      // Guarantees every active tour operator receives the customer's tour request in their dashboard.
+      const activeVendors = tx.query("SELECT id, business_name, contact_phone, contact_email FROM vendor_accounts WHERE status = 'active'");
 
-      // If no catalog matches found (e.g. custom unlisted tour destination),
-      // dispatch to primary verified tour operator so request is never lost
-      if (topMatches.length === 0 && (!matchResult.diagnostics || matchResult.diagnostics.length === 0)) {
-        const fallbackProps = tx.query(`
-          SELECT p.*, v.id as vendor_id
-          FROM properties p
-          JOIN vendor_accounts v ON p.vendor_id = v.id
-          WHERE p.status = 'active'
-          ORDER BY p.star_rating DESC
-          LIMIT 5
-        `);
-        if (fallbackProps.length > 0) {
-          topMatches = fallbackProps.map(prop => {
-            const room = tx.queryOne('SELECT * FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1', [prop.id]);
-            return {
-              property: {
-                id: prop.id,
-                vendorId: prop.vendor_id,
-                name: prop.name,
-                city: prop.city,
-                state: prop.state,
-                starRating: prop.star_rating
-              },
-              matchedRoom: {
-                id: room ? room.id : prop.id,
-                name: room ? room.name : 'Custom Tour Package'
-              },
-              pricing: {
-                totalPayablePaise: totalBudgetPaise
-              }
-            };
-          });
-          tx.execute("UPDATE hotel_booking_requests SET status = 'awaiting_responses' WHERE id = ?", [requestId]);
+      // Map any catalog properties matching the requested destination
+      const matchedPropByVendor = new Map();
+      if (matchResult && matchResult.matches && matchResult.matches.length > 0) {
+        for (const m of matchResult.matches) {
+          if (!matchedPropByVendor.has(m.property.vendorId)) {
+            matchedPropByVendor.set(m.property.vendorId, m.property);
+          }
         }
       }
 
       const notifiedVendors = new Set();
+      let dispatchedCount = 0;
 
-      for (const m of topMatches) {
+      for (const vendor of activeVendors) {
+        // Choose best property for this vendor:
+        // 1. Direct destination-matched property if found
+        // 2. Or the vendor's primary active property
+        let chosenProp = matchedPropByVendor.get(vendor.id);
+        if (!chosenProp) {
+          chosenProp = tx.queryOne(
+            "SELECT id, name, city, state, star_rating FROM properties WHERE vendor_id = ? AND status = 'active' ORDER BY star_rating DESC LIMIT 1",
+            [vendor.id]
+          );
+        }
+
+        if (!chosenProp) {
+          // Auto-generate tour fleet profile for vendor if missing
+          const newPropId = tx.uuid();
+          tx.execute(`
+            INSERT INTO properties (
+              id, vendor_id, name, slug, property_type, star_rating,
+              description, address_line, city, state, pincode, country,
+              latitude, longitude, timezone, check_in_time, check_out_time,
+              status, inventory_mode
+            ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, 'India Operations', 'All Destinations', 'India', '110001', 'India', 28.6139, 77.2090, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
+          `, [
+            newPropId,
+            vendor.id,
+            `${vendor.business_name} - Tour Fleet`,
+            `fleet-${vendor.id.slice(0, 8)}-${Date.now()}`,
+            `Verified Tour Operator Partner (${vendor.business_name})`
+          ]);
+          chosenProp = { id: newPropId, name: `${vendor.business_name} - Tour Fleet` };
+        }
+
+        // Ensure this property has at least one active room_type and rate so the vendor can accept quotes instantly
+        let room = tx.queryOne('SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1', [chosenProp.id]);
+        if (!room) {
+          const roomTypeId = tx.uuid();
+          tx.execute(`
+            INSERT INTO room_types (id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_active)
+            VALUES (?, ?, 'Custom Tour Package', 'King', 4, 2, 20, 1, 1)
+          `, [roomTypeId, chosenProp.id]);
+          const rateId = tx.uuid();
+          tx.execute(`
+            INSERT INTO room_rates (id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, is_active)
+            VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 1)
+          `, [rateId, roomTypeId]);
+        }
+
         const recipientId = tx.uuid();
         const rawToken = crypto.randomBytes(16).toString('hex');
         const actionTokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
@@ -210,16 +232,17 @@ class RequestService {
             expires_at, action_token_hash
           ) VALUES (?, ?, ?, ?, 'queued', 'pending', ?, ?)
         `, [
-          recipientId, requestId, m.property.id, m.property.vendorId, expiresAt, actionTokenHash
+          recipientId, requestId, chosenProp.id, vendor.id, expiresAt, actionTokenHash
         ]);
 
-        // Automated WhatsApp & Email Notification: notify each distinct eligible vendor ONCE together
-        if (this.notifService && !notifiedVendors.has(m.property.vendorId)) {
-          notifiedVendors.add(m.property.vendorId);
-          const vendor = tx.queryOne('SELECT contact_phone, contact_email, contact_person, business_name FROM vendor_accounts WHERE id = ?', [m.property.vendorId]);
+        dispatchedCount++;
+
+        // Automated WhatsApp & Email Notification: notify each distinct vendor ONCE together
+        if (this.notifService && !notifiedVendors.has(vendor.id)) {
+          notifiedVendors.add(vendor.id);
           
           // 1. WhatsApp alert to vendor.contact_phone
-          const vendorPhone = vendor && vendor.contact_phone;
+          const vendorPhone = vendor.contact_phone;
           if (vendorPhone) {
             this.notifService.send({
               recipientUserId: null,
@@ -229,8 +252,8 @@ class RequestService {
               eventType: 'request.dispatched',
               payload: {
                 recipientId,
-                propertyId: m.property.id,
-                propertyName: m.property.name,
+                propertyId: chosenProp.id,
+                propertyName: chosenProp.name,
                 requestReference: reference,
                 destination,
                 checkInDate,
@@ -245,10 +268,10 @@ class RequestService {
             });
           }
 
-          // 2. Email alert to vendor: only to verified vendor contact email or partner desk
+          // 2. Email alert to vendor: to verified vendor contact email
           const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
           const targetEmails = new Set();
-          if (vendor && vendor.contact_email) targetEmails.add(vendor.contact_email.trim());
+          if (vendor.contact_email) targetEmails.add(vendor.contact_email.trim());
           if (targetEmails.size === 0) targetEmails.add('tripmozy@gmail.com');
 
           // CRITICAL: Ensure the customer/traveler NEVER receives vendor dispatch alerts or vendor action links!
@@ -266,10 +289,10 @@ class RequestService {
                 eventType: 'request.dispatched',
                 payload: {
                   recipientId,
-                  vendorId: m.property.vendorId,
-                  vendorName: (vendor && (vendor.business_name || vendor.contact_person)) || 'TripMozy Verified Tour Operator',
-                  propertyId: m.property.id,
-                  propertyName: m.property.name,
+                  vendorId: vendor.id,
+                  vendorName: vendor.business_name || 'TripMozy Verified Tour Operator',
+                  propertyId: chosenProp.id,
+                  propertyName: chosenProp.name,
                   requestReference: reference,
                   destination,
                   checkInDate,
@@ -281,7 +304,7 @@ class RequestService {
                   rawToken,
                   actionUrl: `${baseUrl}/action?token=${rawToken}&action=accept`,
                   rejectUrl: `${baseUrl}/action?token=${rawToken}&action=reject`,
-                  dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${m.property.vendorId}`
+                  dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${vendor.id}`
                 }
               });
             } catch (err) {
@@ -290,6 +313,9 @@ class RequestService {
           }
         }
       }
+
+      // Guarantee request status is 'awaiting_responses'
+      tx.execute("UPDATE hotel_booking_requests SET status = 'awaiting_responses' WHERE id = ?", [requestId]);
 
       // NOTE: Customer only receives an email when the tour operator partner CONFIRMS their tour
       // (per requirements: no premature dispatch email to the customer; customer gets confirmation + payment link upon vendor acceptance).
@@ -300,22 +326,21 @@ class RequestService {
         action: 'request.submit',
         entityType: 'hotel_booking_request',
         entityId: requestId,
-        afterState: { reference, destination, nights, numRooms, totalBudgetPaise, matchedHotels: topMatches.length },
+        afterState: { reference, destination, nights, numRooms, totalBudgetPaise, matchedVendors: dispatchedCount },
         ipAddress
       });
 
-      const finalStatus = topMatches.length > 0 ? 'awaiting_responses' : initialStatus;
       return {
         id: requestId,
         reference,
-        status: finalStatus,
+        status: 'awaiting_responses',
         destination,
         nights,
         numRooms,
         totalBudgetINR: budgetNum,
-        matchedCount: topMatches.length,
+        matchedCount: dispatchedCount,
         expiresAt,
-        message: `Tour request created successfully! Contacting ${topMatches.length} eligible TripMozy tour operators in ${destination}.`
+        message: `Tour request created successfully! Dispatched to ${dispatchedCount} verified TripMozy tour operators.`
       };
     });
   }

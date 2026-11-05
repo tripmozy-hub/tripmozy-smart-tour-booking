@@ -1280,6 +1280,11 @@
           document.cookie = `tm_user_phone=${encodeURIComponent(uPhone)}; path=/; max-age=2592000; SameSite=Lax`;
         }
 
+        if (data.role === 'vendor' && data.vendor && data.vendor.id) {
+          localStorage.setItem('tm_vendor_id', data.vendor.id);
+          document.cookie = `tm_vendor_id=${data.vendor.id}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+
         // Automatic Redirection according to role:
         if (data.role === 'vendor') {
           showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
