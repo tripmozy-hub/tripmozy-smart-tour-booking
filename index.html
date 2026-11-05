@@ -1363,10 +1363,25 @@
       showToast(`Selected "${destination}" (${nights} Nights · ₹${budget.toLocaleString('en-IN')}). Fine-tune your details below.`);
     }
 
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+      return null;
+    }
+
     function isCustomerLoggedIn() {
-      const token = localStorage.getItem('tm_session_token');
-      const role = localStorage.getItem('tm_user_role');
-      return !!(token && role === 'customer');
+      const token = localStorage.getItem('tm_session_token') || getCookie('tm_session_token');
+      const role = localStorage.getItem('tm_user_role') || getCookie('tm_user_role');
+      if (token && role === 'customer') return true;
+      const rawUser = localStorage.getItem('tm_user_info');
+      if (rawUser) {
+        try {
+          const u = JSON.parse(rawUser);
+          if (u.id || u.email || u.phone) return true;
+        } catch (_) {}
+      }
+      return false;
     }
 
     // Submit Request
@@ -1497,27 +1512,36 @@
     (function checkCustomerSession() {
       try {
         const raw = localStorage.getItem('tm_user_info');
-        const role = localStorage.getItem('tm_user_role');
-        const token = localStorage.getItem('tm_session_token');
-        const isLoggedIn = !!(token && role === 'customer');
+        const isLoggedIn = isCustomerLoggedIn();
 
         const btn = document.getElementById('submitBtn');
         const authHint = document.getElementById('authSubmitHint');
 
-        if (isLoggedIn && raw) {
-          const u = JSON.parse(raw);
-          if (u.displayName && u.displayName !== 'Traveler') {
-            document.getElementById('guestName').value = u.displayName;
+        if (isLoggedIn) {
+          let u = {};
+          if (raw) {
+            try { u = JSON.parse(raw); } catch (_) {}
+          } else {
+            u = {
+              displayName: getCookie('tm_user_name') || 'Traveler',
+              email: getCookie('tm_user_email') || '',
+              phone: getCookie('tm_user_phone') || ''
+            };
           }
-          if (u.email && !u.email.includes('@tripmozy.local')) {
+
+          const dispName = u.displayName || u.name || u.fullName || 'Traveler';
+          if (dispName && dispName !== 'Traveler' && !document.getElementById('guestName').value) {
+            document.getElementById('guestName').value = dispName;
+          }
+          if (u.email && !u.email.includes('@tripmozy.local') && !document.getElementById('guestEmail').value) {
             document.getElementById('guestEmail').value = u.email;
           }
-          if (u.phone) {
-            document.getElementById('guestPhone').value = u.phone.replace('+91', '');
+          if (u.phone && !document.getElementById('guestPhone').value) {
+            document.getElementById('guestPhone').value = u.phone.replace('+91', '').trim();
           }
           const item = document.getElementById('authHeaderItem');
           if (item) {
-            item.innerHTML = `<span style="font-size:13px;color:#d8ba7a;">${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
+            item.innerHTML = `<span style="font-size:13px;color:#d8ba7a;">${dispName}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
           }
 
           if (btn) btn.innerHTML = '<span>Request Tour Quotes Now</span>';
@@ -1572,6 +1596,11 @@
       localStorage.removeItem('tm_session_token');
       localStorage.removeItem('tm_user_role');
       localStorage.removeItem('tm_user_info');
+      document.cookie = 'tm_session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'tm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'tm_user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'tm_user_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'tm_user_phone=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
         window.location.reload();
       });

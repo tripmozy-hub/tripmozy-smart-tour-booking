@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS booking_request_recipients (
     property_id TEXT NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
     vendor_id TEXT NOT NULL REFERENCES vendor_accounts(id) ON DELETE CASCADE,
     delivery_status TEXT NOT NULL DEFAULT 'queued' CHECK(delivery_status IN ('queued', 'sent', 'delivered', 'viewed', 'failed')),
-    response_status TEXT NOT NULL DEFAULT 'pending' CHECK(response_status IN ('pending', 'accepted', 'rejected', 'expired', 'cancelled')),
+    response_status TEXT NOT NULL DEFAULT 'pending' CHECK(response_status IN ('pending', 'accepted', 'rejected', 'expired', 'cancelled', 'accepted_by_other')),
     sent_at TEXT,
     expires_at TEXT NOT NULL,
     action_token_hash TEXT NOT NULL,

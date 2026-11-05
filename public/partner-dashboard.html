@@ -543,9 +543,9 @@ function updateCounts() {
   allRequests.forEach(r => {
     if      (r.response_status === 'accepted') a++;
     else if (r.response_status === 'rejected') rj++;
-    else if (new Date(r.recipient_expires_at) >= now && r.request_status !== 'booked' && r.request_status !== 'cancelled' && r.response_status !== 'cancelled') p++;
+    else if (new Date(r.recipient_expires_at) >= now && r.request_status !== 'booked' && r.request_status !== 'cancelled' && r.response_status !== 'cancelled' && r.response_status !== 'accepted_by_other' && r.rejection_reason !== 'accepted_by_other') p++;
   });
-  const total = allRequests.length;
+  const total = allRequests.filter(r => r.response_status !== 'accepted_by_other' && r.rejection_reason !== 'accepted_by_other').length;
 
   // Tab counts
   document.getElementById('cnt-pending').textContent  = p;
@@ -585,10 +585,10 @@ function renderPage() {
 
   const filtered = allRequests.filter(r => {
     const expired = new Date(r.recipient_expires_at) < now;
-    if (activePage === 'pending')  return r.response_status === 'pending' && !expired && r.request_status !== 'booked' && r.request_status !== 'cancelled' && r.response_status !== 'cancelled';
+    if (activePage === 'pending')  return r.response_status === 'pending' && !expired && r.request_status !== 'booked' && r.request_status !== 'cancelled' && r.response_status !== 'cancelled' && r.response_status !== 'accepted_by_other' && r.rejection_reason !== 'accepted_by_other';
     if (activePage === 'accepted') return r.response_status === 'accepted';
     if (activePage === 'rejected') return r.response_status === 'rejected';
-    return true; // 'all'
+    return r.response_status !== 'accepted_by_other' && r.rejection_reason !== 'accepted_by_other'; // 'all'
   });
 
   const area = document.getElementById('cardsArea');

@@ -47,6 +47,14 @@ class VendorService {
       JOIN hotel_booking_requests req ON r.request_id = req.id
       JOIN properties p ON r.property_id = p.id
       WHERE r.vendor_id = ?
+        AND (r.rejection_reason IS NULL OR r.rejection_reason != 'accepted_by_other')
+        AND r.response_status != 'accepted_by_other'
+        AND NOT (r.response_status = 'pending' AND EXISTS (
+          SELECT 1 FROM booking_request_recipients other_r
+          WHERE other_r.request_id = r.request_id 
+            AND other_r.vendor_id != r.vendor_id 
+            AND other_r.response_status = 'accepted'
+        ))
       ORDER BY r.created_at DESC
     `, [vendorId]);
 
@@ -124,11 +132,27 @@ class VendorService {
         throw new Error('Cannot accept a request that has already been rejected');
       }
       if (recipient.response_status === 'cancelled' || recipient.req_status === 'cancelled') {
+        if (recipient.rejection_reason === 'accepted_by_other') {
+          throw new Error('This tour request has already been accepted by another tour operator and is no longer available.');
+        }
         throw new Error('This tour request has been cancelled by the customer');
       }
       if (new Date(recipient.expires_at) < new Date()) {
         tx.execute('UPDATE booking_request_recipients SET response_status = "expired" WHERE id = ?', [recipientId]);
         throw new Error('This request has expired and can no longer be accepted');
+      }
+
+      // Check if another vendor already accepted this request
+      const otherAccepted = tx.queryOne(`
+        SELECT r.id, v.business_name
+        FROM booking_request_recipients r
+        JOIN vendor_accounts v ON r.vendor_id = v.id
+        WHERE r.request_id = ? AND r.vendor_id != ? AND r.response_status = 'accepted'
+        LIMIT 1
+      `, [recipient.request_id, recipient.vendor_id]);
+
+      if (otherAccepted) {
+        throw new Error(`This tour request has already been accepted by another tour operator (${otherAccepted.business_name || 'Partner Operator'}) and is no longer available.`);
       }
 
       // 2. Room Type & Pricing
@@ -219,6 +243,16 @@ class VendorService {
         SET response_status = 'accepted', responded_at = datetime('now')
         WHERE id = ? OR (request_id = ? AND vendor_id = ?)
       `, [recipientId, recipient.request_id, recipient.vendor_id]);
+
+      // 4b. Disappear automatically from all other vendors who received this request
+      tx.execute(`
+        UPDATE booking_request_recipients
+        SET response_status = 'cancelled',
+            rejection_reason = 'accepted_by_other',
+            rejection_note = 'Accepted by another tour operator',
+            responded_at = datetime('now')
+        WHERE request_id = ? AND vendor_id != ? AND response_status = 'pending'
+      `, [recipient.request_id, recipient.vendor_id]);
 
       // 5. Update request status to 'offers_available'
       tx.execute(`

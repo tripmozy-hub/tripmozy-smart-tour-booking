@@ -695,7 +695,7 @@ const appHandler = async (req, res) => {
   // GET /api/vendor/requests?vendorId=xxx  — List all incoming requests for a vendor
   if (pathname === '/api/vendor/requests' && method === 'GET') {
     let vendorId = reqUrl.searchParams.get('vendorId');
-    if (!vendorId || vendorId === 'null' || vendorId === 'undefined' || vendorId === '3dd3f50b-70ee-476c-93b9-7ae9dfad8a18') {
+    if (!vendorId || vendorId === 'null' || vendorId === 'undefined') {
       vendorId = '30913fc5-870f-44a9-a077-99a5bfbd9f6e';
     }
     try {
@@ -730,7 +730,7 @@ const appHandler = async (req, res) => {
   // GET /api/vendor/info?vendorId=xxx  — Get vendor and property info
   if (pathname === '/api/vendor/info' && method === 'GET') {
     let vendorId = reqUrl.searchParams.get('vendorId');
-    if (!vendorId || vendorId === 'null' || vendorId === 'undefined' || vendorId === '3dd3f50b-70ee-476c-93b9-7ae9dfad8a18') {
+    if (!vendorId || vendorId === 'null' || vendorId === 'undefined') {
       vendorId = '30913fc5-870f-44a9-a077-99a5bfbd9f6e';
     }
     try {

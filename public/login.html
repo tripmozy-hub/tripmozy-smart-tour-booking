@@ -1064,6 +1064,25 @@
           throw new Error(data.error || 'Invalid or expired verification code');
         }
 
+        // Persist session tokens & user profile in localStorage and cookies
+        if (data.token) {
+          localStorage.setItem('tm_session_token', data.token);
+          document.cookie = `tm_session_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+        if (data.role) {
+          localStorage.setItem('tm_user_role', data.role);
+          document.cookie = `tm_user_role=${data.role}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+        if (data.user) {
+          localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+          const uName = data.user.displayName || data.user.name || data.user.fullName || '';
+          const uEmail = data.user.email || '';
+          const uPhone = data.user.phone || '';
+          document.cookie = `tm_user_name=${encodeURIComponent(uName)}; path=/; max-age=2592000; SameSite=Lax`;
+          document.cookie = `tm_user_email=${encodeURIComponent(uEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+          document.cookie = `tm_user_phone=${encodeURIComponent(uPhone)}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+
         // Automatic Redirection according to role:
         if (data.role === 'vendor') {
           showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
@@ -1071,10 +1090,14 @@
             window.location.href = data.redirectUrl || '/partner/dashboard';
           }, 600);
         } else {
-          showAlert('✅ Verification successful! Redirecting to Customer Portal…', 'success');
+          showAlert('✅ Verification successful! Redirecting…', 'success');
+          const params = new URLSearchParams(window.location.search);
+          const returnUrl = params.get('returnUrl') || params.get('redirect');
           const pendingDraft = localStorage.getItem('tm_pending_tour_request');
           setTimeout(() => {
-            if (pendingDraft) {
+            if (returnUrl) {
+              window.location.href = decodeURIComponent(returnUrl);
+            } else if (pendingDraft) {
               window.location.href = '/smart-tour-booking?action=submit';
             } else {
               window.location.href = data.redirectUrl || '/booking';

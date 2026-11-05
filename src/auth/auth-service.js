@@ -302,7 +302,8 @@ class AuthService {
       email: inputEmail || (isEmail ? cleanId : null),
       phone: inputPhone || (!isEmail ? cleanId : null),
       channel: hasEmail ? 'email' : 'sms',
-      role
+      role,
+      otpCode: process.env.NODE_ENV !== 'production' ? otpCode : undefined
     };
   }
 
@@ -405,6 +406,7 @@ class AuthService {
       return {
         success: true,
         sessionToken,
+        token: sessionToken,
         role: 'vendor',
         vendor: {
           id: vendor.id,
@@ -441,6 +443,7 @@ class AuthService {
       return {
         success: true,
         sessionToken,
+        token: sessionToken,
         role: 'customer',
         user: {
           id: user.id,
