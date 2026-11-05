@@ -418,6 +418,52 @@ const appHandler = async (req, res) => {
     return;
   }
 
+  // POST /api/ai/suggest  — Generate personalized AI Tour Highlights with Google Gemini
+  if (pathname === '/api/ai/suggest' && method === 'POST') {
+    readBody(async (err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+      if (!geminiKey) {
+        return sendJson(400, { error: 'Google Gemini API key is not configured.' });
+      }
+
+      const dest = body.destination || 'India';
+      const nights = body.nights || 3;
+      const budget = body.totalBudgetINR ? `₹${body.totalBudgetINR}` : 'Moderate';
+      const prompt = `As a friendly, expert Indian travel planner for TripMozy (tripmozy.com), generate a 3-bullet customized tour highlight summary for a ${nights}-night trip to ${dest} with budget ${budget}. Include recommended sightseeing spots, authentic local food to try, and an insider tip. Keep each bullet concise and engaging.`;
+
+      try {
+        const candidateModels = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.8-flash'];
+        let suggestion = null;
+
+        for (const model of candidateModels) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            if (res.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+              suggestion = data.candidates[0].content.parts[0].text.trim();
+              break;
+            }
+          } catch (_) {}
+        }
+
+        if (!suggestion) {
+          return sendJson(503, { error: 'Gemini AI service is currently unavailable. Please try again later.' });
+        }
+
+        sendJson(200, { success: true, destination: dest, suggestion });
+      } catch (e) {
+        sendJson(500, { error: e.message });
+      }
+    });
+    return;
+  }
+
   if (pathname === '/api/requests' && method === 'POST') {
     readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
