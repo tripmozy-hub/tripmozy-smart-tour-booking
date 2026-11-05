@@ -471,17 +471,31 @@
           </div>
 
           <form id="authForm" onsubmit="handleSendOtp(event)">
-            <!-- Login Field (Returning Users) -->
-            <div class="form-group" id="loginIdentifierGroup">
-              <label for="identifier" id="identifierLabel">Mobile Number or Gmail Address</label>
-              <input
-                type="text"
-                id="identifier"
-                placeholder="e.g. yourname@gmail.com or +91 98765 43210"
-                required
-                autofocus
-                autocomplete="username"
-              >
+            <!-- Sign In Fields (Returning Users: Gmail + Mobile Phone) -->
+            <div id="loginFieldsGroup">
+              <div class="form-group">
+                <label for="signinEmail">Gmail / Email Address</label>
+                <input
+                  type="email"
+                  id="signinEmail"
+                  placeholder="e.g. yourname@gmail.com"
+                  required
+                  autofocus
+                  autocomplete="email"
+                >
+                <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Your 6-digit verification OTP will be sent to this Gmail.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="signinPhone">Mobile Phone Number</label>
+                <input
+                  type="tel"
+                  id="signinPhone"
+                  placeholder="e.g. +91 98765 43210"
+                  required
+                  autocomplete="tel"
+                >
+              </div>
             </div>
 
             <!-- Sign Up Fields (New Registration: Name + Gmail + Phone) -->
@@ -529,7 +543,7 @@
             </div>
 
             <button type="submit" class="btn" id="sendBtn">
-              <span id="sendBtnText">Send Verification Code</span>
+              <span id="sendBtnText">Send Code to Gmail</span>
             </button>
           </form>
 
@@ -593,14 +607,15 @@
     const signupRoleBox = document.getElementById('signupRoleBox');
     const rolePillCustomer = document.getElementById('rolePillCustomer');
     const rolePillPartner = document.getElementById('rolePillPartner');
-    const loginIdentifierGroup = document.getElementById('loginIdentifierGroup');
+    const loginFieldsGroup = document.getElementById('loginFieldsGroup');
+    const signinEmailInput = document.getElementById('signinEmail');
+    const signinPhoneInput = document.getElementById('signinPhone');
     const signupFieldsGroup = document.getElementById('signupFieldsGroup');
     const signupNameInput = document.getElementById('signupName');
     const signupEmailInput = document.getElementById('signupEmail');
     const signupPhoneInput = document.getElementById('signupPhone');
     const businessNameGroup = document.getElementById('businessNameGroup');
     const businessNameInput = document.getElementById('businessName');
-    const identifierInput = document.getElementById('identifier');
     const sendBtn = document.getElementById('sendBtn');
     const sendBtnText = document.getElementById('sendBtnText');
     const switchModeNote = document.getElementById('switchModeNote');
@@ -639,23 +654,24 @@
         headerBadge.textContent = 'Returning User';
 
         pageTitle.textContent = 'Sign In to TripMozy';
-        pageSub.textContent = "Enter your mobile number or Gmail address. We'll automatically recognize whether you are a Customer or Tour Operator and open your dashboard.";
+        pageSub.textContent = "Enter your Gmail address and mobile phone number. Your 6-digit OTP verification code will be sent directly to your Gmail inbox.";
 
-        loginIdentifierGroup.style.display = 'block';
+        loginFieldsGroup.style.display = 'block';
         signupFieldsGroup.style.display = 'none';
         signupRoleBox.style.display = 'none';
         businessNameGroup.style.display = 'none';
 
-        identifierInput.required = true;
+        if (signinEmailInput) signinEmailInput.required = true;
+        if (signinPhoneInput) signinPhoneInput.required = true;
         if (signupNameInput) signupNameInput.required = false;
         if (signupEmailInput) signupEmailInput.required = false;
         if (signupPhoneInput) signupPhoneInput.required = false;
 
         sendBtn.classList.remove('partner-btn');
-        sendBtnText.textContent = 'Send Verification Code';
+        sendBtnText.textContent = 'Send Code to Gmail';
 
         switchModeNote.innerHTML = `Don't have an account yet? <a href="javascript:void(0)" onclick="switchMode('signup')">Sign Up as New User →</a>`;
-        identifierInput.focus();
+        if (signinEmailInput) signinEmailInput.focus();
       } else {
         tabModeSignup.classList.add('active');
         tabModeLogin.classList.remove('active');
@@ -664,13 +680,14 @@
         headerBadge.textContent = 'New Registration';
 
         pageTitle.textContent = 'Join TripMozy';
-        pageSub.textContent = 'Provide your name, Gmail address, and mobile number to register. Your verification OTP code will be sent directly to your Gmail.';
+        pageSub.textContent = 'Provide your name, Gmail address, and mobile phone to register. Your verification OTP code will be sent directly to your Gmail.';
 
-        loginIdentifierGroup.style.display = 'none';
+        loginFieldsGroup.style.display = 'none';
         signupFieldsGroup.style.display = 'block';
         signupRoleBox.style.display = 'block';
 
-        identifierInput.required = false;
+        if (signinEmailInput) signinEmailInput.required = false;
+        if (signinPhoneInput) signinPhoneInput.required = false;
         if (signupNameInput) signupNameInput.required = true;
         if (signupEmailInput) signupEmailInput.required = true;
         if (signupPhoneInput) signupPhoneInput.required = true;
@@ -721,7 +738,7 @@
           return;
         }
         if (!email || !email.includes('@')) {
-          showAlert('Please enter a valid Gmail or email address', 'error');
+          showAlert('Please enter a valid Gmail address', 'error');
           signupEmailInput.focus();
           return;
         }
@@ -742,21 +759,30 @@
           businessName: currentSignupRole === 'vendor' ? businessName : null
         };
       } else {
-        const val = identifierInput.value.trim();
-        if (!val) {
-          showAlert('Please enter your mobile number or Gmail address', 'error');
-          identifierInput.focus();
+        const email = (signinEmailInput.value || '').trim();
+        const phone = (signinPhoneInput.value || '').trim();
+
+        if (!email || !email.includes('@')) {
+          showAlert('Please enter your valid Gmail address', 'error');
+          signinEmailInput.focus();
+          return;
+        }
+        if (!phone || phone.replace(/\D/g, '').length < 10) {
+          showAlert('Please enter your valid 10-digit mobile phone number', 'error');
+          signinPhoneInput.focus();
           return;
         }
 
         payload = {
-          identifier: val,
-          mode: 'login'
+          mode: 'login',
+          email,
+          phone,
+          identifier: email
         };
       }
 
       sendBtn.disabled = true;
-      sendBtnText.innerHTML = `<span class="btn-spinner"></span> Sending code…`;
+      sendBtnText.innerHTML = `<span class="btn-spinner"></span> Sending code to Gmail…`;
 
       try {
         const res = await fetch('/api/auth/send-otp', {
@@ -772,17 +798,14 @@
           if (data.needsSignup) {
             showAlert(`⚠️ ${data.error} We've automatically switched you to Sign Up!`, 'warning');
             switchMode('signup');
-            if (payload.identifier && payload.identifier.includes('@')) {
-              signupEmailInput.value = payload.identifier;
-            } else if (payload.identifier) {
-              signupPhoneInput.value = payload.identifier;
-            }
+            if (payload.email) signupEmailInput.value = payload.email;
+            if (payload.phone) signupPhoneInput.value = payload.phone;
             return;
           }
           throw new Error(data.error || 'Failed to dispatch verification code');
         }
 
-        currentIdentifier = data.identifier || payload.identifier || payload.email;
+        currentIdentifier = data.identifier || payload.email || payload.identifier;
         activeRole = data.role || (currentMode === 'signup' ? currentSignupRole : 'customer');
         maskedTarget.textContent = currentIdentifier;
 
@@ -804,14 +827,22 @@
           verifyBtn.classList.remove('partner-btn');
         }
 
-        const isEmailTarget = data.channel === 'email' || currentIdentifier.includes('@') || (data.email && data.email.includes('@'));
-        const displayTarget = data.email || currentIdentifier;
+        step2Subtitle.innerHTML = `We have sent a 6-digit verification code directly to your Gmail: <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12.5px;color:#64748b;">Please check your Gmail inbox (and Promotions/Spam folder) and enter the 6-digit code below:</span>`;
 
-        if (isEmailTarget) {
-          step2Subtitle.innerHTML = `We have sent a 6-digit verification code directly to your Gmail: <strong style="color:var(--navy);">${displayTarget}</strong>.<br><span style="font-size:12.5px;color:#64748b;">Please check your Gmail inbox (and Promotions/Spam folder) and enter the code below:</span>`;
-        } else {
-          step2Subtitle.innerHTML = `We have sent a 6-digit verification code via <strong>SMS</strong> to your mobile <strong style="color:var(--navy);">${displayTarget}</strong>.<br><span style="font-size:12.5px;color:#64748b;">Please check your text messages (SMS) and enter the 6-digit code below:</span>`;
-        }
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+
+        // Clear boxes and focus on the first box
+        otpBoxes.forEach(b => b.value = '');
+        setTimeout(() => otpBoxes[0].focus(), 150);
+
+      } catch (err) {
+        showAlert(err.message, 'error');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtnText.textContent = currentMode === 'signup' ? 'Register & Send Code to Gmail' : 'Send Code to Gmail';
+      }
+    }
 
         step1.style.display = 'none';
         step2.style.display = 'block';

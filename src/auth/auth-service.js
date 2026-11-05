@@ -109,7 +109,7 @@ class AuthService {
         // Automatically adapt to the registered role (customer or vendor)
         role = existingRole;
       } else {
-        const err = new Error('No account found with this phone number or email. Please sign up to create a new account.');
+        const err = new Error('No account found with this Gmail address or phone number. Please sign up to create a new account.');
         err.needsSignup = true;
         err.accountExists = false;
         throw err;
