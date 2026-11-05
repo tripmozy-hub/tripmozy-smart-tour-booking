@@ -3,29 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Sign In &amp; Register | TripMozy - Smart Tour Booking</title>
+  <title>Private Access &amp; Concierge Login | TripMozy - Smart Tour Booking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --navy: #0f172a;
-      --navy-light: #1e293b;
-      --accent: #f59e0b;
-      --accent-hover: #d97706;
-      --bg: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+      --primary: #0b0f19;
+      --primary-dark: #05070d;
+      --navy: #0b0f19;
+      --navy-light: #151d2f;
+      --accent: #b8924b;
+      --accent-hover: #9a7836;
+      --accent-light: #fbf7ee;
+      --accent-border: #d8ba7a;
+      --bg: #faf8f5;
       --card-bg: #ffffff;
-      --text: #0f172a;
+      --text: #111827;
       --text-muted: #64748b;
-      --border: #e2e8f0;
-      --success: #059669;
-      --radius: 20px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow: 0 4px 20px rgba(15,23,42,0.08), 0 1px 4px rgba(15,23,42,0.04);
-      --shadow-lg: 0 25px 60px -15px rgba(15,23,42,0.15);
+      --text-secondary: #4b5563;
+      --border: #ece7df;
+      --border-focus: #b8924b;
+      --success: #0f766e;
+      --radius: 18px;
+      --radius-sm: 10px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 20px 50px -10px rgba(11, 15, 25, 0.12);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -34,17 +40,18 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* Header */
     header {
       background: var(--navy);
-      color: #fff;
-      padding: 16px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+      padding: 16px 28px;
+      border-bottom: 1px solid rgba(184, 146, 75, 0.2);
     }
     .header-inner {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -53,37 +60,38 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-decoration: none;
-      color: #fff;
+      color: #ffffff;
     }
-    .brand-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-logo { font-size: 23px; font-weight: 800; letter-spacing: -0.5px; }
     .brand-logo span { color: var(--accent); }
     .brand-tag {
       font-size: 11px;
       font-weight: 700;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 4px 10px;
+      background: rgba(184, 146, 75, 0.15);
+      border: 1px solid rgba(184, 146, 75, 0.35);
+      padding: 3px 10px;
       border-radius: 20px;
-      color: #94a3b8;
+      color: #d8ba7a;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
     }
     .header-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
     .nav-link {
-      color: #94a3b8;
+      color: #cbd5e1;
       text-decoration: none;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
       padding: 7px 12px;
       border-radius: 8px;
       transition: all 0.2s;
     }
-    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+    .nav-link:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
 
     /* Main Container */
     .main-wrap {
@@ -91,11 +99,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 48px 16px;
+      padding: 44px 18px;
+      position: relative;
     }
     .login-container {
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
     }
 
     /* Auth Card */
@@ -104,17 +113,20 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow-lg);
-      padding: 40px 36px;
+      padding: 42px 38px;
       transition: all 0.25s ease;
+    }
+    @media (max-width: 500px) {
+      .login-card { padding: 30px 22px; }
     }
 
     /* Top Mode Toggle: Log In vs Sign Up */
     .mode-toggle {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      background: #f1f5f9;
+      background: #faf8f5;
       padding: 5px;
-      border-radius: 14px;
+      border-radius: 12px;
       margin-bottom: 28px;
       border: 1px solid var(--border);
       gap: 4px;
@@ -127,36 +139,34 @@
       padding: 11px 14px;
       border: none;
       background: transparent;
-      border-radius: 10px;
+      border-radius: 9px;
       font-size: 13.5px;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.22s ease;
+      transition: all 0.2s ease;
       font-family: inherit;
       user-select: none;
     }
     .mode-btn:hover:not(.active) {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.65);
+      color: var(--navy);
+      background: rgba(255, 255, 255, 0.7);
     }
     .mode-btn.active {
-      background: #ffffff;
-      color: var(--navy);
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.1);
+      background: var(--navy);
+      color: #faf8f5;
+      box-shadow: 0 2px 8px rgba(11, 15, 25, 0.15);
     }
     .mode-btn.active.login-tab {
-      color: #1e40af;
-      border: 1px solid #dbeafe;
+      color: #d8ba7a;
     }
     .mode-btn.active.signup-tab {
-      color: #92400e;
-      border: 1px solid #fde68a;
+      color: #d8ba7a;
     }
 
     /* Role selection pills inside Sign Up */
     .signup-role-box {
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       display: none;
     }
     .role-pills {
@@ -171,24 +181,25 @@
       align-items: center;
       justify-content: center;
       padding: 14px 10px;
-      border: 2px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 12px;
       cursor: pointer;
-      background: #fff;
+      background: #ffffff;
       transition: all 0.2s ease;
       text-align: center;
     }
     .role-pill:hover {
       border-color: #cbd5e1;
-      background: #f8fafc;
+      background: #faf8f5;
     }
     .role-pill.active {
-      border-color: var(--primary);
-      background: #eff6ff;
+      border-color: var(--navy);
+      background: #faf8f5;
+      box-shadow: 0 2px 8px rgba(11, 15, 25, 0.05);
     }
     .role-pill.active.partner-pill {
       border-color: var(--accent);
-      background: #fffbeb;
+      background: var(--accent-light);
     }
     .role-pill-title {
       font-size: 13px;
@@ -209,22 +220,23 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       padding: 4px 12px;
       border-radius: 20px;
       margin-bottom: 12px;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
     }
     .badge-pill.customer {
-      background: #eff6ff;
-      color: var(--primary);
-      border: 1px solid #bfdbfe;
+      background: var(--accent-light);
+      color: #85621e;
+      border: 1px solid var(--accent-border);
     }
     .badge-pill.partner {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fde68a;
+      background: #fdf6ec;
+      color: #9a6b1f;
+      border: 1px solid #ebd3a7;
     }
     .badge-pill.auto {
       background: #f0fdf4;
@@ -233,10 +245,11 @@
     }
 
     h1 {
-      font-size: 24px;
-      font-weight: 800;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 600;
       margin-bottom: 8px;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
       color: var(--navy);
     }
     .subtitle {
@@ -260,8 +273,8 @@
       width: 100%;
       padding: 13px 16px;
       border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-size: 15px;
+      border-radius: 10px;
+      font-size: 14.5px;
       font-family: inherit;
       color: var(--text);
       background: #ffffff;
@@ -269,46 +282,46 @@
       transition: all 0.2s ease;
     }
     input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(184, 146, 75, 0.18);
     }
 
     /* Buttons */
     .btn {
       width: 100%;
       padding: 14px 20px;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 800;
+      border: 1px solid var(--accent-border);
+      border-radius: 11px;
+      font-size: 14.5px;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      background: var(--primary);
-      color: #ffffff;
-      transition: all 0.2s ease;
+      background: var(--navy);
+      color: #faf8f5;
+      transition: all 0.22s ease;
       font-family: inherit;
-      letter-spacing: 0.1px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 16px rgba(11, 15, 25, 0.14);
     }
     .btn:hover {
-      background: var(--primary-dark);
+      background: #151d2f;
+      color: #d8ba7a;
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.28);
+      box-shadow: 0 8px 22px rgba(11, 15, 25, 0.22);
     }
     .btn:disabled {
-      opacity: 0.65;
+      opacity: 0.6;
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
     }
     .btn.partner-btn {
-      background: #d97706;
-    }
-    .btn.partner-btn:hover {
-      background: #b45309;
-      box-shadow: 0 6px 20px rgba(217, 119, 6, 0.28);
+      background: #151d2f;
+      color: #d8ba7a;
+      border-color: var(--accent);
     }
 
     /* Step 2: OTP Inputs */
@@ -325,25 +338,25 @@
       text-align: center;
       font-size: 22px;
       font-weight: 800;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      background: #fafafa;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #faf8f5;
       color: var(--navy);
       font-family: monospace;
       outline: none;
       transition: all 0.18s ease;
     }
     .otp-box:focus {
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-      transform: scale(1.04);
+      border-color: var(--accent);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(184, 146, 75, 0.18);
+      transform: scale(1.03);
     }
 
     /* Alert Boxes */
     .alert-box {
       padding: 12px 16px;
-      border-radius: 12px;
+      border-radius: 10px;
       font-size: 13px;
       line-height: 1.5;
       margin-bottom: 18px;
@@ -351,9 +364,9 @@
     }
     .alert-box.info {
       display: block;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      color: #85621e;
     }
     .alert-box.success {
       display: block;
@@ -380,13 +393,13 @@
       color: var(--text-muted);
       font-size: 13px;
       font-weight: 600;
-      margin-top: 14px;
+      margin-top: 16px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
-    .back-btn:hover { color: var(--text); }
+    .back-btn:hover { color: var(--navy); }
 
     .switch-mode-note {
       text-align: center;
@@ -395,7 +408,7 @@
       color: var(--text-muted);
     }
     .switch-mode-note a {
-      color: var(--primary);
+      color: #85621e;
       font-weight: 700;
       text-decoration: none;
     }
@@ -420,7 +433,7 @@
     <div class="header-inner">
       <a href="/" class="brand">
         <div class="brand-logo">Trip<span>Mozy</span></div>
-        <div class="brand-tag">Authentication Portal</div>
+        <div class="brand-tag">Private Access</div>
       </a>
       <div class="header-right">
         <a href="/smart-tour-booking" class="nav-link">Tour Requests</a>
@@ -438,7 +451,7 @@
         <!-- Top Mode Tabs: Log In vs Sign Up -->
         <div class="mode-toggle" role="tablist">
           <button type="button" class="mode-btn active login-tab" id="tabModeLogin" onclick="switchMode('login')">
-            <span>Log In</span>
+            <span>Sign In</span>
           </button>
           <button type="button" class="mode-btn signup-tab" id="tabModeSignup" onclick="switchMode('signup')">
             <span>Create Account</span>
@@ -452,7 +465,7 @@
           <div class="badge-pill customer" id="headerBadge">Returning User</div>
           <h1 id="pageTitle">Sign In to TripMozy</h1>
           <p class="subtitle" id="pageSub">
-            Enter your mobile number or email. We'll automatically recognize whether you are a Customer or Tour Operator and open your portal.
+            Enter your Gmail address and mobile phone number. Your 6-digit verification code will be sent directly to your Gmail.
           </p>
 
           <!-- Sign Up Only: Role Selector (Customer vs Partner) -->
@@ -558,7 +571,7 @@
           <div class="badge-pill customer" id="step2Badge">Verification Code</div>
           <h1>Enter 6-Digit Code</h1>
           <p class="subtitle" id="step2Subtitle">
-            We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong> via SMS. Please enter the code below:
+            We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong>. Please enter the code below:
           </p>
 
           <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
@@ -584,7 +597,7 @@
         <!-- Card Footer Info -->
         <div class="login-footer-info">
           <span>Secured with OTP Verification</span>
-          <span>Instant Access</span>
+          <span>100% Escrow Protected</span>
         </div>
 
       </div>
@@ -782,7 +795,7 @@
       }
 
       sendBtn.disabled = true;
-      sendBtnText.innerHTML = `<span class="btn-spinner"></span> Sending code to Gmail…`;
+      sendBtnText.innerHTML = `Sending code to Gmail…`;
 
       try {
         const res = await fetch('/api/auth/send-otp', {
@@ -794,7 +807,6 @@
         const data = await res.json();
 
         if (!res.ok) {
-          // If user tried to log in but no account was found, auto-switch to Sign Up
           if (data.needsSignup) {
             showAlert(`⚠️ ${data.error} We've automatically switched you to Sign Up!`, 'warning');
             switchMode('signup');
@@ -809,7 +821,6 @@
         activeRole = data.role || (currentMode === 'signup' ? currentSignupRole : 'customer');
         maskedTarget.textContent = currentIdentifier;
 
-        // If user was on Sign Up but account was ALREADY made, notify auto-switch to Log In!
         if (data.autoSwitchedToLogin) {
           showAlert(`ℹ️ <strong>Account Already Registered!</strong> An account is already associated with this email/phone. Automatically switched to Log In.`, 'info');
           tabModeLogin.classList.add('active');
@@ -844,21 +855,6 @@
       }
     }
 
-        step1.style.display = 'none';
-        step2.style.display = 'block';
-
-        // Clear boxes and focus on the first box
-        otpBoxes.forEach(b => b.value = '');
-        setTimeout(() => otpBoxes[0].focus(), 150);
-
-      } catch (err) {
-        showAlert(err.message, 'error');
-      } finally {
-        sendBtn.disabled = false;
-        sendBtnText.textContent = currentMode === 'signup' ? 'Register & Send Code to Gmail' : 'Send Verification Code';
-      }
-    }
-
     function backToStep1() {
       hideAlert();
       step2.style.display = 'none';
@@ -867,7 +863,7 @@
       if (currentMode === 'signup') {
         if (signupNameInput) signupNameInput.focus();
       } else {
-        if (identifierInput) identifierInput.focus();
+        if (signinEmailInput) signinEmailInput.focus();
       }
     }
 
@@ -913,7 +909,7 @@
       }
 
       verifyBtn.disabled = true;
-      verifyBtnText.innerHTML = `<span class="btn-spinner"></span> Verifying code…`;
+      verifyBtnText.innerHTML = `Verifying code…`;
 
       try {
         const res = await fetch('/api/auth/verify-otp', {
@@ -932,8 +928,6 @@
         }
 
         // Automatic Redirection according to role:
-        // Existing or new Customer -> Customer Page (/booking or pending tour request)
-        // Existing or new Vendor -> Vendor Dashboard (/partner/dashboard)
         if (data.role === 'vendor') {
           showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
           setTimeout(() => {
@@ -941,11 +935,10 @@
           }, 600);
         } else {
           showAlert('✅ Verification successful! Redirecting to Customer Portal…', 'success');
-          // Check if there was a saved tour request in localStorage waiting to be submitted
           const pendingDraft = localStorage.getItem('tm_pending_tour_request');
           setTimeout(() => {
             if (pendingDraft) {
-              window.location.href = '/smart-tour-booking?auto_submit=true';
+              window.location.href = '/smart-tour-booking?action=submit';
             } else {
               window.location.href = data.redirectUrl || '/booking';
             }
