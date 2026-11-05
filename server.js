@@ -76,7 +76,10 @@ const reqService = new RequestService(db, notifService);
 const vendorService = new VendorService(db, notifService);
 const holdEngine = new InventoryHoldEngine(db);
 const bookingService = new BookingService(db);
-const paymentAdapter = new PaymentGatewayAdapter(db);
+const paymentAdapter = new PaymentGatewayAdapter(db, {
+  provider: 'razorpay',
+  keyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT'
+});
 const adminService = new AdminService(db);
 
 // System Admin Context
@@ -543,9 +546,22 @@ const appHandler = async (req, res) => {
     return;
   }
 
+  // Payment Gateway Configuration
+  if (pathname === '/api/payment/config' && method === 'GET') {
+    sendJson(200, {
+      provider: 'razorpay',
+      keyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT',
+      currency: 'INR',
+      name: 'TripMozy',
+      description: 'TripMozy Tour Advance Booking Deposit (30% + 5% GST)'
+    });
+    return;
+  }
+
   if (pathname.startsWith('/api/requests/') && method === 'GET') {
     const id = pathname.replace('/api/requests/', '');
-    const details = reqService.getRequestDetails(id);
+    const isAdmin = reqUrl.searchParams.get('admin') === '1' || reqUrl.searchParams.get('role') === 'admin' || req.headers['x-admin-role'] === 'admin';
+    const details = reqService.getRequestDetails(id, isAdmin);
     if (!details) return sendJson(404, { error: 'Request not found' });
     sendJson(200, details);
     return;

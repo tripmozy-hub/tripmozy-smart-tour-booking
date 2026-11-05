@@ -328,6 +328,7 @@ class VendorService {
         const totalINR = pricing.totalPayablePaise / 100;
         const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
         const paymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&payNow=1`;
+        const adminPaymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&admin=1`;
 
         const notifPayload = {
           guestName: recipient.guest_name,
@@ -417,7 +418,8 @@ class VendorService {
               advancePayableINR: tourPricing.payableNowINR,
               remainingBalanceINR: tourPricing.remainingBalanceINR,
               validUntil,
-              paymentUrl
+              paymentUrl: adminPaymentUrl,
+              adminPaymentUrl
             }
           });
         } catch (adminErr) {

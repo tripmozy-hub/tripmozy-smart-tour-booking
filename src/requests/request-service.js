@@ -387,12 +387,15 @@ class RequestService {
     });
   }
 
-  // Get request details by ID or reference
-  getRequestDetails(requestId) {
+  // Get request details by ID or reference (supports admin oversight mode)
+  getRequestDetails(requestId, isAdmin = false) {
     const req = this.db.queryOne('SELECT * FROM hotel_booking_requests WHERE id = ? OR request_reference = ?', [requestId, requestId]);
     if (!req) return null;
 
     const actualId = req.id;
+    const isBooked = req.status === 'booked';
+    const revealVendorContact = isAdmin || isBooked;
+
     const recipients = this.db.query(`
       SELECT r.*, p.name as property_name, p.city as property_city, p.star_rating,
              v.business_name as vendor_business_name, v.contact_person as vendor_contact_person,
@@ -402,6 +405,16 @@ class RequestService {
       JOIN vendor_accounts v ON p.vendor_id = v.id
       WHERE r.request_id = ?
     `, [actualId]);
+
+    const sanitizedRecipients = recipients.map(r => {
+      if (revealVendorContact) return r;
+      return {
+        ...r,
+        vendor_contact_phone: null,
+        vendor_contact_email: null,
+        vendor_contact_person: 'Verified Tour Partner'
+      };
+    });
 
     const offers = this.db.query(`
       SELECT o.*, p.name as property_name, p.city as property_city, p.star_rating,
@@ -417,15 +430,14 @@ class RequestService {
 
     const enrichedOffers = offers.map(o => {
       const tourPricing = PricingEngine.calculateTourPricing(o.total_payable_paise);
-      const isBooked = req.status === 'booked';
       return {
         ...o,
         tourPricing,
         vendor: {
           businessName: o.vendor_business_name || o.property_name,
-          contactPerson: isBooked ? (o.vendor_contact_person || 'Tour Manager') : 'Verified Tour Partner',
-          contactPhone: isBooked ? (o.vendor_contact_phone || '') : null,
-          contactEmail: isBooked ? (o.vendor_contact_email || '') : null
+          contactPerson: revealVendorContact ? (o.vendor_contact_person || 'Tour Manager') : 'Verified Tour Partner',
+          contactPhone: revealVendorContact ? (o.vendor_contact_phone || '') : null,
+          contactEmail: revealVendorContact ? (o.vendor_contact_email || '') : null
         }
       };
     });
@@ -473,9 +485,10 @@ class RequestService {
 
     return {
       request: req,
-      recipients,
+      recipients: sanitizedRecipients,
       offers: enrichedOffers,
-      booking
+      booking,
+      isAdmin: !!isAdmin
     };
   }
 

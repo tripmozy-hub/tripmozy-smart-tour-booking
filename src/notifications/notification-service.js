@@ -789,7 +789,7 @@ class NotificationService {
             </div>
 
             <div style="text-align:center; margin-bottom:20px;">
-              <a href="${payload.paymentUrl}" target="_blank" style="display:inline-block; background:#0f172a; color:#ffffff; padding:12px 24px; border-radius:8px; font-weight:700; font-size:13px; text-decoration:none;">
+              <a href="${payload.adminPaymentUrl || payload.paymentUrl}" target="_blank" style="display:inline-block; background:#0f172a; color:#ffffff; padding:12px 24px; border-radius:8px; font-weight:700; font-size:13px; text-decoration:none;">
                 View Customer Quote &amp; Payment Portal →
               </a>
             </div>

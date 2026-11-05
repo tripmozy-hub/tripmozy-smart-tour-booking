@@ -9,11 +9,11 @@ class PaymentGatewayAdapter {
   constructor(db, config = {}) {
     this.db = db;
     this.config = {
-      provider: config.provider || 'test_sandbox',
-      keyId: config.keyId || process.env.PAYMENT_PROVIDER_KEY_ID || 'rzp_test_sample',
-      keySecret: config.keySecret || process.env.PAYMENT_PROVIDER_KEY_SECRET || 'rzp_secret_sample',
-      webhookSecret: config.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET || 'rzp_webhook_secret_sample',
-      isProduction: config.isProduction || false,
+      provider: config.provider || 'razorpay',
+      keyId: config.keyId || process.env.PAYMENT_PROVIDER_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT',
+      keySecret: config.keySecret || process.env.PAYMENT_PROVIDER_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'rzp_live_secret',
+      webhookSecret: config.webhookSecret || process.env.PAYMENT_WEBHOOK_SECRET || 'rzp_webhook_secret_live',
+      isProduction: config.isProduction || true,
       ...config
     };
   }
