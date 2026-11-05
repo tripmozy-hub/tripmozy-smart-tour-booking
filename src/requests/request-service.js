@@ -272,8 +272,9 @@ class RequestService {
           // 2. Email alert to vendor: to verified vendor contact email
           const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
           const targetEmails = new Set();
-          if (vendor.contact_email) targetEmails.add(vendor.contact_email.trim());
-          if (targetEmails.size === 0) targetEmails.add('tripmozy@gmail.com');
+          if (vendor.contact_email && vendor.contact_email.trim().toLowerCase() !== 'tripmozy@gmail.com') {
+            targetEmails.add(vendor.contact_email.trim());
+          }
 
           // CRITICAL: Ensure the customer/traveler NEVER receives vendor dispatch alerts or vendor action links!
           if (guestEmail) {
@@ -320,6 +321,46 @@ class RequestService {
 
       // NOTE: Customer only receives an email when the tour operator partner CONFIRMS their tour
       // (per requirements: no premature dispatch email to the customer; customer gets confirmation + payment link upon vendor acceptance).
+
+      // Automated Written Details Email to Main Admin (tripmozy@gmail.com)
+      if (this.notifService) {
+        try {
+          const notifiedVendorsList = activeVendors
+            .map(v => v.business_name || 'Verified Partner')
+            .join(', ');
+
+          this.notifService.send({
+            recipientUserId: null,
+            destination: 'tripmozy@gmail.com',
+            channel: 'email',
+            templateCode: 'admin_new_request',
+            eventType: 'admin.request_created',
+            payload: {
+              requestId,
+              requestReference: reference,
+              guestName,
+              guestPhone,
+              guestEmail,
+              destination,
+              destinationLocality: destinationLocality || 'Not specified',
+              checkInDate,
+              checkOutDate,
+              nights,
+              numRooms,
+              numAdults,
+              numChildren: numChildren || 0,
+              roomPreference: roomPreference || 'standard',
+              requiredFacilities: Array.isArray(requiredFacilities) ? requiredFacilities : [],
+              totalBudgetINR: budgetNum,
+              dispatchedVendorsCount: dispatchedCount,
+              dispatchedVendorsList: notifiedVendorsList,
+              createdAt: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+            }
+          });
+        } catch (adminErr) {
+          console.error('[Admin Request Email Dispatch Error]', adminErr.message);
+        }
+      }
 
       tx.logAudit({
         actorId: finalCustomerId,
@@ -376,14 +417,15 @@ class RequestService {
 
     const enrichedOffers = offers.map(o => {
       const tourPricing = PricingEngine.calculateTourPricing(o.total_payable_paise);
+      const isBooked = req.status === 'booked';
       return {
         ...o,
         tourPricing,
         vendor: {
           businessName: o.vendor_business_name || o.property_name,
-          contactPerson: o.vendor_contact_person || 'Tour Manager',
-          contactPhone: o.vendor_contact_phone || '',
-          contactEmail: o.vendor_contact_email || ''
+          contactPerson: isBooked ? (o.vendor_contact_person || 'Tour Manager') : 'Verified Tour Partner',
+          contactPhone: isBooked ? (o.vendor_contact_phone || '') : null,
+          contactEmail: isBooked ? (o.vendor_contact_email || '') : null
         }
       };
     });
@@ -410,6 +452,14 @@ class RequestService {
         } catch (_) {}
         booking = {
           ...b,
+          guest: {
+            name: req.guest_name,
+            phone: req.guest_phone,
+            email: req.guest_email
+          },
+          guest_name: req.guest_name,
+          guest_phone: req.guest_phone,
+          guest_email: req.guest_email,
           terms_snapshot: terms,
           vendor: {
             businessName: b.vendor_business_name || b.property_name,

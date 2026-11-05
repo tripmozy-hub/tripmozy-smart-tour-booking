@@ -689,10 +689,44 @@ const appHandler = async (req, res) => {
                   remainingPaymentOption: result.remainingPaymentOption,
                   guestName: result.guest ? result.guest.name : 'Traveler',
                   guestPhone: result.guest ? result.guest.phone : '',
+                  guestEmail: result.guest ? result.guest.email : '',
                   dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${b.vendor_id}`
                 }
               });
             }
+
+            // 3. Official Bill & Payment Confirmation to Admin (tripmozy@gmail.com)
+            try {
+              notifService.send({
+                destination: 'tripmozy@gmail.com',
+                channel: 'email',
+                templateCode: 'booking_confirmed',
+                eventType: 'booking.confirmed_admin',
+                payload: {
+                  bookingReference: result.bookingReference,
+                  propertyName: result.propertyName,
+                  vendorName: vendorDisplayName,
+                  vendorPhone: vendorPhoneNum,
+                  vendorEmail: vendorEmailAddr,
+                  guestName: result.guest ? result.guest.name : 'Traveler',
+                  guestPhone: result.guest ? result.guest.phone : '',
+                  guestEmail: result.guest ? result.guest.email : '',
+                  destination: result.destination || result.propertyName,
+                  checkInDate: result.checkInDate,
+                  checkOutDate: result.checkOutDate,
+                  nights: result.nights,
+                  numRooms: result.numRooms,
+                  totalAmountINR: result.totalAmountINR,
+                  advancePaidINR: result.advancePaidINR,
+                  advanceBaseINR: result.advanceBaseINR,
+                  advanceGstINR: result.advanceGstINR,
+                  remainingBalanceINR: result.remainingBalanceINR,
+                  remainingPaymentOption: result.remainingPaymentOption,
+                  paymentReference: result.paymentReference || body.paymentReference,
+                  bookingUrl
+                }
+              });
+            } catch (_) {}
           } catch (_) {}
         }
 
