@@ -223,7 +223,8 @@
     }
     @media (max-width: 640px) {
       .curated-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
     }
     .tour-card {
@@ -724,10 +725,68 @@
       .hero h1 { font-size: 28px; line-height: 1.25; }
       .hero p { font-size: 14px; }
 
-      .curated-wrap { padding: 0 12px; margin-top: -20px; }
-      .curated-box { padding: 18px 14px; border-radius: 14px; }
-      .curated-top { margin-bottom: 14px; }
-      .curated-title-group h2 { font-size: 20px; }
+      .curated-wrap { padding: 0 10px; margin-top: -20px; }
+      .curated-box { padding: 16px 10px; border-radius: 14px; }
+      .curated-top { margin-bottom: 12px; }
+      .curated-title-group h2 { font-size: 19px; }
+      .curated-title-group p { font-size: 12px; }
+
+      /* Feature Signature Cards 2-by-2 together on phone */
+      .curated-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+      }
+      .tour-card-img-wrap { height: 110px; }
+      .tour-card-pill {
+        top: 6px;
+        left: 6px;
+        font-size: 9.5px;
+        padding: 2px 6px;
+      }
+      .tour-card-body {
+        padding: 10px 8px 10px;
+      }
+      .tour-card-title {
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 2px;
+        line-height: 1.25;
+      }
+      .tour-card-subtitle {
+        font-size: 10.5px;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .tour-card-features {
+        font-size: 10.5px;
+        line-height: 1.35;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .tour-card-foot {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        padding-top: 6px;
+      }
+      .tour-card-foot > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .tour-card-price-label { font-size: 9px; }
+      .tour-card-price { font-size: 13.5px; }
+      .tour-card-btn {
+        width: 100%;
+        text-align: center;
+        padding: 6px 4px;
+        font-size: 11px;
+      }
 
       .main-wrap { padding: 0 12px; }
       .form-card { padding: 22px 16px; border-radius: 14px; }
