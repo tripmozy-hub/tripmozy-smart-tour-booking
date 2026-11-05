@@ -418,12 +418,9 @@ class AuthService {
       };
     } else {
       // Customer
-      const isEmail = cleanId.includes('@');
       let user = this.db.queryOne(
-        isEmail
-          ? "SELECT * FROM user_profiles WHERE email = ? AND role = 'customer'"
-          : "SELECT * FROM user_profiles WHERE phone = ? AND role = 'customer'",
-        [cleanId]
+        "SELECT * FROM user_profiles WHERE (email = ? OR phone = ? OR (length(?) >= 10 AND phone LIKE ?)) AND role = 'customer'",
+        [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]
       );
 
       if (!user) {
