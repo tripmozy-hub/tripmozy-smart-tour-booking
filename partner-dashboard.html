@@ -234,9 +234,28 @@
       .stat-label { font-size: 10px; margin-bottom: 2px; }
       .stat-value { font-size: 22px; }
 
-      .card-header { padding: 14px 16px 10px; }
+      .card-header {
+        padding: 14px 16px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .card-right {
+        align-items: flex-start;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+      }
       .card-body { padding: 14px 16px; gap: 12px; grid-template-columns: 1fr; }
-      .card-footer { padding: 12px 14px; }
+      .card-footer {
+        padding: 12px 14px;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .card-footer .btn {
+        width: 100%;
+        justify-content: center;
+      }
 
       .btn {
         padding: 11px 16px;

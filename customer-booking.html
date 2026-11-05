@@ -909,6 +909,7 @@
 
     /* ── Mobile Phone Browser Responsiveness ── */
     @media (max-width: 768px) {
+      body { min-height: 100vh; min-height: 100dvh; }
       header { padding: 10px 14px; }
       .header-inner { flex-wrap: wrap; gap: 8px; }
       .brand-logo { font-size: 20px; }
@@ -917,6 +918,32 @@
       .nav-btn { padding: 6px 10px; font-size: 11px; }
 
       .container { padding: 14px 10px 70px; margin: 10px auto; }
+
+      /* Mobile Stepper */
+      .stepper {
+        margin-bottom: 20px;
+        gap: 4px;
+      }
+      .stepper::before {
+        left: 20px;
+        right: 20px;
+        top: 14px;
+      }
+      .step-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+      }
+      .step-label {
+        font-size: 9.5px;
+        text-align: center;
+        max-width: 65px;
+        line-height: 1.2;
+      }
+      .step-item {
+        padding: 0 4px;
+      }
+
       .request-summary-card { padding: 16px 14px; }
       .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       .offer-card { padding: 16px 14px; }
@@ -924,6 +951,8 @@
       .offer-body { grid-template-columns: 1fr; gap: 14px; }
       .offer-pricing-box { text-align: left; }
       .price-total { font-size: 24px; }
+      .offer-actions { flex-direction: column; gap: 8px; width: 100%; }
+      .offer-actions .btn { width: 100%; }
 
       .modal-overlay { padding: 10px; }
       .checkout-modal {
@@ -943,6 +972,24 @@
         padding: 13px;
         font-size: 15px;
       }
+
+      /* Official Bill & Voucher Mobile Layout */
+      .bill-card { margin-top: 14px; border-radius: 14px; }
+      .bill-header { padding: 18px 14px; }
+      .bill-header-top { flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 14px; }
+      .bill-brand { font-size: 22px; }
+      .bill-meta-grid { grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; }
+      .bill-body { padding: 16px 12px; }
+      .bill-parties-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
+      .party-box { padding: 14px 12px; }
+      .party-title { font-size: 16px; }
+      .phone-number { font-size: 15px; }
+      .bill-schedule-strip { grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; margin-bottom: 18px; }
+      .bill-table th, .bill-table td { padding: 10px 10px; font-size: 12px; }
+      .bill-actions { flex-direction: column; gap: 8px; width: 100%; }
+      .bill-actions button, .bill-actions a { width: 100%; justify-content: center; }
+      .bill-trust-box { padding: 12px; }
+
       .voucher-grid {
         grid-template-columns: 1fr;
         gap: 10px;
