@@ -1135,20 +1135,59 @@
       sendBtnText.innerHTML = `Sending code to Gmail…`;
 
       try {
-        const res = await fetch('/api/auth/send-otp', {
+        let res = await fetch('/api/auth/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        let data = await res.json();
 
         if (!res.ok) {
           if (data.needsSignup) {
-            showNoAccountModal(payload.email || signinEmailInput.value, payload.phone || signinPhoneInput.value);
-            return;
+            // Check if this browser already holds an account profile for this email/phone
+            let cached = null;
+            try {
+              cached = JSON.parse(localStorage.getItem('tm_registered_profile') || 'null');
+            } catch (_) {}
+
+            const targetEmail = (payload.email || signinEmailInput.value || '').trim().toLowerCase();
+            const targetPhone = (payload.phone || signinPhoneInput.value || '').replace(/\D/g, '').slice(-10);
+
+            if (cached && (
+              (cached.email && cached.email.toLowerCase() === targetEmail) ||
+              (cached.phone && cached.phone.replace(/\D/g, '').slice(-10) === targetPhone)
+            )) {
+              // Silently re-hydrate account into server database
+              const retryRes = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  mode: 'login',
+                  restoreProfile: true,
+                  email: targetEmail || cached.email,
+                  phone: payload.phone || cached.phone,
+                  identifier: targetEmail || cached.email,
+                  role: cached.role || 'customer',
+                  name: cached.name,
+                  fullName: cached.name,
+                  businessName: cached.businessName
+                })
+              });
+              if (retryRes.ok) {
+                res = retryRes;
+                data = await retryRes.json();
+              } else {
+                showNoAccountModal(payload.email || signinEmailInput.value, payload.phone || signinPhoneInput.value);
+                return;
+              }
+            } else {
+              showNoAccountModal(payload.email || signinEmailInput.value, payload.phone || signinPhoneInput.value);
+              return;
+            }
+          } else {
+            throw new Error(data.error || 'Failed to dispatch verification code');
           }
-          throw new Error(data.error || 'Failed to dispatch verification code');
         }
 
         currentIdentifier = data.identifier || payload.email || payload.identifier;
@@ -1285,6 +1324,19 @@
           document.cookie = `tm_vendor_id=${data.vendor.id}; path=/; max-age=2592000; SameSite=Lax`;
         }
 
+        // Cache registered profile permanently for seamless re-entry & auto-fill
+        const persistentProfile = {
+          role: data.role,
+          email: (data.user && data.user.email) || (data.vendor && data.vendor.contactEmail) || currentIdentifier,
+          phone: (data.user && data.user.phone) || (data.vendor && data.vendor.contactPhone) || (signinPhoneInput ? signinPhoneInput.value : ''),
+          name: (data.user && data.user.displayName) || (data.vendor && data.vendor.contactPerson) || '',
+          businessName: (data.vendor && data.vendor.businessName) || '',
+          vendorId: (data.vendor && data.vendor.id) || ''
+        };
+        try {
+          localStorage.setItem('tm_registered_profile', JSON.stringify(persistentProfile));
+        } catch (_) {}
+
         // Automatic Redirection according to role:
         if (data.role === 'vendor') {
           showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
@@ -1375,7 +1427,7 @@
       }
     });
 
-    // Auto-detect URL query params (?mode=signup, ?role=partner, etc.)
+    // Auto-detect URL query params and pre-fill stored credentials for returning users
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'signup' || params.get('mode') === 'register') {
@@ -1384,6 +1436,29 @@
       if (params.get('role') === 'partner' || params.get('role') === 'vendor') {
         selectSignupRole('vendor');
       }
+
+      // Prefill signin inputs from remembered session / registered profile
+      try {
+        let remembered = JSON.parse(localStorage.getItem('tm_registered_profile') || 'null');
+        if (!remembered) {
+          const uInfo = JSON.parse(localStorage.getItem('tm_user_info') || 'null');
+          if (uInfo) {
+            remembered = {
+              email: uInfo.email,
+              phone: uInfo.phone,
+              name: uInfo.displayName
+            };
+          }
+        }
+        if (remembered) {
+          if (signinEmailInput && !signinEmailInput.value && remembered.email && !remembered.email.includes('@tripmozy.local')) {
+            signinEmailInput.value = remembered.email;
+          }
+          if (signinPhoneInput && !signinPhoneInput.value && remembered.phone) {
+            signinPhoneInput.value = remembered.phone;
+          }
+        }
+      } catch (_) {}
     });
   </script>
 </body>

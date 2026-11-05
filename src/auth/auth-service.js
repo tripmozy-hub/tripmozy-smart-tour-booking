@@ -53,15 +53,20 @@ class AuthService {
                            cleanId.toLowerCase().includes('sujansutradhar2004@gmail.com');
     if (isKnownPartner) return 'vendor';
 
-    // 2. Check vendor_accounts table
+    // 2. Check vendor_accounts table (case-insensitive email + normalized phone digits)
     const vendorMatch = this.db.queryOne(`
       SELECT v.id FROM vendor_accounts v
-      JOIN user_profiles u ON v.user_id = u.id
-      WHERE v.contact_email = ? OR v.contact_phone = ?
-         OR u.email = ? OR u.phone = ?
-         OR (length(?) >= 10 AND (v.contact_phone LIKE ? OR u.phone LIKE ?))
+      LEFT JOIN user_profiles u ON v.user_id = u.id
+      WHERE LOWER(v.contact_email) = LOWER(?)
+         OR replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+         OR LOWER(u.email) = LOWER(?)
+         OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+         OR (length(?) = 10 AND (
+               replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+            OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+         ))
     `, [
-      cleanId, cleanId, cleanId, cleanId,
+      cleanId, cleanDigits, cleanId, cleanDigits,
       cleanDigits, `%${cleanDigits}%`, `%${cleanDigits}%`
     ]);
     if (vendorMatch) return 'vendor';
@@ -69,23 +74,30 @@ class AuthService {
     // 3. Check customer user_profiles
     const customerMatch = this.db.queryOne(`
       SELECT id FROM user_profiles
-      WHERE (email = ? OR phone = ? OR (length(?) >= 10 AND phone LIKE ?))
-        AND role = 'customer'
-    `, [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]);
+      WHERE (
+        LOWER(email) = LOWER(?)
+        OR replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+        OR (length(?) = 10 AND replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?)
+      ) AND role = 'customer'
+    `, [cleanId, cleanDigits, cleanDigits, `%${cleanDigits}%`]);
     if (customerMatch) return 'customer';
 
     // 4. Check general user_profiles
     const generalUser = this.db.queryOne(`
       SELECT role FROM user_profiles
-      WHERE email = ? OR phone = ? OR (length(?) >= 10 AND phone LIKE ?)
-    `, [cleanId, cleanId, cleanDigits, `%${cleanDigits}%`]);
+      WHERE (
+        LOWER(email) = LOWER(?)
+        OR replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+        OR (length(?) = 10 AND replace(replace(replace(replace(phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?)
+      )
+    `, [cleanId, cleanDigits, cleanDigits, `%${cleanDigits}%`]);
     if (generalUser) return generalUser.role;
 
     return null; // Brand new user
   }
 
   // Send 6-digit OTP code to Customer or Tour Operator
-  sendOtp({ identifier, email = null, phone = null, name = null, fullName = null, role = 'customer', mode = 'any', businessName = null }) {
+  sendOtp({ identifier, email = null, phone = null, name = null, fullName = null, role = 'customer', mode = 'any', businessName = null, restoreProfile = false }) {
     const cleanId = this.normalizeIdentifier(identifier || email || phone);
     if (!cleanId) {
       throw new Error('Please enter a valid email address or mobile number');
@@ -108,6 +120,9 @@ class AuthService {
       if (existingRole) {
         // Automatically adapt to the registered role (customer or vendor)
         role = existingRole;
+      } else if (restoreProfile) {
+        // Re-hydrate registered account into database (e.g. across serverless restarts)
+        console.log(`[AuthService] Re-hydrating account for ${cleanId} (role: ${role})`);
       } else {
         const err = new Error('No account found with this Gmail address or phone number. Please sign up to create a new account.');
         err.needsSignup = true;
@@ -168,17 +183,59 @@ class AuthService {
         targetVendor = this.db.queryOne(`
           SELECT v.*, u.email as u_email, u.phone as u_phone
           FROM vendor_accounts v
-          JOIN user_profiles u ON v.user_id = u.id
-          WHERE v.contact_email = ? OR v.contact_phone = ?
-             OR u.email = ? OR u.phone = ?
-             OR (length(?) >= 10 AND (v.contact_phone LIKE ? OR u.phone LIKE ?))
+          LEFT JOIN user_profiles u ON v.user_id = u.id
+          WHERE LOWER(v.contact_email) = LOWER(?)
+             OR replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+             OR LOWER(u.email) = LOWER(?)
+             OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+             OR (length(?) = 10 AND (
+                   replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+                OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+             ))
         `, [
-          cleanId, cleanId, cleanId, cleanId,
+          cleanId, cleanDigits, cleanId, cleanDigits,
           cleanDigits, `%${cleanDigits}%`, `%${cleanDigits}%`
         ]);
+
+        if (!targetVendor && inputEmail) {
+          targetVendor = this.db.queryOne(`
+            SELECT v.*, u.email as u_email, u.phone as u_phone
+            FROM vendor_accounts v
+            LEFT JOIN user_profiles u ON v.user_id = u.id
+            WHERE LOWER(v.contact_email) = LOWER(?) OR LOWER(u.email) = LOWER(?)
+          `, [inputEmail, inputEmail]);
+        }
+
+        if (!targetVendor && inputPhone) {
+          const inDigits = inputPhone.replace(/\D/g, '').slice(-10);
+          if (inDigits.length === 10) {
+            targetVendor = this.db.queryOne(`
+              SELECT v.*, u.email as u_email, u.phone as u_phone
+              FROM vendor_accounts v
+              LEFT JOIN user_profiles u ON v.user_id = u.id
+              WHERE replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+                 OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+            `, [`%${inDigits}%`, `%${inDigits}%`]);
+          }
+        }
       }
 
-      if (!targetVendor) {
+      if (targetVendor) {
+        if (inputPhone && (!targetVendor.contact_phone || targetVendor.contact_phone.includes('0001') || targetVendor.contact_phone.includes('43210'))) {
+          this.db.execute("UPDATE vendor_accounts SET contact_phone = ? WHERE id = ?", [inputPhone, targetVendor.id]);
+          if (targetVendor.user_id) {
+            this.db.execute("UPDATE user_profiles SET phone = ? WHERE id = ?", [inputPhone, targetVendor.user_id]);
+          }
+          targetVendor.contact_phone = inputPhone;
+        }
+        if (inputEmail && (!targetVendor.contact_email || targetVendor.contact_email.includes('@tripmozy.local'))) {
+          this.db.execute("UPDATE vendor_accounts SET contact_email = ? WHERE id = ?", [inputEmail, targetVendor.id]);
+          if (targetVendor.user_id) {
+            this.db.execute("UPDATE user_profiles SET email = ? WHERE id = ?", [inputEmail, targetVendor.user_id]);
+          }
+          targetVendor.contact_email = inputEmail;
+        }
+      } else {
         // Automatically register new vendor account & tour fleet profile so any vendor can register
         targetVendor = this.registerNewVendor({
           cleanId,
@@ -384,12 +441,17 @@ class AuthService {
         vendor = this.db.queryOne(`
           SELECT v.*, u.id as user_id, u.display_name, u.email as u_email, u.phone as u_phone
           FROM vendor_accounts v
-          JOIN user_profiles u ON v.user_id = u.id
-          WHERE v.contact_email = ? OR v.contact_phone = ?
-             OR u.email = ? OR u.phone = ?
-             OR (length(?) >= 10 AND (v.contact_phone LIKE ? OR u.phone LIKE ?))
+          LEFT JOIN user_profiles u ON v.user_id = u.id
+          WHERE LOWER(v.contact_email) = LOWER(?)
+             OR replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+             OR LOWER(u.email) = LOWER(?)
+             OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?
+             OR (length(?) = 10 AND (
+                   replace(replace(replace(replace(v.contact_phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+                OR replace(replace(replace(replace(u.phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?
+             ))
         `, [
-          cleanId, cleanId, cleanId, cleanId,
+          cleanId, cleanDigits, cleanId, cleanDigits,
           cleanDigits, `%${cleanDigits}%`, `%${cleanDigits}%`
         ]);
       }
@@ -398,10 +460,26 @@ class AuthService {
         vendor = this.registerNewVendor({ cleanId, isEmail: cleanId.includes('@'), cleanDigits });
       }
 
+      let sessionUserId = vendor.user_id;
+      if (!sessionUserId) {
+        const u = this.db.queryOne('SELECT id FROM user_profiles WHERE LOWER(email) = LOWER(?) LIMIT 1', [vendor.contact_email || cleanId]);
+        if (u) {
+          sessionUserId = u.id;
+          this.db.execute('UPDATE vendor_accounts SET user_id = ? WHERE id = ?', [sessionUserId, vendor.id]);
+        } else {
+          sessionUserId = this.db.uuid();
+          this.db.execute(`
+            INSERT INTO user_profiles (id, email, phone, role, display_name, status)
+            VALUES (?, ?, ?, 'vendor', ?, 'active')
+          `, [sessionUserId, vendor.contact_email || cleanId, vendor.contact_phone || null, vendor.contact_person || 'Partner']);
+          this.db.execute('UPDATE vendor_accounts SET user_id = ? WHERE id = ?', [sessionUserId, vendor.id]);
+        }
+      }
+
       this.db.execute(`
         INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
         VALUES (?, ?, 'vendor', ?, ?)
-      `, [sessionId, vendor.user_id, tokenHash, expiresAt]);
+      `, [sessionId, sessionUserId, tokenHash, expiresAt]);
 
       return {
         success: true,
@@ -637,10 +715,10 @@ class AuthService {
         `, [
           propId,
           vendorId,
-          `${businessName} - Tour Fleet & Operations`,
+          `${bName} - Tour Fleet & Operations`,
           propSlug,
-          `Verified TripMozy Tour Operator Partner (${businessName}) providing premium guided tours, vehicle rentals, and customized holiday packages across India.`,
-          `Partner Operations Center, ${businessName}`
+          `Verified TripMozy Tour Operator Partner (${bName}) providing premium guided tours, vehicle rentals, and customized holiday packages across India.`,
+          `Partner Operations Center, ${bName}`
         ]);
 
         const roomTypeId = tx.uuid();
@@ -656,6 +734,25 @@ class AuthService {
             id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, cancellation_rule, is_active
           ) VALUES (?, ?, 'All Inclusions Tour Plan', 250000, 500, 'Breakfast, Dinner & Sightseeing', 'Free cancellation up to 48 hours before tour start', 1)
         `, [rateId, roomTypeId]);
+
+        // Add facilities & backfill active tour requests for new partner
+        const defaultFacs = ['wifi', 'parking', 'breakfast', 'mountain_view', 'ac', 'sightseeing', 'cab_transfer', 'hot_water'];
+        for (const f of defaultFacs) {
+          tx.execute('INSERT OR IGNORE INTO property_facilities (id, property_id, facility_code) VALUES (?, ?, ?)', [tx.uuid(), propId, f]);
+        }
+
+        const activeRequests = tx.query("SELECT id, expires_at FROM hotel_booking_requests WHERE status IN ('awaiting_responses', 'offers_available') ORDER BY created_at DESC LIMIT 10");
+        for (const req of activeRequests) {
+          const recipientId = tx.uuid();
+          const rawToken = crypto.randomBytes(16).toString('hex');
+          const actionTokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+          tx.execute(`
+            INSERT INTO booking_request_recipients (
+              id, request_id, property_id, vendor_id, delivery_status, response_status,
+              expires_at, action_token_hash
+            ) VALUES (?, ?, ?, ?, 'delivered', 'pending', ?, ?)
+          `, [recipientId, req.id, propId, vendorId, req.expires_at, actionTokenHash]);
+        }
 
         vendor = tx.queryOne('SELECT * FROM vendor_accounts WHERE id = ?', [vendorId]);
       }
