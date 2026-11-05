@@ -451,7 +451,7 @@
         <!-- Top Mode Tabs: Log In vs Sign Up -->
         <div class="mode-toggle" role="tablist">
           <button type="button" class="mode-btn active login-tab" id="tabModeLogin" onclick="switchMode('login')">
-            <span>Sign In</span>
+            <span>Log In</span>
           </button>
           <button type="button" class="mode-btn signup-tab" id="tabModeSignup" onclick="switchMode('signup')">
             <span>Create Account</span>
@@ -463,7 +463,7 @@
         <!-- STEP 1: Identification & Registration Form -->
         <div id="step1">
           <div class="badge-pill customer" id="headerBadge">Returning User</div>
-          <h1 id="pageTitle">Sign In to TripMozy</h1>
+          <h1 id="pageTitle">Log In to TripMozy</h1>
           <p class="subtitle" id="pageSub">
             Enter your Gmail address and mobile phone number. Your 6-digit verification code will be sent directly to your Gmail.
           </p>
@@ -666,7 +666,7 @@
         headerBadge.className = 'badge-pill customer';
         headerBadge.textContent = 'Returning User';
 
-        pageTitle.textContent = 'Sign In to TripMozy';
+        pageTitle.textContent = 'Log In to TripMozy';
         pageSub.textContent = "Enter your Gmail address and mobile phone number. Your 6-digit OTP verification code will be sent directly to your Gmail inbox.";
 
         loginFieldsGroup.style.display = 'block';
@@ -834,7 +834,7 @@
           verifyBtn.classList.add('partner-btn');
         } else {
           step2Badge.className = 'badge-pill customer';
-          step2Badge.innerHTML = 'Traveler Sign In';
+          step2Badge.innerHTML = 'Traveler Log In';
           verifyBtn.classList.remove('partner-btn');
         }
 

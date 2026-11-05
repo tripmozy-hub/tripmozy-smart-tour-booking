@@ -833,7 +833,7 @@
       <div class="header-nav">
         <a href="/booking" class="nav-link">My Tour Offers</a>
         <span id="authHeaderItem">
-          <a href="/login" class="nav-link" style="color:#d8ba7a;font-weight:700;">Sign In</a>
+          <a href="/login" class="nav-link" style="color:#d8ba7a;font-weight:700;">Log In</a>
         </span>
         <a href="/login?role=partner" class="partner-btn">Tour Operator Desk</a>
       </div>
@@ -1404,8 +1404,8 @@
         }
 
         btn.disabled = true;
-        btn.innerHTML = '<span>Taking you to Sign In to dispatch quotes...</span>';
-        showToast('Please sign in to verify your identity before requesting quotes. Redirecting to sign in...');
+        btn.innerHTML = '<span>Taking you to Log In to dispatch quotes...</span>';
+        showToast('Please log in to verify your identity before requesting quotes. Redirecting to login...');
 
         setTimeout(() => {
           const returnTarget = encodeURIComponent('/smart-tour-booking?action=submit');
@@ -1563,7 +1563,7 @@
           }
         } else {
           // Guest User (Not logged in)
-          if (btn) btn.innerHTML = '<span>Sign In to Request Tour Quotes</span>';
+          if (btn) btn.innerHTML = '<span>Log In to Request Tour Quotes</span>';
           if (authHint) authHint.style.display = 'block';
         }
       } catch (_) {}
