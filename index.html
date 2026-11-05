@@ -1402,29 +1402,26 @@
         totalBudgetINR: parseInt(slider.value) || 15000,
         roomPreference: document.getElementById('roomPreference').value,
         requiredFacilities: facilities,
-        guestName: document.getElementById('guestName').value,
-        guestEmail: document.getElementById('guestEmail').value,
-        guestPhone: document.getElementById('guestPhone').value,
+        guestName: (document.getElementById('guestName').value || '').trim(),
+        guestEmail: (document.getElementById('guestEmail').value || '').trim(),
+        guestPhone: (document.getElementById('guestPhone').value || '').trim(),
         communicationConsent: document.getElementById('commConsent').checked,
         termsAccepted: document.getElementById('termsAccept').checked
       };
 
-      // REQUIREMENT: Without login, users can fill details, but requesting tour quotes requires sign in.
-      if (!isCustomerLoggedIn()) {
-        // Save current form inputs in localStorage so no progress is lost
-        localStorage.setItem('tm_pending_tour_request', JSON.stringify(payload));
-        if (payload.guestEmail || payload.guestPhone) {
-          localStorage.setItem('tm_prefill_identifier', payload.guestEmail || payload.guestPhone);
-        }
-
-        btn.disabled = true;
-        btn.innerHTML = '<span>Taking you to Log In to dispatch quotes...</span>';
-        showToast('Please log in to verify your identity before requesting quotes. Redirecting to login...');
-
-        setTimeout(() => {
-          const returnTarget = encodeURIComponent('/smart-tour-booking?action=submit');
-          window.location.href = `/login?category=customer&returnUrl=${returnTarget}&reason=auth_required`;
-        }, 600);
+      if (!payload.guestName || payload.guestName.length < 2) {
+        showToast('Please enter your full name');
+        document.getElementById('guestName').focus();
+        return;
+      }
+      if (!payload.guestEmail || !payload.guestEmail.includes('@')) {
+        showToast('Please enter your valid Gmail address');
+        document.getElementById('guestEmail').focus();
+        return;
+      }
+      if (!payload.guestPhone || payload.guestPhone.replace(/\D/g, '').length < 10) {
+        showToast('Please enter your valid 10-digit mobile phone number');
+        document.getElementById('guestPhone').focus();
         return;
       }
 
@@ -1452,6 +1449,18 @@
           throw new Error(data.error || 'Failed to submit tour request');
         }
 
+        // Remember customer permanently so user is never prompted to log in again while requesting tours
+        localStorage.setItem('tm_user_info', JSON.stringify({
+          displayName: payload.guestName,
+          email: payload.guestEmail,
+          phone: payload.guestPhone
+        }));
+        localStorage.setItem('tm_user_role', 'customer');
+        document.cookie = `tm_user_name=${encodeURIComponent(payload.guestName)}; path=/; max-age=2592000; SameSite=Lax`;
+        document.cookie = `tm_user_email=${encodeURIComponent(payload.guestEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+        document.cookie = `tm_user_phone=${encodeURIComponent(payload.guestPhone)}; path=/; max-age=2592000; SameSite=Lax`;
+        document.cookie = `tm_user_role=customer; path=/; max-age=2592000; SameSite=Lax`;
+
         // Show Result Card
         document.getElementById('formCard').style.display = 'none';
         const resultCard = document.getElementById('resultCard');
@@ -1466,8 +1475,11 @@
 
         latestSubmissionId = data.id;
 
-        // Auto-redirect to live offers after 3 seconds
+        // Auto-redirect to live offers after 2 seconds
         if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
+        autoRedirectTimer = setTimeout(() => {
+          window.location.href = viewOffersUrl;
+        }, 2000);
         autoRedirectTimer = setTimeout(() => {
           window.location.href = viewOffersUrl;
         }, 3000);

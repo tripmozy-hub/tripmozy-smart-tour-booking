@@ -100,7 +100,7 @@ class RequestService {
     // 4. Rate Limiting Check
     this.checkRateLimit(guestPhone);
 
-    // 5. Run matching to find candidate hotels
+    // 5. Run matching to find candidate hotels/fleet bases
     const matchResult = this.matchingEngine.findMatches({
       destination,
       targetCoords,
@@ -115,7 +115,8 @@ class RequestService {
       requiredFacilities
     });
 
-    const initialStatus = matchResult.totalMatches > 0 ? 'awaiting_responses' : 'no_matches';
+    // In a nationwide tour marketplace, all active tour operators quote custom tour packages for any destination
+    const initialStatus = 'awaiting_responses';
 
     // 6. Persist in database transaction
     return this.db.transaction((tx) => {

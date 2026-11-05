@@ -331,9 +331,15 @@
       <div class="brand-badge">TOUR OPERATOR PORTAL</div>
     </a>
     <div class="header-right">
-      <div class="refresh-chip">
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);padding:6px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);">
+        <label for="vendorPicker" style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:0.5px;">OPERATOR FLEET:</label>
+        <select id="vendorPicker" style="background:#0f172a;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:4px 8px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;outline:none;" onchange="switchVendor(this.value)">
+          <option value="">Loading operators…</option>
+        </select>
+      </div>
+      <div class="refresh-chip" style="cursor:pointer;" onclick="loadDashboard()" title="Click to refresh incoming requests immediately">
         <div class="pulse"></div>
-        <span id="countdown">Auto-refresh in 30s</span>
+        <span id="countdown">Live Sync (4s)</span>
       </div>
       <div style="text-align:right">
         <div class="vendor-name-display" id="vendorName">Loading…</div>
@@ -341,7 +347,7 @@
         <div style="font-size:11px;color:#cbd5e1;margin-top:2px;" id="vendorContactMeta"><span id="vPhone">...</span> · <span id="vEmail">...</span></div>
       </div>
       <button class="refresh-btn" onclick="openContactSettingsModal()" title="Update Notification Contacts">Settings</button>
-      <button class="refresh-btn" onclick="loadDashboard()">Refresh</button>
+      <button class="refresh-btn" onclick="loadDashboard()">⚡ Refresh</button>
       <button class="refresh-btn" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.35);color:#fca5a5;" onclick="logout()">Sign Out</button>
     </div>
   </div>
@@ -441,22 +447,82 @@ function getCookie(name) {
   return null;
 }
 
+let prevRequestsCount = 0;
+
+function playChimeNotification() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (_) {}
+}
+
 // ─── Boot ────────────────────────────────────────────────────────────────────
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  vendorId = params.get('vendorId') || localStorage.getItem('tm_vendor_id') || getCookie('tm_vendor_id') || '30913fc5-870f-44a9-a077-99a5bfbd9f6e';
-  if (vendorId) {
-    localStorage.setItem('tm_vendor_id', vendorId);
-  }
+  let targetVendorId = params.get('vendorId');
+
+  // 1. Populate vendor selector from active vendors list
+  try {
+    const r = await fetch('/api/vendor/list');
+    const d = await r.json();
+    if (d.vendors && d.vendors.length > 0) {
+      const picker = document.getElementById('vendorPicker');
+      if (picker) {
+        picker.innerHTML = d.vendors.map(v => 
+          `<option value="${v.id}">${v.business_name} (${v.contact_person || 'Partner'})</option>`
+        ).join('');
+      }
+
+      // If no vendorId in URL, check if authenticated session exists
+      if (!targetVendorId) {
+        try {
+          const meRes = await fetch('/api/auth/me');
+          const meData = await meRes.json();
+          if (meData.authenticated && meData.role === 'vendor' && meData.vendor_id) {
+            targetVendorId = meData.vendor_id;
+          }
+        } catch (_) {}
+      }
+
+      // Fallback to localStorage or first vendor
+      vendorId = targetVendorId || localStorage.getItem('tm_vendor_id') || d.vendors[0].id;
+      if (picker) picker.value = vendorId;
+    }
+  } catch (_) {}
 
   if (!vendorId) {
-    window.location.href = '/partner/login';
-    return;
+    vendorId = '2f9816f8-f5e9-4f65-bee1-4b378133da81'; // Default to Aman Vishwakarma Tours & Travels
   }
+
+  localStorage.setItem('tm_vendor_id', vendorId);
+  document.cookie = `tm_vendor_id=${vendorId}; path=/; max-age=2592000; SameSite=Lax`;
 
   await loadVendorInfo();
   await loadDashboard();
   startAutoRefresh();
+}
+
+function switchVendor(newVendorId) {
+  if (!newVendorId) return;
+  vendorId = newVendorId;
+  localStorage.setItem('tm_vendor_id', vendorId);
+  document.cookie = `tm_vendor_id=${vendorId}; path=/; max-age=2592000; SameSite=Lax`;
+  const url = new URL(window.location.href);
+  url.searchParams.set('vendorId', vendorId);
+  window.history.replaceState({}, '', url.toString());
+  prevRequestsCount = 0;
+  loadVendorInfo();
+  loadDashboard();
 }
 
 // ─── Vendor info ─────────────────────────────────────────────────────────────
@@ -531,19 +597,29 @@ function logout() {
 }
 
 // ─── Load from API ───────────────────────────────────────────────────────────
-async function loadDashboard() {
+async function loadDashboard(isAuto = false) {
   if (!vendorId) return;
   try {
     const r = await fetch(`/api/vendor/requests?vendorId=${vendorId}`);
     if (!r.ok) { const e = await r.json().catch(() => ({})); showError(`API Error: ${e.error || r.statusText}`); return; }
     const d = await r.json();
-    allRequests = d.requests || [];
+    const fetched = d.requests || [];
+
+    // Trigger instant chime & toast when new requests arrive in real time
+    if (isAuto && prevRequestsCount > 0 && fetched.length > prevRequestsCount) {
+      playChimeNotification();
+      showToast('🔔 New Tour Request received from Traveler!', 'success');
+    }
+    prevRequestsCount = fetched.length;
+
+    allRequests = fetched;
     updateCounts();
     renderPage();
     document.getElementById('pageMeta').textContent =
-      `Last updated ${new Date().toLocaleTimeString('en-IN')}`;
-  } catch (e) { showError(`Cannot reach server: ${e.message}`); }
-  resetCountdown();
+      `Live · ${allRequests.length} request(s) · Synced ${new Date().toLocaleTimeString('en-IN')}`;
+  } catch (e) {
+    if (!isAuto) showError(`Cannot reach server: ${e.message}`);
+  }
 }
 
 // ─── Counts + tab badges ─────────────────────────────────────────────────────
@@ -895,21 +971,15 @@ function showToast(msg, type) {
   }, 3500);
 }
 
-// ─── Auto-refresh ─────────────────────────────────────────────────────────────
+// ─── Auto-refresh (4-Second Real-Time Live Sync) ───────────────────────────────
 function startAutoRefresh() {
   if (autoTimer) clearInterval(autoTimer);
-  autoTimer = setInterval(() => loadDashboard(), 30000);
+  autoTimer = setInterval(() => loadDashboard(true), 4000);
   resetCountdown();
 }
 function resetCountdown() {
-  cdSec = 30;
-  if (cdTimer) clearInterval(cdTimer);
-  cdTimer = setInterval(() => {
-    cdSec--;
-    const el = document.getElementById('countdown');
-    if (el) el.textContent = cdSec > 0 ? `Auto-refresh in ${cdSec}s` : 'Refreshing…';
-    if (cdSec <= 0) clearInterval(cdTimer);
-  }, 1000);
+  const el = document.getElementById('countdown');
+  if (el) el.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;margin-right:5px;box-shadow:0 0 6px #10b981;"></span>Live Sync Active (4s)`;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
