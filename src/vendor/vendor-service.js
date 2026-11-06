@@ -19,6 +19,76 @@ class VendorService {
       throw new AccessControlError('Not authorized to view requests for this vendor');
     }
 
+    // 1. Ensure vendor has at least one active property & room type so requests can be quoted
+    let vendorProp = this.db.queryOne(
+      "SELECT id, name, city FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1",
+      [vendorId]
+    );
+    if (!vendorProp) {
+      const vendorAcc = this.db.queryOne('SELECT id, business_name, contact_person FROM vendor_accounts WHERE id = ?', [vendorId]);
+      if (vendorAcc) {
+        const newPropId = this.db.uuid();
+        this.db.execute(`
+          INSERT INTO properties (
+            id, vendor_id, name, slug, property_type, star_rating,
+            description, address_line, city, state, pincode, country,
+            latitude, longitude, timezone, check_in_time, check_out_time,
+            status, inventory_mode
+          ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, 'India Operations', 'All Destinations', 'India', '110001', 'India', 28.6139, 77.2090, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
+        `, [
+          newPropId,
+          vendorId,
+          `${vendorAcc.business_name} - Tour Fleet`,
+          `fleet-${vendorId.slice(0, 8)}-${Date.now()}`,
+          `Verified Tour Operator Partner (${vendorAcc.business_name})`
+        ]);
+        vendorProp = { id: newPropId, name: `${vendorAcc.business_name} - Tour Fleet`, city: 'All Destinations' };
+
+        const roomTypeId = this.db.uuid();
+        this.db.execute(`
+          INSERT INTO room_types (id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_accessible, is_active)
+          VALUES (?, ?, 'Custom Tour Package', 'King', 4, 2, 20, 1, 1, 1)
+        `, [roomTypeId, newPropId]);
+        const rateId = this.db.uuid();
+        this.db.execute(`
+          INSERT INTO room_rates (id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, cancellation_rule, is_active)
+          VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 'moderate', 1)
+        `, [rateId, roomTypeId]);
+      }
+    }
+
+    // 2. Dynamic backfill: Ensure all active unassigned requests are delivered to this vendor's dashboard
+    if (vendorProp) {
+      const pendingReqs = this.db.query(`
+        SELECT req.id, req.expires_at
+        FROM hotel_booking_requests req
+        WHERE req.status IN ('awaiting_responses', 'matching', 'dispatching')
+          AND NOT EXISTS (
+            SELECT 1 FROM booking_request_recipients r WHERE r.request_id = req.id AND r.vendor_id = ?
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM booking_request_recipients other_r 
+            WHERE other_r.request_id = req.id AND other_r.response_status = 'accepted'
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM hotel_offers o 
+            WHERE o.request_id = req.id AND o.status = 'valid'
+          )
+      `, [vendorId]);
+
+      for (const pr of pendingReqs) {
+        const recipientId = this.db.uuid();
+        const rawToken = crypto.randomBytes(16).toString('hex');
+        const actionTokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        this.db.execute(`
+          INSERT INTO booking_request_recipients (
+            id, request_id, property_id, vendor_id, delivery_status, response_status,
+            expires_at, action_token_hash
+          ) VALUES (?, ?, ?, ?, 'delivered', 'pending', ?, ?)
+        `, [recipientId, pr.id, vendorProp.id, vendorId, pr.expires_at, actionTokenHash]);
+      }
+    }
+
     const recipients = this.db.query(`
       SELECT 
         r.id as recipient_id,
@@ -50,19 +120,22 @@ class VendorService {
         AND (r.rejection_reason IS NULL OR r.rejection_reason != 'accepted_by_other')
         AND r.response_status != 'accepted_by_other'
         AND NOT (
-          r.response_status != 'accepted' AND EXISTS (
-            SELECT 1 FROM booking_request_recipients other_r
-            WHERE other_r.request_id = r.request_id 
-              AND other_r.vendor_id != r.vendor_id 
-              AND other_r.response_status = 'accepted'
-          )
-        )
-        AND NOT (
-          r.response_status != 'accepted' AND EXISTS (
-            SELECT 1 FROM hotel_offers o
-            JOIN properties op ON o.property_id = op.id
-            WHERE o.request_id = r.request_id
-              AND op.vendor_id != r.vendor_id
+          r.response_status != 'accepted' AND (
+            r.response_status = 'cancelled'
+            OR req.status IN ('offers_available', 'booked')
+            OR EXISTS (
+              SELECT 1 FROM booking_request_recipients other_r
+              WHERE other_r.request_id = r.request_id 
+                AND other_r.vendor_id != r.vendor_id 
+                AND other_r.response_status = 'accepted'
+            )
+            OR EXISTS (
+              SELECT 1 FROM hotel_offers o
+              JOIN properties op ON o.property_id = op.id
+              WHERE o.request_id = r.request_id
+                AND op.vendor_id != r.vendor_id
+                AND o.status = 'valid'
+            )
           )
         )
       ORDER BY r.created_at DESC

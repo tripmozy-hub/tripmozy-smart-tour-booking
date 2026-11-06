@@ -36,7 +36,7 @@ if (fs.existsSync(envPath)) {
 const { TripMozyDatabase } = require('./src/db/database');
 const { ROLES, SecurityContext } = require('./src/auth/roles');
 const { PropertyService } = require('./src/onboarding/property-service');
-const { loadCatalogIntoDb } = require('./src/onboarding/catalog-loader');
+const { loadCatalogIntoDb, seedCoreTourOperators } = require('./src/onboarding/catalog-loader');
 const { RequestService } = require('./src/requests/request-service');
 const { VendorService } = require('./src/vendor/vendor-service');
 const { InventoryHoldEngine } = require('./src/booking/inventory-hold-engine');
@@ -103,6 +103,13 @@ if (propCount === 0) {
       break;
     }
   }
+}
+
+// Ensure all core tour operators and fleet profiles exist permanently
+try {
+  seedCoreTourOperators(db);
+} catch (err) {
+  console.error('[TripMozy] Error seeding core tour operators:', err.message);
 }
 
 // Background Cron: Release expired inventory holds every 60 seconds (disabled in serverless environments)
@@ -854,7 +861,14 @@ const appHandler = async (req, res) => {
   // GET /api/vendor/list  — List all vendors (for dashboard login/selection)
   if (pathname === '/api/vendor/list' && method === 'GET') {
     try {
-      const vendors = db.query('SELECT id, business_name, contact_person, verification_status, status FROM vendor_accounts WHERE status = \'active\'');
+      const vendors = db.query(`
+        SELECT id, business_name, contact_person, verification_status, status 
+        FROM vendor_accounts 
+        WHERE status = 'active'
+        ORDER BY 
+          CASE WHEN id = '2f9816f8-f5e9-4f65-bee1-4b378133da81' THEN 0 ELSE 1 END,
+          business_name ASC
+      `);
       sendJson(200, { success: true, vendors });
     } catch (e) {
       sendJson(400, { error: e.message });

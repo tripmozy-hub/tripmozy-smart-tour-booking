@@ -6,6 +6,7 @@
 const crypto = require('node:crypto');
 const { PricingEngine } = require('../matching/pricing-engine');
 const { MatchingEngine } = require('../matching/matching-engine');
+const { seedCoreTourOperators } = require('../onboarding/catalog-loader');
 
 class RequestService {
   constructor(db, notifService = null) {
@@ -161,6 +162,10 @@ class RequestService {
 
       // 7. BROADCAST TO ALL ACTIVE TOUR OPERATOR VENDORS SIMULTANEOUSLY
       // Guarantees every active tour operator receives the customer's tour request in their dashboard.
+      try {
+        seedCoreTourOperators(tx);
+      } catch (_) {}
+
       const activeVendors = tx.query("SELECT id, business_name, contact_phone, contact_email FROM vendor_accounts WHERE status = 'active'");
 
       // Map any catalog properties matching the requested destination

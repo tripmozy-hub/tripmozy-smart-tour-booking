@@ -494,8 +494,9 @@ async function init() {
         } catch (_) {}
       }
 
-      // Fallback to localStorage or first vendor
-      vendorId = targetVendorId || localStorage.getItem('tm_vendor_id') || d.vendors[0].id;
+      // Fallback to Aman Vishwakarma Tours & Travels or localStorage
+      const defaultAman = '2f9816f8-f5e9-4f65-bee1-4b378133da81';
+      vendorId = targetVendorId || localStorage.getItem('tm_vendor_id') || defaultAman || d.vendors[0].id;
       if (picker) picker.value = vendorId;
     }
   } catch (_) {}
