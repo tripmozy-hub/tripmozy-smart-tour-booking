@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>TripMozy Executive Admin Console | Private Master Oversight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --navy: #090e17;
+      --navy-card: #111827;
+      --navy-border: #1f2937;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.2);
+      --bg: #090e17;
+      --surface: #111827;
+      --surface-raised: #1f2937;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border: #374151;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
+
+    /* Top Navigation */
+    header { background: #0c121e; border-bottom: 1px solid var(--navy-border); padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+    .header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .brand-wrap { display: flex; align-items: center; gap: 14px; }
+    .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #fff; text-decoration: none; }
+    .brand-logo span { color: var(--accent); }
+    .admin-badge { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header-actions { display: flex; align-items: center; gap: 14px; }
+    .admin-user-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); padding: 6px 14px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 600; color: #e5e7eb; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .btn-header { background: transparent; border: 1px solid var(--border); color: #d1d5db; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-header:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: #6b7280; }
+    .btn-logout { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .btn-logout:hover { background: rgba(239, 68, 68, 0.25); color: #fff; }
+
+    /* Dashboard Layout */
+    .admin-container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+    /* Top Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
+    .stat-card.stat-green::before { background: var(--success); }
+    .stat-card.stat-amber::before { background: var(--warning); }
+    .stat-card.stat-purple::before { background: #8b5cf6; }
+    .stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 800; color: #fff; line-height: 1.1; }
+    .stat-sub { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+
+    /* Navigation Tabs */
+    .nav-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--navy-border); margin-bottom: 24px; padding-bottom: 2px; }
+    .nav-tab { background: transparent; border: none; color: var(--text-muted); font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .2s; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .nav-tab:hover { color: #fff; }
+    .nav-tab.active { color: #fff; border-bottom: 2px solid var(--primary); background: rgba(37, 99, 235, 0.1); }
+    .nav-tab-badge { background: rgba(255,255,255,0.1); color: #e5e7eb; font-size: 11px; padding: 2px 7px; border-radius: 12px; }
+    .nav-tab.active .nav-tab-badge { background: var(--primary); color: #fff; }
+
+    /* Controls Bar */
+    .controls-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .search-box { position: relative; min-width: 280px; flex: 1; max-width: 450px; }
+    .search-box input { width: 100%; background: var(--surface); border: 1px solid var(--navy-border); color: #fff; padding: 10px 14px 10px 38px; border-radius: 8px; font-size: 13px; outline: none; }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 14px; }
+    .filter-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-btn { background: var(--surface); border: 1px solid var(--navy-border); color: #9ca3af; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s; }
+    .filter-btn.active, .filter-btn:hover { background: var(--surface-raised); color: #fff; border-color: #4b5563; }
+    .btn-action-primary { background: var(--primary); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .2s; }
+    .btn-action-primary:hover { background: var(--primary-dark); }
+
+    /* Movements Cards Grid */
+    .movements-list { display: flex; flex-direction: column; gap: 16px; }
+    .movement-card { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); padding: 22px; transition: border-color .2s; }
+    .movement-card:hover { border-color: #374151; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 14px; }
+    .card-ref-group { display: flex; align-items: center; gap: 10px; }
+    .ref-badge { font-family: monospace; font-size: 14px; font-weight: 800; color: #60a5fa; background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3); padding: 3px 10px; border-radius: 6px; }
+    .timestamp { font-size: 12px; color: #9ca3af; }
+    .status-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-awaiting { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-quoted { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-booked { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Movement Columns */
+    .movement-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .section-title { font-size: 11px; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .info-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 14px; font-size: 13px; }
+    .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .info-row:last-child { margin-bottom: 0; }
+    .info-label { color: #9ca3af; }
+    .info-val { font-weight: 700; color: #f3f4f6; text-align: right; }
+    .unmasked-val { color: #34d399; font-weight: 800; font-family: monospace; letter-spacing: 0.2px; }
+    .contact-links { display: flex; gap: 8px; margin-top: 8px; }
+    .contact-link-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #60a5fa; text-decoration: none; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.2); padding: 4px 8px; border-radius: 6px; transition: all .2s; }
+    .contact-link-btn:hover { background: rgba(96, 165, 250, 0.2); color: #fff; }
+
+    /* Operators Table */
+    .table-container { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { background: rgba(255,255,255,0.03); color: #9ca3af; font-weight: 700; padding: 14px 16px; border-bottom: 1px solid var(--navy-border); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+    td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e5e7eb; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.015); }
+    .btn-table { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e5e7eb; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-table:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn-table-danger { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+    .btn-table-danger:hover { background: rgba(239, 68, 68, 0.25); color: #fff; }
+    .badge-active { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .badge-suspended { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
+    /* Featured Cards Grid */
+    .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .feat-card { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+    .feat-img-wrap { height: 160px; position: relative; overflow: hidden; }
+    .feat-img { width: 100%; height: 100%; object-fit: cover; }
+    .feat-badge { position: absolute; top: 12px; left: 12px; background: var(--accent); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+    .feat-duration-badge { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+    .feat-body { padding: 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .feat-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .feat-dest { font-size: 13px; color: #60a5fa; font-weight: 600; margin-bottom: 12px; }
+    .feat-price { font-size: 18px; font-weight: 800; color: #34d399; margin-bottom: 14px; }
+    .feat-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: #111827; border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; padding: 26px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
+    .modal-title { font-size: 18px; font-weight: 800; color: #fff; }
+    .modal-close { background: transparent; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; }
+    .modal-close:hover { color: #fff; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #9ca3af; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-input, .form-textarea, .form-select { width: 100%; background: #1f2937; border: 1px solid #374151; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none; }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--primary); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
+
+    /* Auth Gate Overlay (if unauthorized) */
+    #authGateOverlay { position: fixed; inset: 0; background: #090e17; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .gate-box { background: #111827; border: 1px solid #374151; border-radius: 16px; padding: 36px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body>
+
+  <!-- Master Header -->
+  <header>
+    <div class="header-inner">
+      <div class="brand-wrap">
+        <a href="/" class="brand-logo">Trip<span>Mozy</span></a>
+        <span class="admin-badge">Super Admin Console</span>
+      </div>
+      <div class="header-actions">
+        <div class="admin-user-pill">
+          <span class="live-dot"></span>
+          <span id="headerAdminEmail">tripmozy@gmail.com</span>
+        </div>
+        <button class="btn-header" onclick="loadAllAdminData()" title="Refresh Feed">🔄 Refresh</button>
+        <button class="btn-header btn-logout" onclick="adminSignOut()">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="admin-container">
+
+    <!-- Top Key Metrics -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Tour Requests</div>
+        <div class="stat-value" id="statTotalReqs">0</div>
+        <div class="stat-sub">Across all Indian circuits</div>
+      </div>
+      <div class="stat-card stat-amber">
+        <div class="stat-label">Awaiting Operator</div>
+        <div class="stat-value" id="statAwaiting">0</div>
+        <div class="stat-sub">Pending quotes/acceptance</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Quotes Active</div>
+        <div class="stat-value" id="statQuoted">0</div>
+        <div class="stat-sub">Offer delivered to customer</div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-label">Booked & Advance Paid</div>
+        <div class="stat-value" id="statBooked">0</div>
+        <div class="stat-sub" id="statDepositSum">₹0 deposit collected</div>
+      </div>
+      <div class="stat-card stat-purple">
+        <div class="stat-label">Total Tour GMV</div>
+        <div class="stat-value" id="statGmv">₹0</div>
+        <div class="stat-sub">Gross marketplace value</div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="switchAdminTab('movements')">
+        🎯 Live Movements & Requests
+        <span class="nav-tab-badge" id="badgeMovements">0</span>
+      </button>
+      <button class="nav-tab" onclick="switchAdminTab('operators')">
+        🏢 Tour Operators Directory
+        <span class="nav-tab-badge" id="badgeOperators">0</span>
+      </button>
+      <button class="nav-tab" onclick="switchAdminTab('featured')">
+        ✨ Featured Tour Cards
+        <span class="nav-tab-badge" id="badgeFeatured">0</span>
+      </button>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: MOVEMENTS & LIVE REQUESTS -->
+    <!-- ========================================== -->
+    <div id="tabMovements" class="tab-pane">
+      <div class="controls-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="movementSearch" placeholder="Search customer, phone, city, operator, ref..." oninput="filterMovements()">
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all" onclick="setMovementFilter('all', this)">All Movements</button>
+          <button class="filter-btn" data-filter="awaiting" onclick="setMovementFilter('awaiting', this)">Awaiting Operator</button>
+          <button class="filter-btn" data-filter="quoted" onclick="setMovementFilter('quoted', this)">Quoted / Active</button>
+          <button class="filter-btn" data-filter="booked" onclick="setMovementFilter('booked', this)">Paid & Confirmed</button>
+        </div>
+      </div>
+
+      <div class="movements-list" id="movementsContainer">
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+          Loading live tour movements...
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: TOUR OPERATORS DIRECTORY -->
+    <!-- ========================================== -->
+    <div id="tabOperators" class="tab-pane" style="display: none;">
+      <div class="controls-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="operatorSearch" placeholder="Search operators by name, city, phone..." oninput="filterOperators()">
+        </div>
+        <button class="btn-action-primary" onclick="openAddOperatorModal()">
+          + Add Tour Operator
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Operator / Business</th>
+              <th>Contact Person</th>
+              <th>Phone & Email</th>
+              <th>Base City</th>
+              <th>Fleet / Property</th>
+              <th>Status</th>
+              <th>Requests Activity</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="operatorsTableBody">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading tour operators...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: FEATURED TOUR CARDS -->
+    <!-- ========================================== -->
+    <div id="tabFeatured" class="tab-pane" style="display: none;">
+      <div class="controls-bar">
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Customer Page Featured Tour Cards</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Cards shown on the AI Tour Booking landing page with full itinerary popup modal.</p>
+        </div>
+        <button class="btn-action-primary" onclick="openAddFeaturedModal()">
+          + Add Featured Tour Card
+        </button>
+      </div>
+
+      <div class="featured-grid" id="featuredGridContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD TOUR OPERATOR -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="addOperatorModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Add New Tour Operator Partner</div>
+        <button class="modal-close" onclick="closeModal('addOperatorModal')">&times;</button>
+      </div>
+      <form id="addOperatorForm" onsubmit="submitAddOperator(event)">
+        <div class="form-group">
+          <label class="form-label">Business / Tour Agency Name *</label>
+          <input type="text" name="businessName" class="form-input" placeholder="e.g. Royal Bengal Expeditions" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contact Person Name *</label>
+            <input type="text" name="contactPerson" class="form-input" placeholder="e.g. Rajesh Sharma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Operating Base City *</label>
+            <input type="text" name="city" class="form-input" placeholder="e.g. Srinagar / Goa / Jaipur" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contact Phone / WhatsApp *</label>
+            <input type="tel" name="contactPhone" class="form-input" placeholder="e.g. +91 98765 43210" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Email *</label>
+            <input type="email" name="contactEmail" class="form-input" placeholder="operator@tripmozy.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Commission Basis Points (500 = 5%)</label>
+          <input type="number" name="commissionBps" class="form-input" value="500" min="0" max="3000">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-header" onclick="closeModal('addOperatorModal')">Cancel</button>
+          <button type="submit" class="btn-action-primary" id="btnSubmitOperator">Create Operator Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD FEATURED TOUR CARD -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="addFeaturedModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Add Featured Tour Circuit Card</div>
+        <button class="modal-close" onclick="closeModal('addFeaturedModal')">&times;</button>
+      </div>
+      <form id="addFeaturedForm" onsubmit="submitAddFeatured(event)">
+        <div class="form-group">
+          <label class="form-label">Tour Title *</label>
+          <input type="text" name="title" class="form-input" placeholder="e.g. Heavenly Kashmir & Ladakh Explorer" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Destination *</label>
+            <input type="text" name="destination" class="form-input" placeholder="e.g. Kashmir" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Badge Label</label>
+            <input type="text" name="badge" class="form-input" placeholder="e.g. Trending 2026 / Bestseller" value="Trending 2026">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Duration String * (Shown on Popup)</label>
+            <input type="text" name="duration" class="form-input" placeholder="e.g. 6 Days / 5 Nights" value="6 Days / 5 Nights" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Starting Price INR *</label>
+            <input type="number" name="startingPriceINR" class="form-input" placeholder="24999" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cover Image URL *</label>
+          <input type="url" name="imageUrl" class="form-input" placeholder="https://images.unsplash.com/..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tour Overview</label>
+          <textarea name="overview" class="form-textarea" rows="2" placeholder="Experience the breathtaking Dal Lake, Gulmarg gondola ride, and Pahalgam valleys."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Day-by-Day Highlights (One per line)</label>
+          <textarea name="highlights" class="form-textarea" rows="3" placeholder="Day 1: Srinagar Shikara ride&#10;Day 2: Gulmarg snow gondola&#10;Day 3: Pahalgam Betaab Valley"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Package Inclusions (One per line)</label>
+          <textarea name="inclusions" class="form-textarea" rows="3" placeholder="Deluxe 4-Star Stays&#10;Daily Breakfast & Dinner&#10;Private Cab with Chauffeur&#10;Toll, Parking, Permits"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-header" onclick="closeModal('addFeaturedModal')">Cancel</button>
+          <button type="submit" class="btn-action-primary" id="btnSubmitFeatured">Publish Featured Tour</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL / GATE: DIRECT ADMIN AUTHENTICATION -->
+  <!-- ========================================== -->
+  <div id="authGateOverlay">
+    <div class="gate-box">
+      <div style="font-size: 28px; margin-bottom: 12px;">🔐</div>
+      <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px;">TripMozy Super Admin</h2>
+      <p style="font-size: 13px; color: #9ca3af; margin-bottom: 24px;">Please authenticate with your master administrator credentials to access live movements and operations.</p>
+      <form onsubmit="handleGateLogin(event)">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Admin ID / Email</label>
+          <input type="text" id="gateAdminId" class="form-input" value="tripmozy@gmail.com" required>
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Admin Password</label>
+          <input type="password" id="gatePassword" class="form-input" placeholder="••••••••••••" required>
+        </div>
+        <div id="gateError" style="color: #f87171; font-size: 12px; margin-bottom: 14px; display: none;"></div>
+        <button type="submit" class="btn-action-primary" style="width: 100%; justify-content: center; padding: 12px;" id="btnGateSubmit">
+          Unlock Master Console
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Global State
+    let movementsData = [];
+    let operatorsData = [];
+    let featuredData = [];
+    let activeMovementFilter = 'all';
+
+    // On Load
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAdminSession();
+      // Auto-refresh every 20 seconds
+      setInterval(() => {
+        if (!document.getElementById('authGateOverlay').style.display || document.getElementById('authGateOverlay').style.display === 'none') {
+          loadAllAdminData(true);
+        }
+      }, 20000);
+    });
+
+    async function checkAdminSession() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const user = await res.json();
+          if (user && user.role === 'admin') {
+            document.getElementById('headerAdminEmail').textContent = user.email || 'tripmozy@gmail.com';
+            document.getElementById('authGateOverlay').style.display = 'none';
+            loadAllAdminData();
+            return;
+          }
+        }
+      } catch (_) {}
+      // Show Gate
+      document.getElementById('authGateOverlay').style.display = 'flex';
+    }
+
+    async function handleGateLogin(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('gateError');
+      errEl.style.display = 'none';
+      const btn = document.getElementById('btnGateSubmit');
+      btn.textContent = 'Verifying...';
+
+      const identifier = document.getElementById('gateAdminId').value.trim();
+      const password = document.getElementById('gatePassword').value;
+
+      try {
+        const res = await fetch('/api/auth/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.role === 'admin') {
+          document.getElementById('authGateOverlay').style.display = 'none';
+          document.getElementById('headerAdminEmail').textContent = data.email || identifier;
+          loadAllAdminData();
+        } else {
+          errEl.textContent = data.error || 'Invalid admin credentials.';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Network error: ' + err.message;
+        errEl.style.display = 'block';
+      } finally {
+        btn.textContent = 'Unlock Master Console';
+      }
+    }
+
+    async function adminSignOut() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (_) {}
+      window.location.href = '/login';
+    }
+
+    // Switch Tabs
+    function switchAdminTab(tabKey) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+
+      if (tabKey === 'movements') {
+        document.querySelectorAll('.nav-tab')[0].classList.add('active');
+        document.getElementById('tabMovements').style.display = 'block';
+      } else if (tabKey === 'operators') {
+        document.querySelectorAll('.nav-tab')[1].classList.add('active');
+        document.getElementById('tabOperators').style.display = 'block';
+      } else if (tabKey === 'featured') {
+        document.querySelectorAll('.nav-tab')[2].classList.add('active');
+        document.getElementById('tabFeatured').style.display = 'block';
+      }
+    }
+
+    // Load Data
+    async function loadAllAdminData(isBackground = false) {
+      try {
+        const [movRes, venRes, featRes] = await Promise.all([
+          fetch('/api/admin/movements'),
+          fetch('/api/admin/vendors'),
+          fetch('/api/admin/featured-tours')
+        ]);
+
+        if (movRes.status === 401 || movRes.status === 403) {
+          document.getElementById('authGateOverlay').style.display = 'flex';
+          return;
+        }
+
+        if (movRes.ok) {
+          const movJson = await movRes.json();
+          movementsData = movJson.requests || [];
+          updateStats(movJson.summary || {});
+          renderMovements();
+        }
+
+        if (venRes.ok) {
+          const venJson = await venRes.json();
+          operatorsData = venJson.vendors || [];
+          document.getElementById('badgeOperators').textContent = operatorsData.length;
+          renderOperators();
+        }
+
+        if (featRes.ok) {
+          const featJson = await featRes.json();
+          featuredData = featJson.featuredTours || [];
+          document.getElementById('badgeFeatured').textContent = featuredData.length;
+          renderFeatured();
+        }
+      } catch (err) {
+        if (!isBackground) console.error('Failed to load admin data:', err);
+      }
+    }
+
+    function updateStats(s) {
+      document.getElementById('statTotalReqs').textContent = s.total_requests || movementsData.length || 0;
+      document.getElementById('statAwaiting').textContent = s.awaiting_operators || 0;
+      document.getElementById('statQuoted').textContent = s.quoted_active || 0;
+      document.getElementById('statBooked').textContent = s.completed_booked || 0;
+      document.getElementById('statDepositSum').textContent = `₹${(s.total_deposit_collected_inr || 0).toLocaleString('en-IN')} deposit collected`;
+      document.getElementById('statGmv').textContent = `₹${(s.total_gmv_inr || 0).toLocaleString('en-IN')}`;
+      document.getElementById('badgeMovements').textContent = movementsData.length;
+    }
+
+    // ==========================================
+    // RENDER TAB 1: MOVEMENTS
+    // ==========================================
+    function setMovementFilter(filter, el) {
+      activeMovementFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderMovements();
+    }
+
+    function filterMovements() {
+      renderMovements();
+    }
+
+    function renderMovements() {
+      const q = (document.getElementById('movementSearch').value || '').toLowerCase();
+      const container = document.getElementById('movementsContainer');
+
+      const filtered = movementsData.filter(r => {
+        // Status filter
+        if (activeMovementFilter === 'awaiting' && r.status !== 'awaiting_responses') return false;
+        if (activeMovementFilter === 'quoted' && r.status !== 'offers_available') return false;
+        if (activeMovementFilter === 'booked' && r.status !== 'booked') return false;
+
+        // Search text
+        if (!q) return true;
+        const custName = (r.customer && r.customer.name || '').toLowerCase();
+        const custPhone = (r.customer && r.customer.phone || '').toLowerCase();
+        const custEmail = (r.customer && r.customer.email || '').toLowerCase();
+        const dest = (r.tour && r.tour.destination || '').toLowerCase();
+        const ref = (r.reference || '').toLowerCase();
+        const opName = (r.acceptedOperator && r.acceptedOperator.business_name || '').toLowerCase();
+
+        return custName.includes(q) || custPhone.includes(q) || custEmail.includes(q) || dest.includes(q) || ref.includes(q) || opName.includes(q);
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 48px; background: var(--surface); border: 1px dashed var(--navy-border); border-radius: var(--radius); color: var(--text-muted);">
+            No tour movements matching the selected filter.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(r => {
+        let statusBadge = '<span class="status-badge status-awaiting">Awaiting Operator</span>';
+        if (r.status === 'offers_available') statusBadge = '<span class="status-badge status-quoted">Offer Quoted / Ready</span>';
+        if (r.status === 'booked') statusBadge = '<span class="status-badge status-booked">Advance Paid & Confirmed</span>';
+
+        const cust = r.customer || {};
+        const tour = r.tour || {};
+        const op = r.acceptedOperator || null;
+        const offer = r.offer || null;
+        const pay = r.payment || {};
+
+        const cleanPhone = (cust.phone || '').replace(/\D/g, '');
+        const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone}` : null;
+        const bookingPortalUrl = `/booking?id=${r.id}`;
+
+        return `
+          <div class="movement-card">
+            <div class="card-top">
+              <div class="card-ref-group">
+                <span class="ref-badge">${r.reference || r.id.slice(0, 8).toUpperCase()}</span>
+                <span class="timestamp">Created: ${new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                ${statusBadge}
+                <a href="${bookingPortalUrl}" target="_blank" class="contact-link-btn" title="View Customer Portal">
+                  🔗 Open Portal
+                </a>
+              </div>
+            </div>
+
+            <div class="movement-grid">
+              <!-- Customer Profile & Unmasked PII -->
+              <div>
+                <div class="section-title">👤 Traveler Details (Unmasked)</div>
+                <div class="info-box">
+                  <div class="info-row">
+                    <span class="info-label">Full Name:</span>
+                    <span class="info-val">${cust.name || 'Anonymous Traveler'}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-val unmasked-val">${cust.phone || 'N/A'}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-val unmasked-val">${cust.email || 'N/A'}</span>
+                  </div>
+                  <div class="contact-links">
+                    ${cust.phone ? `<a href="tel:${cust.phone}" class="contact-link-btn">📞 Call</a>` : ''}
+                    ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="contact-link-btn" style="color: #34d399; border-color: rgba(52, 211, 153, 0.3);">💬 WhatsApp</a>` : ''}
+                    ${cust.email ? `<a href="mailto:${cust.email}" class="contact-link-btn">✉️ Email</a>` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tour Circuit & Requirements -->
+              <div>
+                <div class="section-title">🗺️ Tour Circuit & Specs</div>
+                <div class="info-box">
+                  <div class="info-row">
+                    <span class="info-label">Destination:</span>
+                    <span class="info-val" style="color: #60a5fa;">${tour.destination || 'India Tour'}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Duration:</span>
+                    <span class="info-val">${tour.duration_nights ? `${tour.duration_nights} Nights / ${tour.duration_nights + 1} Days` : 'Custom'}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Dates:</span>
+                    <span class="info-val">${tour.check_in_date || 'Flexible'} → ${tour.check_out_date || ''}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Guests & Rooms:</span>
+                    <span class="info-val">${tour.adults || 2} Adults, ${tour.children || 0} Kids (${tour.rooms_required || 1} Rooms)</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Budget:</span>
+                    <span class="info-val">₹${(tour.budget_min_inr || 0).toLocaleString('en-IN')} - ₹${(tour.budget_max_inr || 0).toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accepting Tour Operator -->
+              <div>
+                <div class="section-title">🏢 Accepting Tour Operator</div>
+                <div class="info-box">
+                  ${op ? `
+                    <div class="info-row">
+                      <span class="info-label">Operator:</span>
+                      <span class="info-val" style="color: #fbbf24;">${op.business_name}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Contact:</span>
+                      <span class="info-val">${op.contact_person || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Operator Phone:</span>
+                      <span class="info-val unmasked-val">${op.phone || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Operator ID:</span>
+                      <span class="info-val" style="font-family: monospace; font-size: 11px;">${op.vendor_id ? op.vendor_id.slice(0, 8) : 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Fleet / Property:</span>
+                      <span class="info-val">${op.property_name || 'Fleet'} (${op.city || ''})</span>
+                    </div>
+                  ` : `
+                    <div style="text-align: center; padding: 12px; color: var(--text-muted);">
+                      <em>Waiting for an operator to claim and quote...</em>
+                    </div>
+                  `}
+                </div>
+              </div>
+
+              <!-- Offer & Payment Status -->
+              <div>
+                <div class="section-title">💳 Quote & Payment Status</div>
+                <div class="info-box">
+                  ${offer ? `
+                    <div class="info-row">
+                      <span class="info-label">Total Tour Price:</span>
+                      <span class="info-val" style="color: #60a5fa; font-size: 14px;">₹${(offer.total_price_inr || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">30% Advance Deposit:</span>
+                      <span class="info-val" style="color: #fbbf24; font-weight: 800;">₹${(offer.advance_deposit_inr || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Payment Status:</span>
+                      <span class="info-val">
+                        ${pay.payment_status === 'captured' || r.status === 'booked' 
+                          ? '<span style="color: #34d399; font-weight: 800;">✅ Advance Paid</span>' 
+                          : '<span style="color: #f87171;">⏳ Pending</span>'}
+                      </span>
+                    </div>
+                    ${pay.gateway_payment_id ? `
+                      <div class="info-row">
+                        <span class="info-label">Razorpay ID:</span>
+                        <span class="info-val" style="font-family: monospace; font-size: 11px;">${pay.gateway_payment_id}</span>
+                      </div>
+                    ` : ''}
+                    <div class="info-row">
+                      <span class="info-label">Balance on Arrival:</span>
+                      <span class="info-val">₹${(offer.remaining_balance_inr || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                  ` : `
+                    <div style="text-align: center; padding: 12px; color: var(--text-muted);">
+                      <em>No quote submitted yet</em>
+                    </div>
+                  `}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // RENDER TAB 2: OPERATORS
+    // ==========================================
+    function filterOperators() {
+      renderOperators();
+    }
+
+    function renderOperators() {
+      const q = (document.getElementById('operatorSearch').value || '').toLowerCase();
+      const tbody = document.getElementById('operatorsTableBody');
+
+      const filtered = operatorsData.filter(v => {
+        if (!q) return true;
+        const b = (v.business_name || '').toLowerCase();
+        const p = (v.contact_person || '').toLowerCase();
+        const ph = (v.contact_phone || '').toLowerCase();
+        const c = (v.city || '').toLowerCase();
+        return b.includes(q) || p.includes(q) || ph.includes(q) || c.includes(q);
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">No tour operators found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(v => {
+        const isActive = v.status === 'active';
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 700; color: #fff;">${v.business_name}</div>
+              <div style="font-size: 11px; font-family: monospace; color: #9ca3af;">ID: ${v.id.slice(0, 8)}</div>
+            </td>
+            <td>${v.contact_person || 'N/A'}</td>
+            <td>
+              <div>${v.contact_phone || 'N/A'}</div>
+              <div style="font-size: 11px; color: #9ca3af;">${v.contact_email || 'N/A'}</div>
+            </td>
+            <td>${v.city || 'India'}</td>
+            <td>
+              <div style="font-weight: 600;">${v.property_name || 'Tour Fleet'}</div>
+              <div style="font-size: 11px; color: #9ca3af;">Mode: instant_confirmed</div>
+            </td>
+            <td>
+              <span class="${isActive ? 'badge-active' : 'badge-suspended'}">
+                ${isActive ? 'Active' : 'Suspended'}
+              </span>
+            </td>
+            <td>
+              <div style="font-size: 12px;"><strong>${v.total_received || 0}</strong> received</div>
+              <div style="font-size: 11px; color: #34d399;"><strong>${v.total_accepted || 0}</strong> accepted</div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-table" onclick="toggleOperatorStatus('${v.id}', '${isActive ? 'suspended' : 'active'}')">
+                  ${isActive ? 'Suspend' : 'Activate'}
+                </button>
+                <button class="btn-table btn-table-danger" onclick="deleteOperator('${v.id}', '${v.business_name.replace(/'/g, "\\'")}')">
+                  Remove
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function toggleOperatorStatus(vendorId, newStatus) {
+      try {
+        const res = await fetch(`/api/admin/vendors/${vendorId}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (res.ok) {
+          loadAllAdminData();
+        } else {
+          const err = await res.json();
+          alert('Failed to update status: ' + (err.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function deleteOperator(vendorId, name) {
+      if (!confirm(`Are you sure you want to permanently remove tour operator "${name}"?`)) return;
+      try {
+        const res = await fetch(`/api/admin/vendors/${vendorId}`, { method: 'DELETE' });
+        if (res.ok) {
+          loadAllAdminData();
+        } else {
+          const err = await res.json();
+          alert('Failed to delete operator: ' + (err.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function openAddOperatorModal() {
+      document.getElementById('addOperatorModal').classList.add('active');
+    }
+
+    async function submitAddOperator(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById('btnSubmitOperator');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      const payload = {
+        businessName: form.businessName.value.trim(),
+        contactPerson: form.contactPerson.value.trim(),
+        contactPhone: form.contactPhone.value.trim(),
+        contactEmail: form.contactEmail.value.trim(),
+        city: form.city.value.trim(),
+        commissionBps: parseInt(form.commissionBps.value || '500', 10)
+      };
+
+      try {
+        const res = await fetch('/api/admin/vendors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          closeModal('addOperatorModal');
+          form.reset();
+          loadAllAdminData();
+        } else {
+          alert('Error: ' + (data.error || 'Could not create operator'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Operator Account';
+      }
+    }
+
+    // ==========================================
+    // RENDER TAB 3: FEATURED TOURS
+    // ==========================================
+    function renderFeatured() {
+      const container = document.getElementById('featuredGridContainer');
+      if (!featuredData.length) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 48px; background: var(--surface); border: 1px dashed var(--navy-border); border-radius: var(--radius); color: var(--text-muted);">
+            No featured tour cards added yet.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = featuredData.map(f => {
+        let highlights = [];
+        try {
+          highlights = typeof f.highlights === 'string' ? JSON.parse(f.highlights) : (f.highlights || []);
+        } catch (_) {}
+
+        return `
+          <div class="feat-card">
+            <div class="feat-img-wrap">
+              <img src="${f.image_url || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'}" class="feat-img" alt="${f.title}" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'">
+              ${f.badge ? `<div class="feat-badge">${f.badge}</div>` : ''}
+              <div class="feat-duration-badge">⏱️ ${f.duration || '6 Days / 5 Nights'}</div>
+            </div>
+            <div class="feat-body">
+              <div>
+                <div class="feat-title">${f.title}</div>
+                <div class="feat-dest">📍 ${f.destination}</div>
+                <div class="feat-price">₹${(f.starting_price_inr || 0).toLocaleString('en-IN')} <span style="font-size: 11px; color: #9ca3af; font-weight: 500;">/ person</span></div>
+                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 12px;">${f.overview || ''}</p>
+                ${highlights.length ? `
+                  <ul style="font-size: 11px; color: #d1d5db; padding-left: 16px; margin-bottom: 12px;">
+                    ${highlights.slice(0, 3).map(h => `<li>${h}</li>`).join('')}
+                  </ul>
+                ` : ''}
+              </div>
+              <div class="feat-actions">
+                <span style="font-size: 11px; color: #34d399; font-weight: 700;">Active on Booking Page</span>
+                <button class="btn-table btn-table-danger" onclick="deleteFeaturedTour('${f.id}', '${f.title.replace(/'/g, "\\'")}')">
+                  Remove Card
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openAddFeaturedModal() {
+      document.getElementById('addFeaturedModal').classList.add('active');
+    }
+
+    async function submitAddFeatured(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById('btnSubmitFeatured');
+      btn.disabled = true;
+      btn.textContent = 'Publishing...';
+
+      const highlights = form.highlights.value.split('\n').map(s => s.trim()).filter(Boolean);
+      const inclusions = form.inclusions.value.split('\n').map(s => s.trim()).filter(Boolean);
+
+      const payload = {
+        title: form.title.value.trim(),
+        destination: form.destination.value.trim(),
+        duration: form.duration.value.trim(),
+        startingPriceINR: parseInt(form.startingPriceINR.value, 10),
+        badge: form.badge.value.trim(),
+        imageUrl: form.imageUrl.value.trim(),
+        overview: form.overview.value.trim(),
+        highlights: highlights,
+        inclusions: inclusions
+      };
+
+      try {
+        const res = await fetch('/api/admin/featured-tours', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          closeModal('addFeaturedModal');
+          form.reset();
+          loadAllAdminData();
+        } else {
+          alert('Error: ' + (data.error || 'Could not save tour'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Publish Featured Tour';
+      }
+    }
+
+    async function deleteFeaturedTour(id, title) {
+      if (!confirm(`Are you sure you want to remove featured card "${title}"?`)) return;
+      try {
+        const res = await fetch(`/api/admin/featured-tours/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          loadAllAdminData();
+        } else {
+          const err = await res.json();
+          alert('Failed to delete card: ' + (err.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+  </script>
+</body>
+</html>

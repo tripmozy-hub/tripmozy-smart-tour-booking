@@ -393,6 +393,21 @@ const appHandler = async (req, res) => {
     return;
   }
 
+  // POST /api/auth/admin-login — Secret Admin Direct Password Authentication
+  if ((pathname === '/api/auth/admin-login' || pathname === '/api/auth/login') && method === 'POST') {
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      try {
+        const result = authService.adminPasswordLogin(body);
+        res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+        sendJson(200, result);
+      } catch (e) {
+        sendJson(401, { error: e.message || 'Invalid admin credentials' });
+      }
+    });
+    return;
+  }
+
   if (pathname === '/api/auth/me' && method === 'GET') {
     const authHeader = req.headers['authorization'] || '';
     const cookieHeader = req.headers['cookie'] || '';
@@ -966,6 +981,131 @@ const appHandler = async (req, res) => {
       sendJson(200, metrics);
     } catch (e) {
       sendJson(403, { error: e.message });
+    }
+    return;
+  }
+
+  // GET /api/admin/movements — Full Movement & Request Oversight
+  if (pathname === '/api/admin/movements' && method === 'GET') {
+    try {
+      const movements = adminService.getAllMovements(systemAdminContext);
+      let awaiting_operators = 0;
+      let quoted_active = 0;
+      let completed_booked = 0;
+      let total_deposit_collected_inr = 0;
+      let total_gmv_inr = 0;
+
+      for (const m of movements) {
+        if (m.requestStatus === 'awaiting_responses') awaiting_operators++;
+        if (m.requestStatus === 'offers_available') quoted_active++;
+        if (m.requestStatus === 'booked' || m.payment?.isPaid) {
+          completed_booked++;
+          total_deposit_collected_inr += (m.payment?.advancePaidINR || 0);
+        }
+        total_gmv_inr += (m.quote?.totalPackageINR || m.tour?.totalBudgetINR || 0);
+      }
+
+      const summary = {
+        total_requests: movements.length,
+        awaiting_operators,
+        quoted_active,
+        completed_booked,
+        total_deposit_collected_inr,
+        total_gmv_inr
+      };
+
+      sendJson(200, { success: true, movements, requests: movements, summary });
+    } catch (e) {
+      sendJson(403, { error: e.message });
+    }
+    return;
+  }
+
+  // GET /api/admin/vendors — List all registered tour operators
+  if (pathname === '/api/admin/vendors' && method === 'GET') {
+    try {
+      const vendors = adminService.getAllVendors(systemAdminContext);
+      sendJson(200, { success: true, vendors, operators: vendors });
+    } catch (e) {
+      sendJson(403, { error: e.message });
+    }
+    return;
+  }
+
+  // POST /api/admin/vendors — Add a new tour operator
+  if (pathname === '/api/admin/vendors' && method === 'POST') {
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON' });
+      try {
+        const vendor = adminService.addVendor({ ...body, actorContext: systemAdminContext });
+        sendJson(201, { success: true, vendor });
+      } catch (e) {
+        sendJson(400, { error: e.message });
+      }
+    });
+    return;
+  }
+
+  // POST /api/admin/vendors/:id/status — Toggle operator status
+  if (pathname.match(/^\/api\/admin\/vendors\/[^/]+\/status$/) && method === 'POST') {
+    const vendorId = pathname.split('/')[4];
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON' });
+      try {
+        const result = adminService.updateVendorStatus({ vendorId, ...body, actorContext: systemAdminContext });
+        sendJson(200, result);
+      } catch (e) {
+        sendJson(400, { error: e.message });
+      }
+    });
+    return;
+  }
+
+  // DELETE /api/admin/vendors/:id — Remove tour operator
+  if (pathname.match(/^\/api\/admin\/vendors\/[^/]+$/) && method === 'DELETE') {
+    const vendorId = pathname.split('/')[4];
+    try {
+      const result = adminService.removeVendor({ vendorId, actorContext: systemAdminContext });
+      sendJson(200, result);
+    } catch (e) {
+      sendJson(400, { error: e.message });
+    }
+    return;
+  }
+
+  // GET /api/featured-tours or /api/admin/featured-tours — Featured Tour Cards
+  if ((pathname === '/api/featured-tours' || pathname === '/api/admin/featured-tours') && method === 'GET') {
+    try {
+      const tours = adminService.getFeaturedTours();
+      sendJson(200, { success: true, tours, featuredTours: tours });
+    } catch (e) {
+      sendJson(400, { error: e.message });
+    }
+    return;
+  }
+
+  // POST /api/admin/featured-tours — Add a featured tour card
+  if (pathname === '/api/admin/featured-tours' && method === 'POST') {
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON' });
+      try {
+        const tour = adminService.addFeaturedTour({ ...body, actorContext: systemAdminContext });
+        sendJson(201, { success: true, tour });
+      } catch (e) {
+        sendJson(400, { error: e.message });
+      }
+    });
+    return;
+  }
+
+  // DELETE /api/admin/featured-tours/:id — Remove a featured tour card
+  if (pathname.match(/^\/api\/admin\/featured-tours\/[^/]+$/) && method === 'DELETE') {
+    const id = pathname.split('/')[4];
+    try {
+      const result = adminService.removeFeaturedTour({ id, actorContext: systemAdminContext });
+      sendJson(200, result);
+    } catch (e) {
+      sendJson(400, { error: e.message });
     }
     return;
   }

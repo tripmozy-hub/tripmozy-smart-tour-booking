@@ -819,6 +819,275 @@
       .action-links { flex-direction: column; width: 100%; }
       .btn-secondary, .btn-primary-link { width: 100%; justify-content: center; padding: 13px; }
     }
+
+    /* Tour Details Popup Modal */
+    .tour-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .tour-modal-backdrop.active {
+      display: flex;
+    }
+    .tour-modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px -15px rgba(11, 15, 25, 0.4);
+      border: 1px solid var(--border);
+      position: relative;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .tour-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(11, 15, 25, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.2s;
+    }
+    .tour-modal-close:hover {
+      background: #000000;
+      color: var(--accent);
+    }
+    .tour-modal-hero {
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+      background: #0b0f19;
+    }
+    .tour-modal-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tour-modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11, 15, 25, 0.2) 0%, rgba(11, 15, 25, 0.75) 100%);
+    }
+    .tour-modal-badge-group {
+      position: absolute;
+      bottom: 14px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tour-modal-badge {
+      background: var(--accent);
+      color: #0b0f19;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tour-modal-duration {
+      background: rgba(11, 15, 25, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+    .tour-modal-content {
+      padding: 24px;
+    }
+    .tour-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .tour-modal-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+    .tour-modal-dest {
+      font-size: 13px;
+      font-weight: 600;
+      color: #b8924b;
+    }
+    .tour-modal-price-box {
+      background: #faf8f5;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      text-align: right;
+    }
+    .tour-modal-price-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tour-modal-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.1;
+    }
+    .tour-modal-advance-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f766e;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .tour-modal-overview {
+      font-size: 13.5px;
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--accent);
+    }
+    .tour-modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 600px) {
+      .tour-modal-grid { grid-template-columns: 1fr; }
+    }
+    .tour-modal-section {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .tour-modal-sec-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tour-modal-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .tour-modal-list li {
+      font-size: 12.5px;
+      color: #374151;
+      padding: 5px 0 5px 18px;
+      position: relative;
+      line-height: 1.45;
+      border-bottom: 1px dashed #f1ece4;
+    }
+    .tour-modal-list li:last-child {
+      border-bottom: none;
+    }
+    .tour-modal-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 11px;
+    }
+    .tour-modal-foot {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tour-modal-note {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .tour-modal-cta-btn {
+      width: 100%;
+      background: var(--navy);
+      color: #d8ba7a;
+      border: 1px solid var(--accent-border);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .tour-modal-cta-btn:hover {
+      background: #000000;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(11, 15, 25, 0.25);
+    }
+    .tour-card-btn-secondary {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .tour-card-btn-secondary:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
   </style>
 </head>
 <body>
@@ -855,131 +1124,71 @@
         <div class="curated-title-group">
           <div class="curated-tag">CURATED INSPIRATION</div>
           <h2 style="margin-top:6px;">Featured Signature Circuits</h2>
-          <p>Select any signature itinerary to instantly pre-fill your request, or design your bespoke tour from scratch below.</p>
+          <p>Click any signature circuit to view duration, complete day-by-day highlights, and transparent package pricing.</p>
         </div>
       </div>
 
-      <div class="curated-grid">
-        <!-- Tour 1: Kashmir -->
-        <div class="tour-card">
-          <div class="tour-card-img-wrap">
-            <img class="tour-card-img" src="https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80" alt="Kashmir Alpine Haven" loading="lazy">
-            <span class="tour-card-pill">5 Nights · 6 Days</span>
-          </div>
-          <div class="tour-card-body">
-            <div class="tour-card-title">Kashmir Alpine Haven</div>
-            <div class="tour-card-subtitle">Srinagar · Gulmarg · Pahalgam</div>
-            <div class="tour-card-features">
-              Private cab transfers, luxury Dal Lake houseboat stay, Shikara ride &amp; scenic valley excursions.
-            </div>
-            <div class="tour-card-foot">
-              <div>
-                <div class="tour-card-price-label">EST. FROM</div>
-                <div class="tour-card-price">&#8377;28,000</div>
-              </div>
-              <button type="button" class="tour-card-btn" onclick="selectPresetJourney('Srinagar, Jammu and Kashmir', 5, 28000, ['wifi', 'parking', 'breakfast', 'mountain_view'], 'resort')">
-                Select Journey
-              </button>
-            </div>
-          </div>
-        </div>
+      <div class="curated-grid" id="featuredCircuitsGrid">
+        <!-- Dynamically loaded from /api/featured-tours with modal popup details -->
+      </div>
+    </div>
+  </section>
 
-        <!-- Tour 2: Rajasthan -->
-        <div class="tour-card">
-          <div class="tour-card-img-wrap">
-            <img class="tour-card-img" src="https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80" alt="Royal Rajasthan Palaces" loading="lazy">
-            <span class="tour-card-pill">6 Nights · 7 Days</span>
-          </div>
-          <div class="tour-card-body">
-            <div class="tour-card-title">Royal Rajasthan Heritage</div>
-            <div class="tour-card-subtitle">Jaipur · Jodhpur · Udaipur</div>
-            <div class="tour-card-features">
-              Boutique Haveli stays, private chauffeur sedan, Amer Fort tour &amp; Lake Pichola sunset cruise.
-            </div>
-            <div class="tour-card-foot">
-              <div>
-                <div class="tour-card-price-label">EST. FROM</div>
-                <div class="tour-card-price">&#8377;36,000</div>
-              </div>
-              <button type="button" class="tour-card-btn" onclick="selectPresetJourney('Jaipur, Rajasthan', 6, 36000, ['wifi', 'parking', 'breakfast'], 'homestay')">
-                Select Journey
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tour 3: Kerala -->
-        <div class="tour-card">
-          <div class="tour-card-img-wrap">
-            <img class="tour-card-img" src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80" alt="Kerala Backwaters & Tea Hills" loading="lazy">
-            <span class="tour-card-pill">4 Nights · 5 Days</span>
-          </div>
-          <div class="tour-card-body">
-            <div class="tour-card-title">Kerala Serenity &amp; Hills</div>
-            <div class="tour-card-subtitle">Munnar · Thekkady · Alleppey</div>
-            <div class="tour-card-features">
-              Private backwaters houseboat, mist-clad tea estate resort, spice garden trail &amp; all transfers.
-            </div>
-            <div class="tour-card-foot">
-              <div>
-                <div class="tour-card-price-label">EST. FROM</div>
-                <div class="tour-card-price">&#8377;24,000</div>
-              </div>
-              <button type="button" class="tour-card-btn" onclick="selectPresetJourney('Munnar, Kerala', 4, 24000, ['wifi', 'parking', 'breakfast', 'pool'], 'resort')">
-                Select Journey
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tour 4: Himachal -->
-        <div class="tour-card">
-          <div class="tour-card-img-wrap">
-            <img class="tour-card-img" src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=600&q=80" alt="Himachal Snow Panorama" loading="lazy">
-            <span class="tour-card-pill">4 Nights · 5 Days</span>
-          </div>
-          <div class="tour-card-body">
-            <div class="tour-card-title">Himachal Snow Panorama</div>
-            <div class="tour-card-subtitle">Manali · Solang · Rohtang</div>
-            <div class="tour-card-features">
-              Cozy mountain lodge, dedicated 4x4 snow excursion cab, valley viewpoints &amp; daily breakfast.
-            </div>
-            <div class="tour-card-foot">
-              <div>
-                <div class="tour-card-price-label">EST. FROM</div>
-                <div class="tour-card-price">&#8377;22,000</div>
-              </div>
-              <button type="button" class="tour-card-btn" onclick="selectPresetJourney('Manali, Himachal Pradesh', 4, 22000, ['wifi', 'parking', 'breakfast', 'mountain_view'], 'hotel')">
-                Select Journey
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tour 5: Golden Triangle -->
-        <div class="tour-card">
-          <div class="tour-card-img-wrap">
-            <img class="tour-card-img" src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80" alt="Golden Triangle Heritage" loading="lazy">
-            <span class="tour-card-pill">4 Nights · 5 Days</span>
-          </div>
-          <div class="tour-card-body">
-            <div class="tour-card-title">Golden Triangle Classic</div>
-            <div class="tour-card-subtitle">Delhi · Agra · Jaipur</div>
-            <div class="tour-card-features">
-              Taj Mahal sunrise circuit, historic fort tours, private AC chauffeur sedan &amp; handpicked boutique hotels.
-            </div>
-            <div class="tour-card-foot">
-              <div>
-                <div class="tour-card-price-label">EST. FROM</div>
-                <div class="tour-card-price">&#8377;20,000</div>
-              </div>
-              <button type="button" class="tour-card-btn" onclick="selectPresetJourney('Jaipur, Rajasthan', 4, 20000, ['wifi', 'parking', 'breakfast'], 'hotel')">
-                Select Journey
-              </button>
-            </div>
-          </div>
+  <!-- Interactive Tour Details Popup Modal -->
+  <div class="tour-modal-backdrop" id="tourDetailModal" onclick="handleBackdropClick(event)">
+    <div class="tour-modal-card">
+      <button type="button" class="tour-modal-close" onclick="closeTourDetailModal()">&times;</button>
+      <div class="tour-modal-hero">
+        <img id="modalImg" src="https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80" alt="Tour Circuit" class="tour-modal-img">
+        <div class="tour-modal-overlay"></div>
+        <div class="tour-modal-badge-group">
+          <span class="tour-modal-badge" id="modalBadge">Bestseller 2026</span>
+          <span class="tour-modal-duration" id="modalDuration">⏱️ 6 Days / 5 Nights</span>
         </div>
       </div>
+      <div class="tour-modal-content">
+        <div class="tour-modal-header">
+          <div>
+            <h2 id="modalTitle" class="tour-modal-title">Heavenly Kashmir &amp; Ladakh Circuit</h2>
+            <div id="modalDest" class="tour-modal-dest">📍 Srinagar · Gulmarg · Pahalgam</div>
+          </div>
+          <div class="tour-modal-price-box">
+            <div class="tour-modal-price-label">ESTIMATED FROM</div>
+            <div id="modalPrice" class="tour-modal-price">₹28,000</div>
+            <div class="tour-modal-advance-pill" id="modalAdvance">30% Advance: ₹8,400</div>
+          </div>
+        </div>
+
+        <div class="tour-modal-overview" id="modalOverview">
+          Experience pristine snow-clad peaks, scenic Dal Lake houseboat stays, and breathtaking Himalayan valley expeditions.
+        </div>
+
+        <div class="tour-modal-grid">
+          <div class="tour-modal-section">
+            <div class="tour-modal-sec-title">🗺️ Complete Day-by-Day Highlights</div>
+            <ul class="tour-modal-list" id="modalHighlights">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+          <div class="tour-modal-section">
+            <div class="tour-modal-sec-title">✨ Package Inclusions</div>
+            <ul class="tour-modal-list" id="modalInclusions">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+
+        <div class="tour-modal-foot">
+          <div class="tour-modal-note">
+            🔒 <strong>100% Escrow Protected:</strong> You pay the 30% advance deposit only after your verified tour operator confirms your itinerary.
+          </div>
+          <button type="button" class="tour-modal-cta-btn" id="modalCtaBtn" onclick="applyAndBookTourModal()">
+            ✨ Book This Tour Circuit →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
     </div>
   </section>
 
@@ -1322,6 +1531,253 @@
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 4000);
     }
+
+    // Featured Tour Cards & Details Popup Modal System
+    let loadedFeaturedTours = [];
+    let selectedTourForModal = null;
+
+    const defaultFallbackTours = [
+      {
+        id: 'kashmir-seed',
+        title: 'Heavenly Kashmir & Ladakh Circuit',
+        destination: 'Srinagar, Jammu and Kashmir',
+        duration: '6 Days / 5 Nights',
+        nights: 5,
+        starting_price_inr: 28000,
+        badge: 'Trending 2026',
+        image_url: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80',
+        overview: 'Experience the magic of Dal Lake houseboats, Gulmarg snow slopes, and scenic Pahalgam valleys with private transport.',
+        highlights: [
+          'Day 1: Srinagar arrival & sunset Shikara ride on Dal Lake',
+          'Day 2: Gulmarg snow gondola ride & Kongdoori peak view',
+          'Day 3: Pahalgam scenic Betaab Valley & Aru Valley excursion',
+          'Day 4: Sonamarg glacier drive & Thajiwas snow trail',
+          'Day 5: Mughal Gardens (Nishat & Shalimar) & local craft bazaar',
+          'Day 6: Houseboat breakfast & departure transfer'
+        ],
+        inclusions: [
+          'Deluxe 4-Star Resort & Houseboat Stays',
+          'Daily Breakfast & Dinner Included',
+          'Private Dedicated AC Sedan / SUV with Chauffeur',
+          'Shikara Ride & All Inner-Line Permits'
+        ]
+      },
+      {
+        id: 'rajasthan-seed',
+        title: 'Royal Rajasthan Heritage Circuit',
+        destination: 'Jaipur, Rajasthan',
+        duration: '7 Days / 6 Nights',
+        nights: 6,
+        starting_price_inr: 36000,
+        badge: 'Heritage Classic',
+        image_url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80',
+        overview: 'Walk the majestic palaces of Jaipur, the blue fortresses of Jodhpur, and the romantic lakes of Udaipur.',
+        highlights: [
+          'Day 1-2: Jaipur Pink City, Amer Fort & Hawa Mahal',
+          'Day 3: Pushkar Brahma Temple & Desert sunset view',
+          'Day 4: Jodhpur Mehrangarh Fort & Jaswant Thada',
+          'Day 5-6: Udaipur Lake Pichola cruise & City Palace'
+        ],
+        inclusions: [
+          'Heritage Haveli & Boutique Palace Stays',
+          'Daily Royal Buffet Breakfast',
+          'Chauffeur Sedan with Fuel, Tolls & Parking',
+          'Guided Sightseeing with Local Historians'
+        ]
+      },
+      {
+        id: 'kerala-seed',
+        title: 'Kerala Backwaters & Tea Hills',
+        destination: 'Munnar, Kerala',
+        duration: '5 Days / 4 Nights',
+        nights: 4,
+        starting_price_inr: 24000,
+        badge: 'Bestseller',
+        image_url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80',
+        overview: 'Rejuvenate in emerald Munnar tea hills, wildlife sanctuary trails of Thekkady, and a private Alleppey houseboat.',
+        highlights: [
+          'Day 1-2: Munnar tea plantations & Mattupetty Dam',
+          'Day 3: Thekkady spice plantation & Periyar boating',
+          'Day 4: Alleppey private luxury houseboat cruise & backwaters',
+          'Day 5: Cochin cultural walk & departure'
+        ],
+        inclusions: [
+          'Tea Valley Resort & Private Air-Conditioned Houseboat',
+          'All Meals on Houseboat + Daily Breakfast at Resorts',
+          'Private Sedan Transfer with Sightseeing',
+          'Spice Plantation Guided Tour'
+        ]
+      },
+      {
+        id: 'himachal-seed',
+        title: 'Himachal Snow & Valley Explorer',
+        destination: 'Manali, Himachal Pradesh',
+        duration: '5 Days / 4 Nights',
+        nights: 4,
+        starting_price_inr: 22000,
+        badge: 'Snow Explorer',
+        image_url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=600&q=80',
+        overview: 'Discover the snow valleys of Solang and Atal Tunnel, Old Manali cafes, and peaceful cedar forests.',
+        highlights: [
+          'Day 1: Arrival Manali & Hadimba Temple walk',
+          'Day 2: Solang Valley adventure sports & snow views',
+          'Day 3: Atal Tunnel & Sissu Lahaul Valley excursion',
+          'Day 4: Naggar Castle heritage & art gallery visit',
+          'Day 5: Riverside nature walk & departure'
+        ],
+        inclusions: [
+          'Mountain View Boutique Cottages',
+          'Daily Breakfast & Chef Special Dinner',
+          'Private Dedicated Mountain Cab & Experienced Chauffeur',
+          'All State Taxes, Green Tax & Parking'
+        ]
+      }
+    ];
+
+    async function loadFeaturedTourCards() {
+      const container = document.getElementById('featuredCircuitsGrid');
+      if (!container) return;
+
+      try {
+        const res = await fetch('/api/featured-tours');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.featuredTours && data.featuredTours.length > 0) {
+            loadedFeaturedTours = data.featuredTours;
+          } else {
+            loadedFeaturedTours = defaultFallbackTours;
+          }
+        } else {
+          loadedFeaturedTours = defaultFallbackTours;
+        }
+      } catch (_) {
+        loadedFeaturedTours = defaultFallbackTours;
+      }
+
+      renderFeaturedCircuits();
+    }
+
+    function renderFeaturedCircuits() {
+      const container = document.getElementById('featuredCircuitsGrid');
+      if (!container) return;
+
+      container.innerHTML = loadedFeaturedTours.map((t, idx) => {
+        const price = t.starting_price_inr || 25000;
+        const advance = Math.round(price * 0.3);
+        const duration = t.duration || `${(t.nights || 4) + 1} Days / ${t.nights || 4} Nights`;
+
+        return `
+          <div class="tour-card" onclick="openTourDetailModal(${idx})">
+            <div class="tour-card-img-wrap">
+              <img class="tour-card-img" src="${t.image_url || 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80'}" alt="${t.title}" loading="lazy">
+              <span class="tour-card-pill">⏱️ ${duration}</span>
+            </div>
+            <div class="tour-card-body">
+              <div class="tour-card-title">${t.title}</div>
+              <div class="tour-card-subtitle">📍 ${t.destination}</div>
+              <div class="tour-card-features">
+                ${t.overview || 'Handcrafted itinerary curated by verified tour operators.'}
+              </div>
+              <div class="tour-card-foot" onclick="event.stopPropagation()">
+                <div>
+                  <div class="tour-card-price-label">EST. FROM</div>
+                  <div class="tour-card-price">₹${price.toLocaleString('en-IN')}</div>
+                  <div style="font-size:10px; color:#0f766e; font-weight:700;">30% Adv: ₹${advance.toLocaleString('en-IN')}</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                  <button type="button" class="tour-card-btn-secondary" onclick="openTourDetailModal(${idx})">
+                    Explore Details &amp; Duration ℹ️
+                  </button>
+                  <button type="button" class="tour-card-btn" onclick="selectPresetJourney('${t.destination.replace(/'/g, "\\'")}', ${t.nights || 5}, ${price}, ['wifi', 'parking', 'breakfast'], 'resort')">
+                    Select Journey →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openTourDetailModal(idx) {
+      const tour = loadedFeaturedTours[idx];
+      if (!tour) return;
+      selectedTourForModal = tour;
+
+      const modal = document.getElementById('tourDetailModal');
+      const price = tour.starting_price_inr || 25000;
+      const advance = Math.round(price * 0.3);
+      const duration = tour.duration || `${(tour.nights || 4) + 1} Days / ${tour.nights || 4} Nights`;
+
+      let highlights = [];
+      try {
+        highlights = typeof tour.highlights === 'string' ? JSON.parse(tour.highlights) : (tour.highlights || []);
+      } catch (_) { highlights = []; }
+
+      let inclusions = [];
+      try {
+        inclusions = typeof tour.inclusions === 'string' ? JSON.parse(tour.inclusions) : (tour.inclusions || []);
+      } catch (_) { inclusions = []; }
+
+      if (!highlights.length) {
+        highlights = [
+          'Arrival & transfer to luxury hotel / resort',
+          'Private guided sightseeing with verified local driver',
+          'Scenic viewpoints & cultural landmarks',
+          'Houseboat / mountain valley excursion',
+          'Breakfast & departure assistance'
+        ];
+      }
+
+      if (!inclusions.length) {
+        inclusions = [
+          'Deluxe Hotel & Resort Accommodations',
+          'Daily Breakfast & Dinner',
+          'Private AC Cab with Dedicated Chauffeur',
+          'Toll, State Taxes & Inner Line Permits'
+        ];
+      }
+
+      document.getElementById('modalImg').src = tour.image_url || 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80';
+      document.getElementById('modalBadge').textContent = tour.badge || 'Bestseller 2026';
+      document.getElementById('modalDuration').textContent = `⏱️ ${duration}`;
+      document.getElementById('modalTitle').textContent = tour.title;
+      document.getElementById('modalDest').textContent = `📍 ${tour.destination}`;
+      document.getElementById('modalPrice').textContent = `₹${price.toLocaleString('en-IN')}`;
+      document.getElementById('modalAdvance').textContent = `30% Advance: ₹${advance.toLocaleString('en-IN')}`;
+      document.getElementById('modalOverview').textContent = tour.overview || 'Handcrafted itinerary matched with verified local operators.';
+
+      const hlList = document.getElementById('modalHighlights');
+      hlList.innerHTML = highlights.map(h => `<li>${h}</li>`).join('');
+
+      const incList = document.getElementById('modalInclusions');
+      incList.innerHTML = inclusions.map(inc => `<li>${inc}</li>`).join('');
+
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTourDetailModal() {
+      const modal = document.getElementById('tourDetailModal');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target && e.target.id === 'tourDetailModal') {
+        closeTourDetailModal();
+      }
+    }
+
+    function applyAndBookTourModal() {
+      if (!selectedTourForModal) return;
+      const t = selectedTourForModal;
+      closeTourDetailModal();
+      selectPresetJourney(t.destination, t.nights || 5, t.starting_price_inr || 28000, ['wifi', 'parking', 'breakfast'], 'resort');
+    }
+
+    // Call on load
+    loadFeaturedTourCards();
 
     // Select Curated Suggested Tour Journey
     function selectPresetJourney(destination, nights, budget, inclusions, style) {

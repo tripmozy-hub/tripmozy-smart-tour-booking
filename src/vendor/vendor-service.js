@@ -399,7 +399,7 @@ class VendorService {
       // 6. Notify Customer via WhatsApp & Email (Vendor Confirmation & Payment Link)
       if (this.notifService) {
         const totalINR = pricing.totalPayablePaise / 100;
-        const baseUrl = process.env.APP_BASE_URL || process.env.BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : 'http://localhost:8080'));
+        const baseUrl = process.env.APP_BASE_URL || (process.env.NODE_ENV === 'development' && !process.env.VERCEL ? 'http://localhost:8080' : 'https://tripmozy-smart-tour-booking.vercel.app');
         const paymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&payNow=1`;
         const adminPaymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&admin=1`;
 

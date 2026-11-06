@@ -796,8 +796,21 @@
                   required
                   autofocus
                   autocomplete="email"
+                  oninput="handleAdminEmailDetection(this.value)"
                 >
                 <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Your 6-digit verification OTP will be sent to this Gmail.</div>
+              </div>
+
+              <!-- Master Admin Password (Dynamically Revealed for Admin ID) -->
+              <div class="form-group" id="adminPasswordGroup" style="display:none; margin-top:-6px; margin-bottom:16px;">
+                <label for="adminPassword" style="color:#b8924b; font-weight:700;">Admin Master Password</label>
+                <input
+                  type="password"
+                  id="adminPassword"
+                  placeholder="Enter administrator password"
+                  autocomplete="current-password"
+                >
+                <div style="font-size:11.5px;color:#b8924b;margin-top:4px;">Enter password for instant Super Admin Console access.</div>
               </div>
 
               <div class="form-group">
@@ -1069,6 +1082,23 @@
       }
     }
 
+    function handleAdminEmailDetection(val) {
+      const clean = (val || '').trim().toLowerCase();
+      const adminGroup = document.getElementById('adminPasswordGroup');
+      const isAdmin = clean === 'tripmozy@gmail.com' || clean === 'admin@tripmozy.com' || clean === 'admin';
+      if (adminGroup) {
+        if (isAdmin) {
+          adminGroup.style.display = 'block';
+          if (signinPhoneInput) signinPhoneInput.required = false;
+          sendBtnText.textContent = 'Log In to Console';
+        } else {
+          adminGroup.style.display = 'none';
+          if (signinPhoneInput && currentMode === 'login') signinPhoneInput.required = true;
+          sendBtnText.textContent = 'Send Code to Gmail';
+        }
+      }
+    }
+
     // STEP 1: Submit Identifier to Send OTP
     async function handleSendOtp(e) {
       e.preventDefault();
@@ -1111,6 +1141,49 @@
       } else {
         const email = (signinEmailInput.value || '').trim();
         const phone = (signinPhoneInput.value || '').trim();
+        const adminPassEl = document.getElementById('adminPassword');
+        const adminPass = adminPassEl ? adminPassEl.value : '';
+        const isAdmin = email.toLowerCase() === 'tripmozy@gmail.com' || email.toLowerCase() === 'admin@tripmozy.com' || email.toLowerCase() === 'admin';
+
+        // Direct Master Admin Password Sign-In
+        if (isAdmin && adminPass) {
+          sendBtn.disabled = true;
+          sendBtnText.innerHTML = `Authenticating Master Console…`;
+          try {
+            const adminRes = await fetch('/api/auth/admin-login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ identifier: email, password: adminPass })
+            });
+            const adminData = await adminRes.json();
+            if (adminRes.ok && adminData.role === 'admin') {
+              if (adminData.token) {
+                localStorage.setItem('tm_session_token', adminData.token);
+                document.cookie = `tm_session_token=${adminData.token}; path=/; max-age=2592000; SameSite=Lax`;
+              }
+              localStorage.setItem('tm_user_role', 'admin');
+              document.cookie = `tm_user_role=admin; path=/; max-age=2592000; SameSite=Lax`;
+              if (adminData.user) {
+                localStorage.setItem('tm_user_info', JSON.stringify(adminData.user));
+              }
+              showAlert('✅ Master Admin Authenticated! Redirecting to Console…', 'success');
+              setTimeout(() => {
+                window.location.href = adminData.redirectUrl || '/admin';
+              }, 400);
+              return;
+            } else {
+              showAlert(adminData.error || 'Invalid administrator password', 'error');
+              sendBtn.disabled = false;
+              sendBtnText.textContent = 'Log In to Console';
+              return;
+            }
+          } catch (err) {
+            showAlert('Login error: ' + err.message, 'error');
+            sendBtn.disabled = false;
+            sendBtnText.textContent = 'Log In to Console';
+            return;
+          }
+        }
 
         if (!email || !email.includes('@')) {
           showAlert('Please enter your valid Gmail address', 'error');
@@ -1338,7 +1411,12 @@
         } catch (_) {}
 
         // Automatic Redirection according to role:
-        if (data.role === 'vendor') {
+        if (data.role === 'admin') {
+          showAlert('✅ Verification successful! Redirecting to Super Admin Console…', 'success');
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || '/admin';
+          }, 400);
+        } else if (data.role === 'vendor') {
           showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
           setTimeout(() => {
             window.location.href = data.redirectUrl || '/partner/dashboard';

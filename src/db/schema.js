@@ -437,6 +437,36 @@ CREATE TABLE IF NOT EXISTS auth_otps (
     is_used INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- 26. ADMIN CREDENTIALS (Secure Password Access)
+CREATE TABLE IF NOT EXISTS admin_credentials (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'admin',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 27. FEATURED TOUR CARDS (AI Tour Planner & Customer Portal)
+CREATE TABLE IF NOT EXISTS featured_tour_cards (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    destination TEXT NOT NULL,
+    duration TEXT NOT NULL,
+    nights INTEGER NOT NULL DEFAULT 5,
+    days INTEGER NOT NULL DEFAULT 6,
+    starting_price_inr INTEGER NOT NULL,
+    badge TEXT DEFAULT 'Featured',
+    image_url TEXT,
+    overview TEXT,
+    highlights_json TEXT,
+    inclusions_json TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    display_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 module.exports = { DDL_STATEMENTS };

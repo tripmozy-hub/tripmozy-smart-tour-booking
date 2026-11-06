@@ -30,7 +30,7 @@ class NotificationService {
       twilioToken: config.twilioToken || process.env.TWILIO_AUTH_TOKEN || null,
       twilioFrom: config.twilioFrom || process.env.TWILIO_PHONE_NUMBER || null,
       smsGatewayUrl: config.smsGatewayUrl || process.env.SMS_GATEWAY_URL || null,
-      baseUrl: config.baseUrl || process.env.APP_BASE_URL || process.env.BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : 'http://localhost:8080')),
+      baseUrl: config.baseUrl || process.env.APP_BASE_URL || (process.env.NODE_ENV === 'development' && !process.env.VERCEL ? 'http://localhost:8080' : 'https://tripmozy-smart-tour-booking.vercel.app'),
       ...config
     };
     this.mockLogs = [];

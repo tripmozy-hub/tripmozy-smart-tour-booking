@@ -364,6 +364,81 @@ class AuthService {
     };
   }
 
+  // Direct Admin Password Authentication
+  adminPasswordLogin({ identifier, password }) {
+    if (!identifier || !password) {
+      throw new Error('Please provide both Admin ID and Password');
+    }
+
+    const cleanId = this.normalizeIdentifier(identifier).toLowerCase();
+    const cleanPassword = String(password).trim();
+    const passHash = crypto.createHash('sha256').update(cleanPassword).digest('hex');
+
+    // 1. Check in admin_credentials
+    let cred = null;
+    try {
+      cred = this.db.queryOne(`
+        SELECT * FROM admin_credentials
+        WHERE LOWER(email) = LOWER(?)
+      `, [cleanId]);
+    } catch (_) {}
+
+    // Fallback: Also accept 'tripmozy@gmail.com' or 'admin@tripmozy.com' or 'admin'
+    const isMasterAdmin = cleanId === 'tripmozy@gmail.com' || cleanId === 'admin@tripmozy.com' || cleanId === 'admin';
+    const masterPassHash = '466748976afcd72bec8a7c9bd0a7f25033e811fec64f541e86611435b987946a'; // TripMozy@Admin2026!
+
+    if (!cred && isMasterAdmin && passHash === masterPassHash) {
+      cred = {
+        id: 'admin_user_001',
+        email: cleanId.includes('@') ? cleanId : 'tripmozy@gmail.com',
+        password_hash: masterPassHash,
+        role: 'admin'
+      };
+    }
+
+    if (!cred || cred.password_hash !== passHash) {
+      throw new Error('Invalid Admin ID or Password');
+    }
+
+    // Ensure user profile exists
+    let user = this.db.queryOne('SELECT * FROM user_profiles WHERE LOWER(email) = LOWER(?)', [cred.email]);
+    if (!user) {
+      const uid = this.db.uuid();
+      this.db.execute(`
+        INSERT INTO user_profiles (id, email, role, display_name, status, is_phone_verified, is_email_verified)
+        VALUES (?, ?, 'admin', 'TripMozy Super Admin', 'active', 1, 1)
+      `, [uid, cred.email]);
+      user = this.db.queryOne('SELECT * FROM user_profiles WHERE id = ?', [uid]);
+    } else if (user.role !== 'admin') {
+      this.db.execute("UPDATE user_profiles SET role = 'admin', status = 'active' WHERE id = ?", [user.id]);
+    }
+
+    // Generate secure session token
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
+    const sessionId = this.db.uuid();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    this.db.execute(`
+      INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
+      VALUES (?, ?, 'admin', ?, ?)
+    `, [sessionId, user.id, tokenHash, expiresAt]);
+
+    return {
+      success: true,
+      token: sessionToken,
+      sessionToken,
+      role: 'admin',
+      redirectUrl: '/admin',
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.display_name || 'TripMozy Super Admin',
+        role: 'admin'
+      }
+    };
+  }
+
   // Verify OTP code and establish user/vendor session
   verifyOtp({ identifier, otpCode, role = 'customer' }) {
     const cleanId = this.normalizeIdentifier(identifier);
