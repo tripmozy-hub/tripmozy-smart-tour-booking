@@ -1433,7 +1433,7 @@
       if (params.get('mode') === 'signup' || params.get('mode') === 'register') {
         switchMode('signup');
       }
-      if (params.get('role') === 'partner' || params.get('role') === 'vendor') {
+      if (params.get('role') === 'partner' || params.get('role') === 'vendor' || window.location.pathname.includes('vendor') || window.location.pathname.includes('partner')) {
         selectSignupRole('vendor');
       }
 

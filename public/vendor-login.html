@@ -3,327 +3,1286 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Tour Operator Partner Sign In | TripMozy</title>
+  <title>Private Access &amp; Concierge Login | TripMozy - Smart Tour Booking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --navy: #0f172a;
-      --navy-dark: #090d16;
-      --accent: #f59e0b;
-      --accent-hover: #d97706;
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #ffffff;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --success: #10b981;
+      --primary: #0b0f19;
+      --primary-dark: #05070d;
+      --navy: #0b0f19;
+      --navy-light: #151d2f;
+      --accent: #b8924b;
+      --accent-hover: #9a7836;
+      --accent-light: #fbf7ee;
+      --accent-border: #d8ba7a;
+      --bg: #faf8f5;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #64748b;
+      --text-secondary: #4b5563;
+      --border: #ece7df;
+      --border-focus: #b8924b;
+      --success: #0f766e;
       --radius: 18px;
-      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      --radius-sm: 10px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 20px 50px -10px rgba(11, 15, 25, 0.12);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background: radial-gradient(circle at top right, #1e3a8a 0%, var(--bg) 60%);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
+    /* Header */
     header {
-      padding: 20px 28px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: var(--navy);
+      color: #ffffff;
+      padding: 16px 28px;
+      border-bottom: 1px solid rgba(184, 146, 75, 0.2);
     }
     .header-inner {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
-    .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #ffffff;
+    }
+    .brand-logo { font-size: 23px; font-weight: 800; letter-spacing: -0.5px; }
     .brand-logo span { color: var(--accent); }
-    .brand-badge {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fbbf24;
+    .brand-tag {
       font-size: 11px;
       font-weight: 700;
+      background: rgba(184, 146, 75, 0.15);
+      border: 1px solid rgba(184, 146, 75, 0.35);
       padding: 3px 10px;
       border-radius: 20px;
-      letter-spacing: 0.5px;
+      color: #d8ba7a;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
     }
-    .nav-link { color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 600; transition: color 0.2s; }
-    .nav-link:hover { color: #fff; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .nav-link {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
 
+    /* Main Container with India Background */
     .main-wrap {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 48px 18px;
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(11, 15, 25, 0.72) 0%, rgba(11, 15, 25, 0.85) 100%),
+        url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=2000&q=85') center center / cover no-repeat;
     }
-    .login-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      max-width: 460px;
+    @media (min-width: 768px) {
+      .main-wrap {
+        background-attachment: fixed;
+      }
+    }
+    .login-container {
       width: 100%;
-      padding: 40px 36px;
+      max-width: 480px;
+      position: relative;
+      z-index: 2;
     }
 
+    /* Auth Card */
+    .login-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(216, 186, 122, 0.45);
+      border-radius: var(--radius);
+      box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      padding: 42px 38px;
+      transition: all 0.25s ease;
+    }
+
+    /* Top Mode Toggle: Log In vs Sign Up */
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #faf8f5;
+      padding: 5px;
+      border-radius: 12px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border);
+      gap: 4px;
+    }
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      user-select: none;
+    }
+    .mode-btn:hover:not(.active) {
+      color: var(--navy);
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .mode-btn.active {
+      background: var(--navy);
+      color: #faf8f5;
+      box-shadow: 0 2px 8px rgba(11, 15, 25, 0.15);
+    }
+    .mode-btn.active.login-tab {
+      color: #d8ba7a;
+    }
+    .mode-btn.active.signup-tab {
+      color: #d8ba7a;
+    }
+
+    /* Role selection pills inside Sign Up */
+    .signup-role-box {
+      margin-bottom: 22px;
+      display: none;
+    }
+    .role-pills {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .role-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .role-pill:hover {
+      border-color: #cbd5e1;
+      background: #faf8f5;
+    }
+    .role-pill.active {
+      border-color: var(--navy);
+      background: #faf8f5;
+      box-shadow: 0 2px 8px rgba(11, 15, 25, 0.05);
+    }
+    .role-pill.active.partner-pill {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .role-pill-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .role-pill-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Badges & Headings */
     .badge-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(37, 99, 235, 0.15);
-      border: 1px solid rgba(37, 99, 235, 0.3);
-      color: #60a5fa;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       padding: 4px 12px;
       border-radius: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
     }
-    h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
-    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+    .badge-pill.customer {
+      background: var(--accent-light);
+      color: #85621e;
+      border: 1px solid var(--accent-border);
+    }
+    .badge-pill.partner {
+      background: #fdf6ec;
+      color: #9a6b1f;
+      border: 1px solid #ebd3a7;
+    }
+    .badge-pill.auto {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
 
-    .form-group { margin-bottom: 20px; }
-    label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #cbd5e1; }
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+      color: var(--navy);
+    }
+    .subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      color: var(--text);
+      letter-spacing: 0.1px;
+    }
     input[type="text"], input[type="email"], input[type="tel"] {
       width: 100%;
-      padding: 14px 16px;
-      background: rgba(15, 23, 42, 0.6);
+      padding: 13px 16px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      font-size: 16px; /* Prevents iOS auto-zoom */
+      font-size: 14.5px;
       font-family: inherit;
-      color: #fff;
-      transition: all 0.2s;
-    }
-    input:focus {
+      color: var(--text);
+      background: #ffffff;
       outline: none;
+      transition: all 0.2s ease;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus {
       border-color: var(--accent);
-      background: rgba(15, 23, 42, 0.8);
-      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+      box-shadow: 0 0 0 3px rgba(184, 146, 75, 0.18);
     }
 
+    /* Buttons */
     .btn {
       width: 100%;
-      padding: 15px;
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 800;
+      padding: 14px 20px;
+      border: 1px solid var(--accent-border);
+      border-radius: 11px;
+      font-size: 14.5px;
+      font-weight: 700;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--navy);
+      color: #faf8f5;
+      transition: all 0.22s ease;
       font-family: inherit;
-      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 16px rgba(11, 15, 25, 0.14);
     }
-    .btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn:hover {
+      background: #151d2f;
+      color: #d8ba7a;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(11, 15, 25, 0.22);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .btn.partner-btn {
+      background: #151d2f;
+      color: #d8ba7a;
+      border-color: var(--accent);
+    }
 
-    /* Step 2 */
+    /* Step 2: OTP Inputs */
     .step-2 { display: none; }
-    .test-pill {
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px dashed rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
-      padding: 10px 14px;
+    .otp-inputs {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .otp-box {
+      width: 100%;
+      height: 58px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #faf8f5;
+      color: var(--navy);
+      font-family: monospace;
+      outline: none;
+      transition: all 0.18s ease;
+    }
+    .otp-box:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(184, 146, 75, 0.18);
+      transform: scale(1.03);
+    }
+
+    /* Alert Boxes */
+    .alert-box {
+      padding: 12px 16px;
       border-radius: 10px;
       font-size: 13px;
-      margin: 16px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
+      line-height: 1.5;
+      margin-bottom: 18px;
+      display: none;
     }
-    .test-pill:hover { background: rgba(245, 158, 11, 0.2); }
+    .alert-box.info {
+      display: block;
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      color: #85621e;
+    }
+    .alert-box.success {
+      display: block;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .alert-box.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .alert-box.warning {
+      display: block;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
 
     .back-btn {
-      background: none;
+      background: transparent;
       border: none;
       color: var(--text-muted);
       font-size: 13px;
-      cursor: pointer;
-      margin-top: 16px;
-      display: inline-block;
       font-weight: 600;
-      font-family: inherit;
+      margin-top: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .back-btn:hover { color: #fff; }
+    .back-btn:hover { color: var(--navy); }
 
-    @media (max-width: 640px) {
-      .main-wrap { padding: 20px 14px; }
-      .login-card { padding: 24px 18px; border-radius: 14px; }
-      header { padding: 12px 16px; }
-      h1 { font-size: 22px; }
-      .subtitle { font-size: 13px; margin-bottom: 20px; }
-      .chip { padding: 6px 12px; font-size: 12px; }
-    }
-
-    .footer-note {
+    .switch-mode-note {
       text-align: center;
-      margin-top: 26px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 22px;
       font-size: 13px;
       color: var(--text-muted);
     }
-    .footer-note a { color: var(--accent); text-decoration: none; font-weight: 700; }
-    .footer-note a:hover { text-decoration: underline; }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #0284c7;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-      transition: all 0.3s;
-      z-index: 1000;
-      opacity: 0;
+    .switch-mode-note a {
+      color: #85621e;
+      font-weight: 700;
+      text-decoration: none;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .switch-mode-note a:hover { text-decoration: underline; }
+
+    /* ── No Account Found Popup Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(11, 15, 25, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: modalFadeIn 0.22s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-card {
+      background: #ffffff;
+      border: 1.5px solid rgba(184, 146, 75, 0.45);
+      border-radius: 20px;
+      padding: 32px 24px 28px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 35px rgba(184, 146, 75, 0.18);
+      text-align: center;
+      position: relative;
+      animation: modalScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalScaleUp {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      font-size: 26px;
+      line-height: 1;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+    .modal-close-btn:hover {
+      color: #0f172a;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .modal-badge {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+    }
+    .modal-sub-icon {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      font-size: 14px;
+      background: #ffffff;
+      border-radius: 50%;
+      padding: 2px;
+      border: 1px solid #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0b0f19;
+      margin: 0 0 8px;
+      letter-spacing: -0.3px;
+    }
+    .modal-desc {
+      font-size: 13.5px;
+      color: #475569;
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+    .modal-details-pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      font-size: 12.5px;
+    }
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #0f172a;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .detail-item .detail-icon {
+      font-size: 14px;
+      color: #b8924b;
+    }
+    .modal-subtext {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.5;
+      margin: 0 0 20px;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal-primary-btn {
+      width: 100%;
+      padding: 13px 20px;
+      font-size: 14.5px;
+      font-weight: 700;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e293b, #0b0f19);
+      color: #f8fafc;
+      border: 1px solid rgba(184, 146, 75, 0.4);
+      box-shadow: 0 4px 14px rgba(11, 15, 25, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .modal-primary-btn:hover {
+      background: #000000;
+      color: #d8ba7a;
+      box-shadow: 0 6px 18px rgba(11, 15, 25, 0.35);
+    }
+    .modal-secondary-btn {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .modal-secondary-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .login-footer-info {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── Mobile Phone Browser Responsiveness ── */
+    @media (max-width: 640px) {
+      body {
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+      header {
+        padding: 10px 14px;
+      }
+      .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+        gap: 4px;
+      }
+      .nav-link {
+        font-size: 11.5px;
+        padding: 4px 8px;
+      }
+      .brand-logo {
+        font-size: 19px;
+      }
+      .brand-tag {
+        font-size: 9.5px;
+        padding: 2px 7px;
+      }
+
+      .main-wrap {
+        padding: 18px 12px 32px;
+        align-items: flex-start;
+        background-attachment: scroll !important;
+      }
+      .login-container {
+        width: 100%;
+        max-width: 100%;
+      }
+      .login-tagline-pill {
+        font-size: 10px !important;
+        padding: 4px 12px !important;
+        letter-spacing: 0.5px !important;
+      }
+      .login-card {
+        padding: 22px 16px;
+        border-radius: 16px;
+      }
+      .mode-toggle {
+        margin-bottom: 20px;
+        padding: 4px;
+      }
+      .mode-btn {
+        padding: 9px 8px;
+        font-size: 13px;
+      }
+      h1 {
+        font-size: 21px !important;
+        margin-bottom: 6px !important;
+      }
+      .subtitle {
+        font-size: 12.5px !important;
+        margin-bottom: 18px !important;
+        line-height: 1.5 !important;
+      }
+
+      /* iOS Safari Auto-Zoom Prevention (font-size >= 16px) */
+      input[type="text"], input[type="email"], input[type="tel"] {
+        font-size: 16px !important;
+        padding: 12px 14px !important;
+        border-radius: 9px;
+      }
+      .form-group {
+        margin-bottom: 14px;
+      }
+      label {
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+
+      /* Role Selector Pills */
+      .role-pills {
+        gap: 8px;
+      }
+      .role-pill {
+        padding: 10px 6px;
+        border-radius: 10px;
+      }
+      .role-pill-title {
+        font-size: 12px;
+      }
+      .role-pill-desc {
+        font-size: 10px;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 13px 16px;
+        font-size: 14px;
+        border-radius: 10px;
+      }
+
+      /* 6-Digit OTP Boxes on Phone */
+      .otp-inputs {
+        gap: 6px;
+        margin-bottom: 18px;
+      }
+      .otp-box {
+        height: 48px;
+        font-size: 18px;
+        border-radius: 8px;
+      }
+
+      .login-footer-info {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-align: center;
+        margin-top: 18px;
+        padding-top: 14px;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <!-- Top Navigation -->
   <header>
     <div class="header-inner">
-      <a href="/partner/dashboard" class="brand">
+      <a href="/" class="brand">
         <div class="brand-logo">Trip<span>Mozy</span></div>
-        <div class="brand-badge">TOUR OPERATOR PORTAL</div>
+        <div class="brand-tag">Private Access</div>
       </a>
-      <div>
-        <a href="/smart-tour-booking" class="nav-link">← Traveler Portal</a>
+      <div class="header-right">
+        <a href="/smart-tour-booking" class="nav-link">Tour Requests</a>
+        <a href="/booking" class="nav-link">My Quotes</a>
       </div>
     </div>
   </header>
 
+  <!-- Main Login Card -->
   <main class="main-wrap">
-    <div class="login-card">
-      
-      <!-- STEP 1: Enter Partner Phone or Email -->
-      <div id="step1">
-        <div class="badge-pill">🎒 Operator Portal Access</div>
-        <h1>Partner Sign In &amp; Registration</h1>
-        <p class="subtitle">Enter your operator mobile number or partner email to access active customer tour requests, send quotes, or register a new vendor ID.</p>
-
-        <form id="requestOtpForm" onsubmit="handleSendOtp(event)">
-          <div class="form-group">
-            <label for="identifier">Operator Mobile or Partner Email</label>
-            <input type="text" id="identifier" placeholder="e.g. +91 98765 43210 or partner@example.com" required autofocus>
-          </div>
-          <button type="submit" class="btn" id="sendBtn">Send Partner Verification Code</button>
-        </form>
-
-        <div class="footer-note">
-          Are you a traveler? <a href="/customer/login">Sign in to Customer Portal</a>
-        </div>
+    <div class="login-container">
+      <div style="text-align:center; margin-bottom:18px;">
+        <span class="login-tagline-pill" style="display:inline-flex; align-items:center; gap:8px; font-size:11.5px; font-weight:700; color:#d8ba7a; background:rgba(11, 15, 25, 0.75); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(184, 146, 75, 0.45); padding:6px 18px; border-radius:9999px; letter-spacing:0.8px; text-transform:uppercase;">
+          Incredible India · Private Concierge Access
+        </span>
       </div>
+      <div class="login-card">
 
-      <!-- STEP 2: Verify 6-digit OTP -->
-      <div id="step2" class="step-2">
-        <div class="badge-pill">🔐 Partner Verification</div>
-        <h1>Enter 6-Digit Code</h1>
-        <p class="subtitle" id="step2Subtitle">Dispatched code to <strong id="sentTarget" style="color:#fff;">—</strong>. Please enter the code below:</p>
-
-        <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
-          <div class="form-group">
-            <input type="text" id="otpCode" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="Enter 6-digit code" maxlength="6" style="text-align:center;font-size:26px;font-weight:800;letter-spacing:8px;font-family:monospace;background:#0f172a;color:#fbbf24;" required>
-          </div>
-          <button type="submit" class="btn" id="verifyBtn">Verify &amp; Open Partner Dashboard</button>
-        </form>
-
-        <div style="text-align:center;">
-          <button type="button" class="back-btn" onclick="backToStep1()">← Change phone or email</button>
+        <!-- Top Mode Tabs: Log In vs Sign Up -->
+        <div class="mode-toggle" role="tablist">
+          <button type="button" class="mode-btn active login-tab" id="tabModeLogin" onclick="switchMode('login')">
+            <span>Log In</span>
+          </button>
+          <button type="button" class="mode-btn signup-tab" id="tabModeSignup" onclick="switchMode('signup')">
+            <span>Create Account</span>
+          </button>
         </div>
-      </div>
 
+        <div id="alertBox" class="alert-box"></div>
+
+        <!-- STEP 1: Identification & Registration Form -->
+        <div id="step1">
+          <div class="badge-pill customer" id="headerBadge">Returning User</div>
+          <h1 id="pageTitle">Log In to TripMozy</h1>
+          <p class="subtitle" id="pageSub">
+            Enter your Gmail address and mobile phone number. Your 6-digit verification code will be sent directly to your Gmail.
+          </p>
+
+          <!-- Sign Up Only: Role Selector (Customer vs Partner) -->
+          <div id="signupRoleBox" class="signup-role-box">
+            <label>Choose Account Type:</label>
+            <div class="role-pills">
+              <div class="role-pill active" id="rolePillCustomer" onclick="selectSignupRole('customer')">
+                <div class="role-pill-title">Traveler</div>
+                <div class="role-pill-desc">Request &amp; compare custom tour quotes</div>
+              </div>
+              <div class="role-pill" id="rolePillPartner" onclick="selectSignupRole('vendor')">
+                <div class="role-pill-title">Tour Operator</div>
+                <div class="role-pill-desc">Receive tour requests &amp; send quotes</div>
+              </div>
+            </div>
+          </div>
+
+          <form id="authForm" onsubmit="handleSendOtp(event)">
+            <!-- Sign In Fields (Returning Users: Gmail + Mobile Phone) -->
+            <div id="loginFieldsGroup">
+              <div class="form-group">
+                <label for="signinEmail">Gmail / Email Address</label>
+                <input
+                  type="email"
+                  id="signinEmail"
+                  placeholder="e.g. yourname@gmail.com"
+                  required
+                  autofocus
+                  autocomplete="email"
+                >
+                <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Your 6-digit verification OTP will be sent to this Gmail.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="signinPhone">Mobile Phone Number</label>
+                <input
+                  type="tel"
+                  id="signinPhone"
+                  placeholder="e.g. +91 98765 43210"
+                  required
+                  autocomplete="tel"
+                >
+              </div>
+            </div>
+
+            <!-- Sign Up Fields (New Registration: Name + Gmail + Phone) -->
+            <div id="signupFieldsGroup" style="display:none;">
+              <div class="form-group">
+                <label for="signupName">Full Name</label>
+                <input
+                  type="text"
+                  id="signupName"
+                  placeholder="e.g. Rahul Sharma"
+                  autocomplete="name"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="signupEmail">Gmail / Email Address</label>
+                <input
+                  type="email"
+                  id="signupEmail"
+                  placeholder="e.g. yourname@gmail.com"
+                  autocomplete="email"
+                >
+                <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Your 6-digit OTP code will be delivered to this Gmail.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="signupPhone">Mobile Phone Number</label>
+                <input
+                  type="tel"
+                  id="signupPhone"
+                  placeholder="e.g. +91 98765 43210"
+                  autocomplete="tel"
+                >
+              </div>
+            </div>
+
+            <!-- Optional Business Name for new Tour Operator Registration -->
+            <div class="form-group" id="businessNameGroup" style="display:none;">
+              <label for="businessName">Tour Agency / Business Name</label>
+              <input
+                type="text"
+                id="businessName"
+                placeholder="e.g. Himalayan Explorers Tours &amp; Travels"
+              >
+            </div>
+
+            <button type="submit" class="btn" id="sendBtn">
+              <span id="sendBtnText">Send Code to Gmail</span>
+            </button>
+          </form>
+
+          <div class="switch-mode-note" id="switchModeNote">
+            Don't have an account yet?
+            <a href="javascript:void(0)" onclick="switchMode('signup')">Sign Up as New User →</a>
+          </div>
+        </div>
+
+        <!-- STEP 2: 6-Digit Verification Code -->
+        <div id="step2" class="step-2">
+          <div class="badge-pill customer" id="step2Badge">Verification Code</div>
+          <h1>Enter 6-Digit Code</h1>
+          <p class="subtitle" id="step2Subtitle">
+            We have sent a 6-digit verification code to <strong id="maskedTarget" style="color:var(--navy);">...</strong>. Please enter the code below:
+          </p>
+
+          <form id="verifyOtpForm" onsubmit="handleVerifyOtp(event)">
+            <div class="otp-inputs">
+              <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autofocus>
+              <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            </div>
+
+            <button type="submit" class="btn" id="verifyBtn">
+              <span id="verifyBtnText">Verify &amp; Enter Portal</span>
+            </button>
+          </form>
+
+          <button type="button" class="back-btn" onclick="backToStep1()">
+            ← Change Mobile Number / Email
+          </button>
+        </div>
+
+        <!-- Card Footer Info -->
+        <div class="login-footer-info">
+          <span>Secured with OTP Verification</span>
+          <span>100% Escrow Protected</span>
+        </div>
+
+      </div>
     </div>
   </main>
 
-  <div id="toast" class="toast"></div>
+  <!-- No Account Found Popup Modal -->
+  <div id="noAccountModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <button type="button" class="modal-close-btn" onclick="closeNoAccountModal()" aria-label="Close dialog">&times;</button>
+      <div class="modal-badge">
+        <span>👤</span>
+        <span class="modal-sub-icon">❓</span>
+      </div>
+      <h2 id="modalTitle" class="modal-title">No Account Found</h2>
+      <p class="modal-desc">
+        We couldn't find an existing TripMozy account associated with these details:
+      </p>
+      <div class="modal-details-pill" id="modalEnteredDetails">
+        <div class="detail-item" id="modalEmailItem">
+          <span class="detail-icon">✉️</span>
+          <span class="detail-text" id="modalEnteredEmail"></span>
+        </div>
+        <div class="detail-item" id="modalPhoneItem">
+          <span class="detail-icon">📱</span>
+          <span class="detail-text" id="modalEnteredPhone"></span>
+        </div>
+      </div>
+      <p class="modal-subtext">
+        Create your free TripMozy account to request custom tour packages, compare quotes, and travel across Incredible India.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn modal-primary-btn" onclick="proceedToCreateAccount()">
+          <span>✨ Create Your Account</span>
+        </button>
+        <button type="button" class="modal-secondary-btn" onclick="closeNoAccountModal()">
+          <span>Check Details / Try Again</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
+    // State
+    let currentMode = 'login'; // 'login' | 'signup'
+    let currentSignupRole = 'customer'; // 'customer' | 'vendor'
+    let activeRole = 'customer'; // 'customer' | 'vendor'
     let currentIdentifier = '';
 
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3500);
+    // DOM Elements
+    const tabModeLogin = document.getElementById('tabModeLogin');
+    const tabModeSignup = document.getElementById('tabModeSignup');
+    const headerBadge = document.getElementById('headerBadge');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSub = document.getElementById('pageSub');
+    const signupRoleBox = document.getElementById('signupRoleBox');
+    const rolePillCustomer = document.getElementById('rolePillCustomer');
+    const rolePillPartner = document.getElementById('rolePillPartner');
+    const loginFieldsGroup = document.getElementById('loginFieldsGroup');
+    const signinEmailInput = document.getElementById('signinEmail');
+    const signinPhoneInput = document.getElementById('signinPhone');
+    const signupFieldsGroup = document.getElementById('signupFieldsGroup');
+    const signupNameInput = document.getElementById('signupName');
+    const signupEmailInput = document.getElementById('signupEmail');
+    const signupPhoneInput = document.getElementById('signupPhone');
+    const businessNameGroup = document.getElementById('businessNameGroup');
+    const businessNameInput = document.getElementById('businessName');
+    const sendBtn = document.getElementById('sendBtn');
+    const sendBtnText = document.getElementById('sendBtnText');
+    const switchModeNote = document.getElementById('switchModeNote');
+    const alertBox = document.getElementById('alertBox');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step2Badge = document.getElementById('step2Badge');
+    const step2Subtitle = document.getElementById('step2Subtitle');
+    const maskedTarget = document.getElementById('maskedTarget');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const verifyBtnText = document.getElementById('verifyBtnText');
+    const otpBoxes = document.querySelectorAll('.otp-box');
+
+    function showAlert(msg, type = 'error') {
+      alertBox.className = `alert-box ${type}`;
+      alertBox.innerHTML = msg;
+      alertBox.style.display = 'block';
     }
 
-    async function handleSendOtp(e) {
-      e.preventDefault();
-      const input = document.getElementById('identifier').value.trim();
-      if (!input) return;
+    function hideAlert() {
+      alertBox.className = 'alert-box';
+      alertBox.style.display = 'none';
+      alertBox.innerHTML = '';
+    }
 
-      const btn = document.getElementById('sendBtn');
-      btn.disabled = true;
-      btn.textContent = 'Sending code...';
+    // Switch between "Log In" (Existing User) and "Sign Up" (New User)
+    function switchMode(mode) {
+      hideAlert();
+      currentMode = mode;
 
-      try {
-        const res = await fetch('/api/auth/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier: input, role: 'vendor' })
-        });
-        const data = await res.json();
+      if (currentMode === 'login') {
+        tabModeLogin.classList.add('active');
+        tabModeSignup.classList.remove('active');
 
-        if (res.ok && data.success) {
-          currentIdentifier = data.identifier;
-          document.getElementById('sentTarget').textContent = input;
-          const subEl = document.getElementById('step2Subtitle');
-          if (subEl) {
-            if (input.includes('@')) {
-              subEl.innerHTML = `Dispatched code to <strong id="sentTarget" style="color:#fff;">${input}</strong> via email. Please check your inbox and enter the code below:`;
-            } else {
-              subEl.innerHTML = `Dispatched code to <strong id="sentTarget" style="color:#fff;">${input}</strong> via <strong>SMS text message</strong>. Please check your SMS messages and enter the code below:`;
-            }
-          }
+        headerBadge.className = 'badge-pill customer';
+        headerBadge.textContent = 'Returning User';
 
-          document.getElementById('otpCode').value = '';
+        pageTitle.textContent = 'Log In to TripMozy';
+        pageSub.textContent = "Enter your Gmail address and mobile phone number. Your 6-digit OTP verification code will be sent directly to your Gmail inbox.";
 
-          document.getElementById('step1').style.display = 'none';
-          document.getElementById('step2').style.display = 'block';
-          document.getElementById('otpCode').focus();
-          showToast('✅ ' + data.message);
-        } else {
-          showToast('⚠️ ' + (data.error || 'Could not send verification code'));
-        }
-      } catch (err) {
-        showToast('Network error: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Send Partner Verification Code';
+        loginFieldsGroup.style.display = 'block';
+        signupFieldsGroup.style.display = 'none';
+        signupRoleBox.style.display = 'none';
+        businessNameGroup.style.display = 'none';
+
+        if (signinEmailInput) signinEmailInput.required = true;
+        if (signinPhoneInput) signinPhoneInput.required = true;
+        if (signupNameInput) signupNameInput.required = false;
+        if (signupEmailInput) signupEmailInput.required = false;
+        if (signupPhoneInput) signupPhoneInput.required = false;
+
+        sendBtn.classList.remove('partner-btn');
+        sendBtnText.textContent = 'Send Code to Gmail';
+
+        switchModeNote.innerHTML = `Don't have an account yet? <a href="javascript:void(0)" onclick="switchMode('signup')">Sign Up as New User →</a>`;
+        if (signinEmailInput) signinEmailInput.focus();
+      } else {
+        tabModeSignup.classList.add('active');
+        tabModeLogin.classList.remove('active');
+
+        headerBadge.className = 'badge-pill partner';
+        headerBadge.textContent = 'New Registration';
+
+        pageTitle.textContent = 'Join TripMozy';
+        pageSub.textContent = 'Provide your name, Gmail address, and mobile phone to register. Your verification OTP code will be sent directly to your Gmail.';
+
+        loginFieldsGroup.style.display = 'none';
+        signupFieldsGroup.style.display = 'block';
+        signupRoleBox.style.display = 'block';
+
+        if (signinEmailInput) signinEmailInput.required = false;
+        if (signinPhoneInput) signinPhoneInput.required = false;
+        if (signupNameInput) signupNameInput.required = true;
+        if (signupEmailInput) signupEmailInput.required = true;
+        if (signupPhoneInput) signupPhoneInput.required = true;
+
+        updateSignupRoleUI();
+        sendBtnText.textContent = 'Register & Send Code to Gmail';
+
+        switchModeNote.innerHTML = `Already have an account? <a href="javascript:void(0)" onclick="switchMode('login')">Log In here →</a>`;
+        if (signupNameInput) signupNameInput.focus();
       }
     }
 
+    function selectSignupRole(role) {
+      currentSignupRole = role;
+      updateSignupRoleUI();
+    }
+
+    function updateSignupRoleUI() {
+      if (currentSignupRole === 'vendor') {
+        rolePillCustomer.classList.remove('active');
+        rolePillPartner.classList.add('active', 'partner-pill');
+        businessNameGroup.style.display = 'block';
+        sendBtn.classList.add('partner-btn');
+      } else {
+        rolePillPartner.classList.remove('active', 'partner-pill');
+        rolePillCustomer.classList.add('active');
+        businessNameGroup.style.display = 'none';
+        sendBtn.classList.remove('partner-btn');
+      }
+    }
+
+    // STEP 1: Submit Identifier to Send OTP
+    async function handleSendOtp(e) {
+      e.preventDefault();
+      hideAlert();
+
+      let payload = {};
+
+      if (currentMode === 'signup') {
+        const name = (signupNameInput.value || '').trim();
+        const email = (signupEmailInput.value || '').trim();
+        const phone = (signupPhoneInput.value || '').trim();
+        const businessName = (businessNameInput.value || '').trim();
+
+        if (!name) {
+          showAlert('Please enter your full name', 'error');
+          signupNameInput.focus();
+          return;
+        }
+        if (!email || !email.includes('@')) {
+          showAlert('Please enter a valid Gmail address', 'error');
+          signupEmailInput.focus();
+          return;
+        }
+        if (!phone || phone.replace(/\D/g, '').length < 10) {
+          showAlert('Please enter a valid 10-digit mobile phone number', 'error');
+          signupPhoneInput.focus();
+          return;
+        }
+
+        payload = {
+          mode: 'signup',
+          role: currentSignupRole,
+          name,
+          fullName: name,
+          email,
+          phone,
+          identifier: email,
+          businessName: currentSignupRole === 'vendor' ? businessName : null
+        };
+      } else {
+        const email = (signinEmailInput.value || '').trim();
+        const phone = (signinPhoneInput.value || '').trim();
+
+        if (!email || !email.includes('@')) {
+          showAlert('Please enter your valid Gmail address', 'error');
+          signinEmailInput.focus();
+          return;
+        }
+        if (!phone || phone.replace(/\D/g, '').length < 10) {
+          showAlert('Please enter your valid 10-digit mobile phone number', 'error');
+          signinPhoneInput.focus();
+          return;
+        }
+
+        payload = {
+          mode: 'login',
+          email,
+          phone,
+          identifier: email
+        };
+      }
+
+      sendBtn.disabled = true;
+      sendBtnText.innerHTML = `Sending code to Gmail…`;
+
+      try {
+        let res = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        let data = await res.json();
+
+        if (!res.ok) {
+          if (data.needsSignup) {
+            // Check if this browser already holds an account profile for this email/phone
+            let cached = null;
+            try {
+              cached = JSON.parse(localStorage.getItem('tm_registered_profile') || 'null');
+            } catch (_) {}
+
+            const targetEmail = (payload.email || signinEmailInput.value || '').trim().toLowerCase();
+            const targetPhone = (payload.phone || signinPhoneInput.value || '').replace(/\D/g, '').slice(-10);
+
+            if (cached && (
+              (cached.email && cached.email.toLowerCase() === targetEmail) ||
+              (cached.phone && cached.phone.replace(/\D/g, '').slice(-10) === targetPhone)
+            )) {
+              // Silently re-hydrate account into server database
+              const retryRes = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  mode: 'login',
+                  restoreProfile: true,
+                  email: targetEmail || cached.email,
+                  phone: payload.phone || cached.phone,
+                  identifier: targetEmail || cached.email,
+                  role: cached.role || 'customer',
+                  name: cached.name,
+                  fullName: cached.name,
+                  businessName: cached.businessName
+                })
+              });
+              if (retryRes.ok) {
+                res = retryRes;
+                data = await retryRes.json();
+              } else {
+                showNoAccountModal(payload.email || signinEmailInput.value, payload.phone || signinPhoneInput.value);
+                return;
+              }
+            } else {
+              showNoAccountModal(payload.email || signinEmailInput.value, payload.phone || signinPhoneInput.value);
+              return;
+            }
+          } else {
+            throw new Error(data.error || 'Failed to dispatch verification code');
+          }
+        }
+
+        currentIdentifier = data.identifier || payload.email || payload.identifier;
+        activeRole = data.role || (currentMode === 'signup' ? currentSignupRole : 'customer');
+        maskedTarget.textContent = currentIdentifier;
+
+        if (data.autoSwitchedToLogin) {
+          showAlert(`ℹ️ <strong>Account Already Registered!</strong> An account is already associated with this email/phone. Automatically switched to Log In.`, 'info');
+          tabModeLogin.classList.add('active');
+          tabModeSignup.classList.remove('active');
+        }
+
+        // Configure Step 2 Heading & Badges
+        if (activeRole === 'vendor') {
+          step2Badge.className = 'badge-pill partner';
+          step2Badge.innerHTML = 'Tour Operator Partner Desk';
+          verifyBtn.classList.add('partner-btn');
+        } else {
+          step2Badge.className = 'badge-pill customer';
+          step2Badge.innerHTML = 'Traveler Log In';
+          verifyBtn.classList.remove('partner-btn');
+        }
+
+        step2Subtitle.innerHTML = `We have sent a 6-digit verification code directly to your Gmail: <strong style="color:var(--navy);">${currentIdentifier}</strong>.<br><span style="font-size:12.5px;color:#64748b;">Please check your Gmail inbox (and Promotions/Spam folder) and enter the 6-digit code below:</span>`;
+
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+
+        // Clear boxes and focus on the first box
+        otpBoxes.forEach(b => b.value = '');
+        setTimeout(() => otpBoxes[0].focus(), 150);
+
+      } catch (err) {
+        showAlert(err.message, 'error');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtnText.textContent = currentMode === 'signup' ? 'Register & Send Code to Gmail' : 'Send Code to Gmail';
+      }
+    }
+
+    function backToStep1() {
+      hideAlert();
+      step2.style.display = 'none';
+      step1.style.display = 'block';
+      otpBoxes.forEach(b => b.value = '');
+      if (currentMode === 'signup') {
+        if (signupNameInput) signupNameInput.focus();
+      } else {
+        if (signinEmailInput) signinEmailInput.focus();
+      }
+    }
+
+    // OTP Box Navigation & Paste Support
+    otpBoxes.forEach((box, index) => {
+      box.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val.slice(0, 1);
+        if (val && index < otpBoxes.length - 1) {
+          otpBoxes[index + 1].focus();
+        }
+      });
+
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && index > 0) {
+          otpBoxes[index - 1].focus();
+        }
+      });
+
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        if (text) {
+          const digits = text.slice(0, 6).split('');
+          digits.forEach((d, i) => {
+            if (otpBoxes[i]) otpBoxes[i].value = d;
+          });
+          const nextIdx = Math.min(digits.length, otpBoxes.length - 1);
+          otpBoxes[nextIdx].focus();
+        }
+      });
+    });
+
+    // STEP 2: Verify OTP
     async function handleVerifyOtp(e) {
       e.preventDefault();
-      const code = document.getElementById('otpCode').value.trim();
-      if (!code || code.length !== 6) {
-        showToast('Please enter the 6-digit code');
+      hideAlert();
+
+      const otp = Array.from(otpBoxes).map(b => b.value.trim()).join('');
+      if (otp.length !== 6) {
+        showAlert('Please enter the complete 6-digit verification code', 'error');
         return;
       }
 
-      const btn = document.getElementById('verifyBtn');
-      btn.disabled = true;
-      btn.textContent = 'Verifying partner code...';
+      verifyBtn.disabled = true;
+      verifyBtnText.innerHTML = `Verifying code…`;
 
       try {
         const res = await fetch('/api/auth/verify-otp', {
@@ -331,48 +1290,176 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             identifier: currentIdentifier,
-            otpCode: code,
-            role: 'vendor'
+            otpCode: otp,
+            role: activeRole
           })
         });
+
         const data = await res.json();
-
-        if (res.ok && data.success) {
-          // Store session & role
-          localStorage.setItem('tm_session_token', data.sessionToken);
-          localStorage.setItem('tm_user_role', data.role || 'vendor');
-
-          if (data.role === 'customer') {
-            localStorage.setItem('tm_user_info', JSON.stringify(data.user));
-            showToast('🎉 Customer account verified! Opening Customer Portal...');
-            setTimeout(() => {
-              window.location.href = data.redirectUrl || '/booking';
-            }, 600);
-          } else {
-            if (data.vendor) {
-              localStorage.setItem('tm_vendor_id', data.vendor.id);
-              localStorage.setItem('tm_vendor_info', JSON.stringify(data.vendor));
-            }
-            showToast('🎉 Partner verified! Opening dashboard...');
-            setTimeout(() => {
-              window.location.href = data.redirectUrl || (data.vendor ? `/partner/dashboard?vendorId=${data.vendor.id}` : '/partner/dashboard');
-            }, 600);
-          }
-        } else {
-          showToast('❌ ' + (data.error || 'Invalid code'));
+        if (!res.ok) {
+          throw new Error(data.error || 'Invalid or expired verification code');
         }
+
+        // Persist session tokens & user profile in localStorage and cookies
+        if (data.token) {
+          localStorage.setItem('tm_session_token', data.token);
+          document.cookie = `tm_session_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+        if (data.role) {
+          localStorage.setItem('tm_user_role', data.role);
+          document.cookie = `tm_user_role=${data.role}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+        if (data.user) {
+          localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+          const uName = data.user.displayName || data.user.name || data.user.fullName || '';
+          const uEmail = data.user.email || '';
+          const uPhone = data.user.phone || '';
+          document.cookie = `tm_user_name=${encodeURIComponent(uName)}; path=/; max-age=2592000; SameSite=Lax`;
+          document.cookie = `tm_user_email=${encodeURIComponent(uEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+          document.cookie = `tm_user_phone=${encodeURIComponent(uPhone)}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+
+        if (data.role === 'vendor' && data.vendor && data.vendor.id) {
+          localStorage.setItem('tm_vendor_id', data.vendor.id);
+          document.cookie = `tm_vendor_id=${data.vendor.id}; path=/; max-age=2592000; SameSite=Lax`;
+        }
+
+        // Cache registered profile permanently for seamless re-entry & auto-fill
+        const persistentProfile = {
+          role: data.role,
+          email: (data.user && data.user.email) || (data.vendor && data.vendor.contactEmail) || currentIdentifier,
+          phone: (data.user && data.user.phone) || (data.vendor && data.vendor.contactPhone) || (signinPhoneInput ? signinPhoneInput.value : ''),
+          name: (data.user && data.user.displayName) || (data.vendor && data.vendor.contactPerson) || '',
+          businessName: (data.vendor && data.vendor.businessName) || '',
+          vendorId: (data.vendor && data.vendor.id) || ''
+        };
+        try {
+          localStorage.setItem('tm_registered_profile', JSON.stringify(persistentProfile));
+        } catch (_) {}
+
+        // Automatic Redirection according to role:
+        if (data.role === 'vendor') {
+          showAlert('✅ Verification successful! Redirecting to Tour Operator Dashboard…', 'success');
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || '/partner/dashboard';
+          }, 600);
+        } else {
+          showAlert('✅ Verification successful! Redirecting…', 'success');
+          const params = new URLSearchParams(window.location.search);
+          const returnUrl = params.get('returnUrl') || params.get('redirect');
+          const pendingDraft = localStorage.getItem('tm_pending_tour_request');
+          setTimeout(() => {
+            if (returnUrl) {
+              window.location.href = decodeURIComponent(returnUrl);
+            } else if (pendingDraft) {
+              window.location.href = '/smart-tour-booking?action=submit';
+            } else {
+              window.location.href = data.redirectUrl || '/booking';
+            }
+          }, 600);
+        }
+
       } catch (err) {
-        showToast('Network error: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Verify & Open Partner Dashboard';
+        showAlert(err.message, 'error');
+        verifyBtn.disabled = false;
+        verifyBtnText.textContent = 'Verify & Enter Portal';
       }
     }
 
-    function backToStep1() {
-      document.getElementById('step2').style.display = 'none';
-      document.getElementById('step1').style.display = 'block';
+    // ── No Account Found Popup Modal Handlers ──
+    function showNoAccountModal(email, phone) {
+      const emailElem = document.getElementById('modalEnteredEmail');
+      const phoneElem = document.getElementById('modalEnteredPhone');
+      const emailItem = document.getElementById('modalEmailItem');
+      const phoneItem = document.getElementById('modalPhoneItem');
+      const modal = document.getElementById('noAccountModal');
+
+      if (email && email.trim()) {
+        emailElem.textContent = email.trim();
+        emailItem.style.display = 'flex';
+      } else {
+        emailItem.style.display = 'none';
+      }
+
+      if (phone && phone.trim()) {
+        phoneElem.textContent = phone.trim();
+        phoneItem.style.display = 'flex';
+      } else {
+        phoneItem.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
     }
+
+    function closeNoAccountModal() {
+      const modal = document.getElementById('noAccountModal');
+      if (modal) modal.style.display = 'none';
+      document.body.style.overflow = '';
+      if (signinEmailInput) signinEmailInput.focus();
+    }
+
+    function proceedToCreateAccount() {
+      const enteredEmail = (signinEmailInput ? signinEmailInput.value : '').trim();
+      const enteredPhone = (signinPhoneInput ? signinPhoneInput.value : '').trim();
+      closeNoAccountModal();
+      switchMode('signup');
+      if (enteredEmail && signupEmailInput) signupEmailInput.value = enteredEmail;
+      if (enteredPhone && signupPhoneInput) signupPhoneInput.value = enteredPhone;
+      if (signupNameInput) signupNameInput.focus();
+    }
+
+    // Close modal on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('noAccountModal');
+        if (modal && modal.style.display !== 'none') {
+          closeNoAccountModal();
+        }
+      }
+    });
+
+    // Close modal when clicking backdrop
+    window.addEventListener('click', (e) => {
+      const modal = document.getElementById('noAccountModal');
+      if (e.target === modal) {
+        closeNoAccountModal();
+      }
+    });
+
+    // Auto-detect URL query params and pre-fill stored credentials for returning users
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'signup' || params.get('mode') === 'register') {
+        switchMode('signup');
+      }
+      if (params.get('role') === 'partner' || params.get('role') === 'vendor' || window.location.pathname.includes('vendor') || window.location.pathname.includes('partner')) {
+        selectSignupRole('vendor');
+      }
+
+      // Prefill signin inputs from remembered session / registered profile
+      try {
+        let remembered = JSON.parse(localStorage.getItem('tm_registered_profile') || 'null');
+        if (!remembered) {
+          const uInfo = JSON.parse(localStorage.getItem('tm_user_info') || 'null');
+          if (uInfo) {
+            remembered = {
+              email: uInfo.email,
+              phone: uInfo.phone,
+              name: uInfo.displayName
+            };
+          }
+        }
+        if (remembered) {
+          if (signinEmailInput && !signinEmailInput.value && remembered.email && !remembered.email.includes('@tripmozy.local')) {
+            signinEmailInput.value = remembered.email;
+          }
+          if (signinPhoneInput && !signinPhoneInput.value && remembered.phone) {
+            signinPhoneInput.value = remembered.phone;
+          }
+        }
+      } catch (_) {}
+    });
   </script>
 </body>
 </html>
