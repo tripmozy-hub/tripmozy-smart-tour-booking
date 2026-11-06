@@ -275,7 +275,7 @@ class RequestService {
           }
 
           // 2. Email alert to vendor: to verified vendor contact email
-          const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080');
+          const baseUrl = process.env.APP_BASE_URL || process.env.BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : 'http://localhost:8080'));
           const targetEmails = new Set();
           if (vendor.contact_email && vendor.contact_email.trim().toLowerCase() !== 'tripmozy@gmail.com') {
             targetEmails.add(vendor.contact_email.trim());

@@ -28,6 +28,15 @@ module.exports = (req, res) => {
 
   // Restore original URL when rewritten by Vercel
   const host = req.headers.host || 'localhost';
+
+  // Canonical Redirect: If accessed via preview deployment hash URL, redirect to canonical production domain
+  if (host.includes('-tripmozy.vercel.app') && !host.startsWith('tripmozy-smart-tour-booking.vercel.app')) {
+    const prodUrl = `https://tripmozy-smart-tour-booking.vercel.app${req.url}`;
+    res.writeHead(302, { Location: prodUrl });
+    res.end();
+    return;
+  }
+
   try {
     const parsed = new URL(req.url, `http://${host}`);
     const originalUrl = parsed.searchParams.get('__url') || req.headers['x-matched-path'] || req.headers['x-now-route-matches'];

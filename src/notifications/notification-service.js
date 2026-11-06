@@ -30,7 +30,7 @@ class NotificationService {
       twilioToken: config.twilioToken || process.env.TWILIO_AUTH_TOKEN || null,
       twilioFrom: config.twilioFrom || process.env.TWILIO_PHONE_NUMBER || null,
       smsGatewayUrl: config.smsGatewayUrl || process.env.SMS_GATEWAY_URL || null,
-      baseUrl: config.baseUrl || process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:8080'),
+      baseUrl: config.baseUrl || process.env.APP_BASE_URL || process.env.BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : 'http://localhost:8080')),
       ...config
     };
     this.mockLogs = [];
@@ -58,7 +58,7 @@ class NotificationService {
 
   // Generate formatted text message for WhatsApp
   generateWhatsAppText(templateCode, payload) {
-    const base = payload.baseUrl || this.config.baseUrl || 'http://localhost:8080';
+    const base = payload.baseUrl || this.config.baseUrl || (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : 'http://localhost:8080');
 
     if (templateCode === 'hotel_request_received') {
       return `🎒 *TripMozy Tour Request Alert!*\n` +

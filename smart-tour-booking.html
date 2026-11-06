@@ -1456,6 +1456,7 @@
           phone: payload.guestPhone
         }));
         localStorage.setItem('tm_user_role', 'customer');
+        localStorage.setItem('tm_latest_request_id', data.id);
         document.cookie = `tm_user_name=${encodeURIComponent(payload.guestName)}; path=/; max-age=2592000; SameSite=Lax`;
         document.cookie = `tm_user_email=${encodeURIComponent(payload.guestEmail)}; path=/; max-age=2592000; SameSite=Lax`;
         document.cookie = `tm_user_phone=${encodeURIComponent(payload.guestPhone)}; path=/; max-age=2592000; SameSite=Lax`;

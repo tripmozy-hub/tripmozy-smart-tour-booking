@@ -132,7 +132,7 @@ const TRIP_PLANNER_DIR = process.env.TRIP_PLANNER_DIR || path.join(__dirname, 'p
 const appHandler = async (req, res) => {
   const reqHost = req.headers['host'] || 'localhost:8080';
   const reqProto = req.headers['x-forwarded-proto'] || (req.connection && req.connection.encrypted ? 'https' : 'http');
-  const baseUrl = process.env.BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${reqProto}://${reqHost}`);
+  const baseUrl = process.env.BASE_URL || process.env.APP_BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : `${reqProto}://${reqHost}`));
 
   const reqUrl = new URL(req.url, baseUrl);
   let pathname = reqUrl.searchParams.get('__url') || req.headers['x-matched-path'] || reqUrl.pathname;
