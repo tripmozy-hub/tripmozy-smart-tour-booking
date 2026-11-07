@@ -2,172 +2,1029 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>TripMozy Executive Admin Console | Private Master Oversight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>TripMozy Sovereign Admin Console | Private Master Oversight</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --navy: #090e17;
-      --navy-card: #111827;
-      --navy-border: #1f2937;
-      --accent: #f59e0b;
-      --accent-glow: rgba(245, 158, 11, 0.2);
-      --bg: #090e17;
-      --surface: #111827;
-      --surface-raised: #1f2937;
-      --text: #f3f4f6;
-      --text-muted: #9ca3af;
-      --border: #374151;
+      --primary: #d8ba7a;
+      --primary-dark: #b8924b;
+      --primary-light: #f5e8cc;
+      --gold-gradient: linear-gradient(135deg, #f5e3b5 0%, #d8ba7a 50%, #9c7a36 100%);
+      --gold-border: rgba(216, 186, 122, 0.28);
+      --gold-border-subtle: rgba(216, 186, 122, 0.14);
+      --gold-glow: 0 0 24px rgba(216, 186, 122, 0.18);
+      
+      --bg: #070a12;
+      --bg-card: rgba(14, 20, 34, 0.88);
+      --bg-card-raised: rgba(22, 31, 52, 0.95);
+      --bg-header: rgba(7, 10, 18, 0.92);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-gold: #e2c78f;
+      
+      --border: rgba(255, 255, 255, 0.08);
       --success: #10b981;
-      --danger: #ef4444;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --danger: #f43f5e;
       --warning: #f59e0b;
-      --radius: 12px;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow-luxury: 0 16px 40px -10px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(216, 186, 122, 0.15);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
 
-    /* Top Navigation */
-    header { background: #0c121e; border-bottom: 1px solid var(--navy-border); padding: 0 24px; position: sticky; top: 0; z-index: 100; }
-    .header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 68px; }
-    .brand-wrap { display: flex; align-items: center; gap: 14px; }
-    .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #fff; text-decoration: none; }
-    .brand-logo span { color: var(--accent); }
-    .admin-badge { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
-    .header-actions { display: flex; align-items: center; gap: 14px; }
-    .admin-user-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); padding: 6px 14px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 600; color: #e5e7eb; }
-    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-    .btn-header { background: transparent; border: 1px solid var(--border); color: #d1d5db; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
-    .btn-header:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: #6b7280; }
-    .btn-logout { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
-    .btn-logout:hover { background: rgba(239, 68, 68, 0.25); color: #fff; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(ellipse at 50% -10%, rgba(216, 186, 122, 0.14) 0%, rgba(7, 10, 18, 0) 70%),
+        radial-gradient(ellipse at 100% 40%, rgba(184, 146, 75, 0.06) 0%, rgba(7, 10, 18, 0) 50%),
+        linear-gradient(180deg, #090e1a 0%, #05080e 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom, 30px);
+      -webkit-font-smoothing: antialiased;
+    }
 
-    /* Dashboard Layout */
-    .admin-container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+    /* Prevent iOS Safari auto-zoom on input focus */
+    @media (max-width: 640px) {
+      input, select, textarea { font-size: 16px !important; }
+    }
 
-    /* Top Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; }
-    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
-    .stat-card.stat-green::before { background: var(--success); }
-    .stat-card.stat-amber::before { background: var(--warning); }
-    .stat-card.stat-purple::before { background: #8b5cf6; }
-    .stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .stat-value { font-size: 26px; font-weight: 800; color: #fff; line-height: 1.1; }
-    .stat-sub { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+    /* ============================================================ */
+    /* TOP LUXURY HEADER                                            */
+    /* ============================================================ */
+    header {
+      background: var(--bg-header);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--gold-border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand-crown {
+      color: var(--primary);
+      font-size: 18px;
+      filter: drop-shadow(0 0 6px rgba(216, 186, 122, 0.4));
+    }
+    .brand-logo {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: #ffffff;
+    }
+    .brand-logo span {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .admin-crest {
+      background: rgba(216, 186, 122, 0.1);
+      border: 1px solid var(--gold-border);
+      color: var(--text-gold);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    @media (max-width: 480px) {
+      .admin-crest span.crest-text { display: none; }
+    }
 
-    /* Navigation Tabs */
-    .nav-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--navy-border); margin-bottom: 24px; padding-bottom: 2px; }
-    .nav-tab { background: transparent; border: none; color: var(--text-muted); font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .2s; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-    .nav-tab:hover { color: #fff; }
-    .nav-tab.active { color: #fff; border-bottom: 2px solid var(--primary); background: rgba(37, 99, 235, 0.1); }
-    .nav-tab-badge { background: rgba(255,255,255,0.1); color: #e5e7eb; font-size: 11px; padding: 2px 7px; border-radius: 12px; }
-    .nav-tab.active .nav-tab-badge { background: var(--primary); color: #fff; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .live-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseLive 2s infinite ease-in-out;
+    }
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
 
-    /* Controls Bar */
-    .controls-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .search-box { position: relative; min-width: 280px; flex: 1; max-width: 450px; }
-    .search-box input { width: 100%; background: var(--surface); border: 1px solid var(--navy-border); color: #fff; padding: 10px 14px 10px 38px; border-radius: 8px; font-size: 13px; outline: none; }
-    .search-box input:focus { border-color: var(--primary); }
-    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 14px; }
-    .filter-group { display: flex; gap: 8px; flex-wrap: wrap; }
-    .filter-btn { background: var(--surface); border: 1px solid var(--navy-border); color: #9ca3af; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s; }
-    .filter-btn.active, .filter-btn:hover { background: var(--surface-raised); color: #fff; border-color: #4b5563; }
-    .btn-action-primary { background: var(--primary); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .2s; }
-    .btn-action-primary:hover { background: var(--primary-dark); }
+    .btn-header-luxury {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      min-height: 38px;
+    }
+    .btn-header-luxury:hover, .btn-header-luxury:active {
+      background: rgba(216, 186, 122, 0.14);
+      border-color: var(--gold-border);
+      color: #ffffff;
+    }
+    .btn-logout-luxury {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fca5a5;
+    }
+    .btn-logout-luxury:hover, .btn-logout-luxury:active {
+      background: rgba(244, 63, 94, 0.22);
+      border-color: #f43f5e;
+      color: #ffffff;
+    }
 
-    /* Movements Cards Grid */
-    .movements-list { display: flex; flex-direction: column; gap: 16px; }
-    .movement-card { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); padding: 22px; transition: border-color .2s; }
-    .movement-card:hover { border-color: #374151; }
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 14px; }
-    .card-ref-group { display: flex; align-items: center; gap: 10px; }
-    .ref-badge { font-family: monospace; font-size: 14px; font-weight: 800; color: #60a5fa; background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3); padding: 3px 10px; border-radius: 6px; }
-    .timestamp { font-size: 12px; color: #9ca3af; }
-    .status-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .status-awaiting { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .status-quoted { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
-    .status-booked { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    /* ============================================================ */
+    /* CONTAINER & MASTER HERO STATS                                */
+    /* ============================================================ */
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    @media (min-width: 768px) {
+      .admin-container { padding: 24px; }
+    }
 
-    /* Movement Columns */
-    .movement-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .section-title { font-size: 11px; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .info-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 14px; font-size: 13px; }
-    .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .info-row:last-child { margin-bottom: 0; }
-    .info-label { color: #9ca3af; }
-    .info-val { font-weight: 700; color: #f3f4f6; text-align: right; }
-    .unmasked-val { color: #34d399; font-weight: 800; font-family: monospace; letter-spacing: 0.2px; }
-    .contact-links { display: flex; gap: 8px; margin-top: 8px; }
-    .contact-link-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #60a5fa; text-decoration: none; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.2); padding: 4px 8px; border-radius: 6px; transition: all .2s; }
-    .contact-link-btn:hover { background: rgba(96, 165, 250, 0.2); color: #fff; }
+    /* Master Top Bar */
+    .sovereign-banner {
+      background: linear-gradient(135deg, rgba(216, 186, 122, 0.08) 0%, rgba(14, 20, 34, 0.8) 100%);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sovereign-banner::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; width: 120px; height: 100%;
+      background: radial-gradient(circle at top right, rgba(216, 186, 122, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+    .sovereign-title-group h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sovereign-title-group p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .sovereign-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .meta-chip {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11.5px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-    /* Operators Table */
-    .table-container { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); overflow-x: auto; }
+    /* Luxury Key Metrics Grid (Optimized for Phones) */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    @media (min-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    }
+    .stat-card-luxury {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card-luxury:active, .stat-card-luxury:hover {
+      border-color: var(--gold-border);
+      transform: translateY(-2px);
+    }
+    .stat-card-luxury.span-full-mobile {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(22, 31, 52, 0.95) 0%, rgba(14, 20, 34, 0.95) 100%);
+      border: 1px solid var(--gold-border);
+    }
+    @media (min-width: 900px) {
+      .stat-card-luxury.span-full-mobile { grid-column: span 1; }
+    }
+    .stat-icon {
+      font-size: 16px;
+      margin-bottom: 6px;
+      display: inline-block;
+    }
+    .stat-label-luxury {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 4px;
+    }
+    .stat-num-luxury {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .stat-num-luxury.gold {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-num-luxury.emerald {
+      color: #34d399;
+    }
+    .stat-num-luxury.amber {
+      color: #fbbf24;
+    }
+    .stat-sub-luxury {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================================================ */
+    /* SEGMENTED LUXURY TABS (TOUCH-SCROLLABLE)                    */
+    /* ============================================================ */
+    .tabs-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .nav-tabs-luxury {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+    .nav-tabs-luxury::-webkit-scrollbar { display: none; }
+    
+    .nav-tab-luxury {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.22s ease;
+      min-height: 44px; /* Touch target */
+    }
+    .nav-tab-luxury:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .nav-tab-luxury.active {
+      color: #0b0f19;
+      background: var(--gold-gradient);
+      border-color: #d8ba7a;
+      box-shadow: var(--gold-glow);
+    }
+    .tab-counter {
+      background: rgba(0, 0, 0, 0.35);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .nav-tab-luxury.active .tab-counter {
+      background: #0b0f19;
+      color: #d8ba7a;
+    }
+
+    /* ============================================================ */
+    /* CONTROLS BAR (SEARCH & FILTERS)                              */
+    /* ============================================================ */
+    .controls-luxury {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (min-width: 768px) {
+      .controls-luxury {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+    .search-box-luxury {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+    }
+    .search-box-luxury input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      color: #ffffff;
+      padding: 12px 14px 12px 42px;
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-box-luxury input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 16px rgba(216, 186, 122, 0.2);
+    }
+    .search-icon-luxury {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 15px;
+    }
+    .filter-pills-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+    }
+    .filter-pills-row::-webkit-scrollbar { display: none; }
+    .filter-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .filter-pill.active, .filter-pill:hover {
+      background: rgba(216, 186, 122, 0.15);
+      border-color: var(--gold-border);
+      color: #ffffff;
+    }
+    .btn-action-gold {
+      background: var(--gold-gradient);
+      color: #0b0f19;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-family: inherit;
+      min-height: 42px;
+      box-shadow: 0 4px 16px rgba(216, 186, 122, 0.25);
+    }
+    .btn-action-gold:hover, .btn-action-gold:active {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(216, 186, 122, 0.4);
+    }
+
+    /* ============================================================ */
+    /* TAB 1: MOVEMENTS & LIVE REQUESTS (MOBILE-LUXURY)             */
+    /* ============================================================ */
+    .movements-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .movement-dossier {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      padding: 18px;
+      position: relative;
+      box-shadow: var(--shadow-luxury);
+      transition: border-color 0.2s ease;
+    }
+    @media (min-width: 768px) {
+      .movement-dossier { padding: 24px; }
+    }
+    .movement-dossier:hover {
+      border-color: var(--gold-border);
+    }
+
+    /* Dossier Top Bar */
+    .dossier-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-wrap: wrap;
+    }
+    .ref-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ref-stamp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-gold);
+      background: rgba(216, 186, 122, 0.12);
+      border: 1px solid var(--gold-border);
+      padding: 3px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+    .dossier-time {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    /* Luxury Status Badges */
+    .status-gem {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .gem-awaiting {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+    .gem-quoted {
+      background: rgba(96, 165, 250, 0.15);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: #93c5fd;
+    }
+    .gem-booked {
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Dossier Grid: 4 Sections */
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 640px) {
+      .dossier-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1080px) {
+      .dossier-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    }
+
+    .dossier-col {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .col-header {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+    }
+    .data-row:last-child { margin-bottom: 0; }
+    .data-lbl { color: #94a3b8; }
+    .data-val { font-weight: 700; color: #f1f5f9; text-align: right; }
+    .unmasked-gold {
+      font-family: 'JetBrains Mono', monospace;
+      color: #34d399;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    /* Direct Contact Buttons on Mobile (Dial / WhatsApp / Email) */
+    .contact-action-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .btn-contact-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 38px;
+      transition: all 0.2s;
+    }
+    .btn-contact-pill.whatsapp {
+      background: rgba(37, 211, 102, 0.15);
+      border-color: rgba(37, 211, 102, 0.35);
+      color: #25d366;
+    }
+    .btn-contact-pill.whatsapp:active, .btn-contact-pill.whatsapp:hover {
+      background: #25d366;
+      color: #000000;
+    }
+    .btn-contact-pill.phone {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #60a5fa;
+    }
+    .btn-contact-pill.phone:active, .btn-contact-pill.phone:hover {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+
+    .dossier-foot {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* ============================================================ */
+    /* TAB 2: OPERATORS (RESPONSIVE CARDS FOR MOBILE + TABLE PC)    */
+    /* ============================================================ */
+    /* Mobile Cards Container */
+    .operators-cards-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    @media (min-width: 900px) {
+      .operators-cards-mobile { display: none; }
+    }
+    .operator-card-luxury {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-luxury);
+    }
+    .op-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .op-biz-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .op-biz-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .op-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .op-action-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Desktop Table */
+    .table-container-luxury {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: var(--shadow-luxury);
+    }
+    @media (min-width: 900px) {
+      .table-container-luxury { display: block; }
+    }
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-    th { background: rgba(255,255,255,0.03); color: #9ca3af; font-weight: 700; padding: 14px 16px; border-bottom: 1px solid var(--navy-border); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-    td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #e5e7eb; vertical-align: middle; }
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-gold);
+      font-weight: 800;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.6px;
+    }
+    td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,0.015); }
-    .btn-table { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e5e7eb; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
-    .btn-table:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .btn-table-danger { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
-    .btn-table-danger:hover { background: rgba(239, 68, 68, 0.25); color: #fff; }
-    .badge-active { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-    .badge-suspended { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    tr:hover td { background: rgba(216, 186, 122, 0.02); }
 
-    /* Featured Cards Grid */
-    .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .feat-card { background: var(--surface); border: 1px solid var(--navy-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
-    .feat-img-wrap { height: 160px; position: relative; overflow: hidden; }
-    .feat-img { width: 100%; height: 100%; object-fit: cover; }
-    .feat-badge { position: absolute; top: 12px; left: 12px; background: var(--accent); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
-    .feat-duration-badge { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
-    .feat-body { padding: 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .feat-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-    .feat-dest { font-size: 13px; color: #60a5fa; font-weight: 600; margin-bottom: 12px; }
-    .feat-price { font-size: 18px; font-weight: 800; color: #34d399; margin-bottom: 14px; }
-    .feat-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; }
+    .btn-pill-action {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-pill-action:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+    .btn-pill-danger {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fca5a5;
+    }
+    .btn-pill-danger:hover {
+      background: rgba(244, 63, 94, 0.25);
+      color: #ffffff;
+    }
 
-    /* Modal Styling */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-overlay.active { display: flex; }
-    .modal-card { background: #111827; border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; padding: 26px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
-    .modal-title { font-size: 18px; font-weight: 800; color: #fff; }
-    .modal-close { background: transparent; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; }
-    .modal-close:hover { color: #fff; }
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 12px; font-weight: 700; color: #9ca3af; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-input, .form-textarea, .form-select { width: 100%; background: #1f2937; border: 1px solid #374151; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none; }
-    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--primary); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
+    /* ============================================================ */
+    /* TAB 3: FEATURED TOUR CARDS (MOBILE & DESKTOP)                */
+    /* ============================================================ */
+    .featured-grid-luxury {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .featured-grid-luxury { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1080px) {
+      .featured-grid-luxury { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    }
+    .feat-card-luxury {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-luxury);
+    }
+    .feat-hero-wrap {
+      height: 180px;
+      position: relative;
+      background: #0b0f19;
+    }
+    .feat-hero-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .feat-badge-top {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--gold-gradient);
+      color: #0b0f19;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .feat-duration-pill {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(7, 10, 18, 0.85);
+      border: 1px solid var(--gold-border);
+      color: #ffffff;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .feat-body-luxury {
+      padding: 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .feat-title-lux {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .feat-dest-lux {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-gold);
+      margin-bottom: 10px;
+    }
+    .feat-price-lux {
+      font-size: 20px;
+      font-weight: 800;
+      color: #34d399;
+      margin-bottom: 12px;
+    }
 
-    /* Auth Gate Overlay (if unauthorized) */
-    #authGateOverlay { position: fixed; inset: 0; background: #090e17; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .gate-box { background: #111827; border: 1px solid #374151; border-radius: 16px; padding: 36px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+    /* ============================================================ */
+    /* MODALS: LUXURY BOTTOM-SHEET ON MOBILE                        */
+    /* ============================================================ */
+    .modal-overlay-lux {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 14, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal-overlay-lux.active { display: flex; }
+    
+    .modal-card-lux {
+      background: #0f1627;
+      border: 1px solid var(--gold-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), var(--gold-glow);
+      position: relative;
+      animation: modalSlideUp 0.25s ease-out;
+    }
+    @media (max-width: 600px) {
+      .modal-overlay-lux {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .modal-card-lux {
+        border-radius: 24px 24px 0 0;
+        max-height: 88vh;
+        padding: 20px;
+      }
+    }
+    @keyframes modalSlideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header-lux {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .modal-title-lux {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 19px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .modal-close-lux {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close-lux:hover { color: #fff; background: rgba(255, 255, 255, 0.15); }
+    
+    .form-group-lux { margin-bottom: 14px; }
+    .form-label-lux {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+    .form-input-lux, .form-textarea-lux {
+      width: 100%;
+      background: rgba(7, 10, 18, 0.7);
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .form-input-lux:focus, .form-textarea-lux:focus {
+      border-color: var(--primary);
+    }
+    .form-row-lux {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .form-row-lux { grid-template-columns: 1fr 1fr; }
+    }
+    .modal-footer-lux {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Auth Gate Overlay */
+    #authGateOverlay {
+      position: fixed;
+      inset: 0;
+      background: #070a12;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .gate-box-lux {
+      background: #0e1422;
+      border: 1px solid var(--gold-border);
+      border-radius: 20px;
+      padding: 32px 24px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), var(--gold-glow);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Master Header -->
+  <!-- Top Luxury Header -->
   <header>
     <div class="header-inner">
       <div class="brand-wrap">
-        <a href="/" class="brand-logo">Trip<span>Mozy</span></a>
-        <span class="admin-badge">Super Admin Console</span>
+        <span class="brand-crown">✦</span>
+        <a href="/" style="text-decoration: none;" class="brand-logo">Trip<span>Mozy</span></a>
+        <div class="admin-crest">
+          <span>👑</span>
+          <span class="crest-text">Master Console</span>
+        </div>
       </div>
       <div class="header-actions">
-        <div class="admin-user-pill">
-          <span class="live-dot"></span>
-          <span id="headerAdminEmail">tripmozy@gmail.com</span>
+        <div class="live-status-pill">
+          <span class="pulse-dot"></span>
+          <span style="font-weight: 700;">LIVE</span>
         </div>
-        <button class="btn-header" onclick="loadAllAdminData()" title="Refresh Feed">🔄 Refresh</button>
-        <button class="btn-header btn-logout" onclick="adminSignOut()">Sign Out</button>
+        <button class="btn-header-luxury" onclick="loadAllAdminData()" title="Sync Live Marketplace">
+          <span>🔄</span>
+        </button>
+        <button class="btn-header-luxury btn-logout-luxury" onclick="adminSignOut()" title="Secure Logout">
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   </header>
@@ -175,256 +1032,291 @@
   <!-- Main Container -->
   <main class="admin-container">
 
-    <!-- Top Key Metrics -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Tour Requests</div>
-        <div class="stat-value" id="statTotalReqs">0</div>
-        <div class="stat-sub">Across all Indian circuits</div>
+    <!-- Sovereign Executive Banner -->
+    <section class="sovereign-banner">
+      <div class="sovereign-title-group">
+        <h1>Private Master Oversight Console</h1>
+        <p>Full real-time visibility of traveler requests, operator acceptance, live quotes, and payment escrow.</p>
       </div>
-      <div class="stat-card stat-amber">
-        <div class="stat-label">Awaiting Operator</div>
-        <div class="stat-value" id="statAwaiting">0</div>
-        <div class="stat-sub">Pending quotes/acceptance</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Quotes Active</div>
-        <div class="stat-value" id="statQuoted">0</div>
-        <div class="stat-sub">Offer delivered to customer</div>
-      </div>
-      <div class="stat-card stat-green">
-        <div class="stat-label">Booked & Advance Paid</div>
-        <div class="stat-value" id="statBooked">0</div>
-        <div class="stat-sub" id="statDepositSum">₹0 deposit collected</div>
-      </div>
-      <div class="stat-card stat-purple">
-        <div class="stat-label">Total Tour GMV</div>
-        <div class="stat-value" id="statGmv">₹0</div>
-        <div class="stat-sub">Gross marketplace value</div>
+      <div class="sovereign-meta">
+        <div class="meta-chip">
+          <span>👤 Master Admin:</span>
+          <strong id="headerAdminEmail" style="color: var(--text-gold);">tripmozy@gmail.com</strong>
+        </div>
+        <div class="meta-chip">
+          <span>🛡️ Mode:</span>
+          <span style="color:#34d399; font-weight:700;">Unmasked PII Enabled</span>
+        </div>
       </div>
     </section>
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-      <button class="nav-tab active" onclick="switchAdminTab('movements')">
-        🎯 Live Movements & Requests
-        <span class="nav-tab-badge" id="badgeMovements">0</span>
-      </button>
-      <button class="nav-tab" onclick="switchAdminTab('operators')">
-        🏢 Tour Operators Directory
-        <span class="nav-tab-badge" id="badgeOperators">0</span>
-      </button>
-      <button class="nav-tab" onclick="switchAdminTab('featured')">
-        ✨ Featured Tour Cards
-        <span class="nav-tab-badge" id="badgeFeatured">0</span>
-      </button>
-    </nav>
+    <!-- Top Key Metrics (Mobile-Optimized Luxury Grid) -->
+    <section class="stats-grid">
+      <div class="stat-card-luxury">
+        <div class="stat-icon">🗺️</div>
+        <div class="stat-label-luxury">Tour Requests</div>
+        <div class="stat-num-luxury" id="statTotalReqs">0</div>
+        <div class="stat-sub-luxury">Across Indian circuits</div>
+      </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 1: MOVEMENTS & LIVE REQUESTS -->
-    <!-- ========================================== -->
+      <div class="stat-card-luxury">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label-luxury">Awaiting Operator</div>
+        <div class="stat-num-luxury amber" id="statAwaiting">0</div>
+        <div class="stat-sub-luxury">Pending quotes / claim</div>
+      </div>
+
+      <div class="stat-card-luxury">
+        <div class="stat-icon">📋</div>
+        <div class="stat-label-luxury">Active Quotes</div>
+        <div class="stat-num-luxury" id="statQuoted">0</div>
+        <div class="stat-sub-luxury">Offer sent to traveler</div>
+      </div>
+
+      <div class="stat-card-luxury">
+        <div class="stat-icon">💎</div>
+        <div class="stat-label-luxury">Paid & Confirmed</div>
+        <div class="stat-num-luxury emerald" id="statBooked">0</div>
+        <div class="stat-sub-luxury" id="statDepositSum">₹0 deposit collected</div>
+      </div>
+
+      <div class="stat-card-luxury span-full-mobile">
+        <div class="stat-icon">👑</div>
+        <div class="stat-label-luxury">Total Marketplace GMV</div>
+        <div class="stat-num-luxury gold" id="statGmv">₹0</div>
+        <div class="stat-sub-luxury">Gross tour package volume</div>
+      </div>
+    </section>
+
+    <!-- Segmented Touch-Scrollable Navigation Tabs -->
+    <div class="tabs-wrapper">
+      <nav class="nav-tabs-luxury">
+        <button class="nav-tab-luxury active" onclick="switchAdminTab('movements')">
+          <span>🎯 Live Movements</span>
+          <span class="tab-counter" id="badgeMovements">0</span>
+        </button>
+        <button class="nav-tab-luxury" onclick="switchAdminTab('operators')">
+          <span>🏢 Tour Operators</span>
+          <span class="tab-counter" id="badgeOperators">0</span>
+        </button>
+        <button class="nav-tab-luxury" onclick="switchAdminTab('featured')">
+          <span>✨ Featured Cards</span>
+          <span class="tab-counter" id="badgeFeatured">0</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TAB 1: MOVEMENTS & LIVE REQUESTS                             -->
+    <!-- ============================================================ */ -->
     <div id="tabMovements" class="tab-pane">
-      <div class="controls-bar">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="movementSearch" placeholder="Search customer, phone, city, operator, ref..." oninput="filterMovements()">
+      <div class="controls-luxury">
+        <div class="search-box-luxury">
+          <span class="search-icon-luxury">🔍</span>
+          <input type="text" id="movementSearch" placeholder="Search traveler, phone, city, operator, ref..." oninput="filterMovements()">
         </div>
-        <div class="filter-group">
-          <button class="filter-btn active" data-filter="all" onclick="setMovementFilter('all', this)">All Movements</button>
-          <button class="filter-btn" data-filter="awaiting" onclick="setMovementFilter('awaiting', this)">Awaiting Operator</button>
-          <button class="filter-btn" data-filter="quoted" onclick="setMovementFilter('quoted', this)">Quoted / Active</button>
-          <button class="filter-btn" data-filter="booked" onclick="setMovementFilter('booked', this)">Paid & Confirmed</button>
+        <div class="filter-pills-row">
+          <button class="filter-pill active" data-filter="all" onclick="setMovementFilter('all', this)">All Movements</button>
+          <button class="filter-pill" data-filter="awaiting" onclick="setMovementFilter('awaiting', this)">Awaiting Operator</button>
+          <button class="filter-pill" data-filter="quoted" onclick="setMovementFilter('quoted', this)">Quotes Active</button>
+          <button class="filter-pill" data-filter="booked" onclick="setMovementFilter('booked', this)">Paid & Confirmed</button>
         </div>
       </div>
 
-      <div class="movements-list" id="movementsContainer">
-        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-          Loading live tour movements...
+      <div class="movements-stream" id="movementsContainer">
+        <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+          Syncing live tour movements...
         </div>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 2: TOUR OPERATORS DIRECTORY -->
-    <!-- ========================================== -->
+    <!-- ============================================================ -->
+    <!-- TAB 2: TOUR OPERATORS DIRECTORY                              -->
+    <!-- ============================================================ */ -->
     <div id="tabOperators" class="tab-pane" style="display: none;">
-      <div class="controls-bar">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="operatorSearch" placeholder="Search operators by name, city, phone..." oninput="filterOperators()">
+      <div class="controls-luxury">
+        <div class="search-box-luxury">
+          <span class="search-icon-luxury">🔍</span>
+          <input type="text" id="operatorSearch" placeholder="Search tour operators by agency, city, contact..." oninput="filterOperators()">
         </div>
-        <button class="btn-action-primary" onclick="openAddOperatorModal()">
-          + Add Tour Operator
+        <button class="btn-action-gold" onclick="openAddOperatorModal()">
+          <span>+ Add Tour Operator</span>
         </button>
       </div>
 
-      <div class="table-container">
+      <!-- Mobile Cards View (Phones) -->
+      <div class="operators-cards-mobile" id="operatorsCardsContainer">
+        <!-- Rendered dynamically for mobile -->
+      </div>
+
+      <!-- Desktop Table View (Laptops & PC) -->
+      <div class="table-container-luxury">
         <table>
           <thead>
             <tr>
-              <th>Operator / Business</th>
+              <th>Operator Agency</th>
               <th>Contact Person</th>
-              <th>Phone & Email</th>
+              <th>Phone &amp; Email</th>
               <th>Base City</th>
-              <th>Fleet / Property</th>
+              <th>Fleet / Mode</th>
               <th>Status</th>
-              <th>Requests Activity</th>
+              <th>Activity</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="operatorsTableBody">
             <tr>
-              <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading tour operators...</td>
+              <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading verified operators...</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 3: FEATURED TOUR CARDS -->
-    <!-- ========================================== -->
+    <!-- ============================================================ -->
+    <!-- TAB 3: FEATURED TOUR CARDS                                   -->
+    <!-- ============================================================ */ -->
     <div id="tabFeatured" class="tab-pane" style="display: none;">
-      <div class="controls-bar">
+      <div class="controls-luxury">
         <div>
-          <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Customer Page Featured Tour Cards</h3>
-          <p style="font-size: 13px; color: var(--text-muted);">Cards shown on the AI Tour Booking landing page with full itinerary popup modal.</p>
+          <h3 style="font-family:'Playfair Display',serif; font-size: 18px; font-weight: 700; color: #fff;">Featured Signature Circuits</h3>
+          <p style="font-size: 12.5px; color: var(--text-muted);">Display cards rendered on customer page with complete duration and itinerary popup.</p>
         </div>
-        <button class="btn-action-primary" onclick="openAddFeaturedModal()">
-          + Add Featured Tour Card
+        <button class="btn-action-gold" onclick="openAddFeaturedModal()">
+          <span>+ Add Featured Card</span>
         </button>
       </div>
 
-      <div class="featured-grid" id="featuredGridContainer">
+      <div class="featured-grid-luxury" id="featuredGridContainer">
         <!-- Rendered dynamically -->
       </div>
     </div>
 
   </main>
 
-  <!-- ========================================== -->
-  <!-- MODAL: ADD TOUR OPERATOR -->
-  <!-- ========================================== -->
-  <div class="modal-overlay" id="addOperatorModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">Add New Tour Operator Partner</div>
-        <button class="modal-close" onclick="closeModal('addOperatorModal')">&times;</button>
+  <!-- ============================================================ -->
+  <!-- MODAL: ADD TOUR OPERATOR                                     -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay-lux" id="addOperatorModal">
+    <div class="modal-card-lux">
+      <div class="modal-header-lux">
+        <div class="modal-title-lux">Register Tour Operator Partner</div>
+        <button type="button" class="modal-close-lux" onclick="closeModal('addOperatorModal')">&times;</button>
       </div>
       <form id="addOperatorForm" onsubmit="submitAddOperator(event)">
-        <div class="form-group">
-          <label class="form-label">Business / Tour Agency Name *</label>
-          <input type="text" name="businessName" class="form-input" placeholder="e.g. Royal Bengal Expeditions" required>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Business / Agency Name *</label>
+          <input type="text" name="businessName" class="form-input-lux" placeholder="e.g. Royal Bengal Expeditions" required>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Contact Person Name *</label>
-            <input type="text" name="contactPerson" class="form-input" placeholder="e.g. Rajesh Sharma" required>
+        <div class="form-row-lux">
+          <div class="form-group-lux">
+            <label class="form-label-lux">Contact Person *</label>
+            <input type="text" name="contactPerson" class="form-input-lux" placeholder="e.g. Rajesh Sharma" required>
           </div>
-          <div class="form-group">
-            <label class="form-label">Operating Base City *</label>
-            <input type="text" name="city" class="form-input" placeholder="e.g. Srinagar / Goa / Jaipur" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Contact Phone / WhatsApp *</label>
-            <input type="tel" name="contactPhone" class="form-input" placeholder="e.g. +91 98765 43210" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Contact Email *</label>
-            <input type="email" name="contactEmail" class="form-input" placeholder="operator@tripmozy.com" required>
+          <div class="form-group-lux">
+            <label class="form-label-lux">Base City *</label>
+            <input type="text" name="city" class="form-input-lux" placeholder="e.g. Srinagar / Goa / Jaipur" required>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Commission Basis Points (500 = 5%)</label>
-          <input type="number" name="commissionBps" class="form-input" value="500" min="0" max="3000">
+        <div class="form-row-lux">
+          <div class="form-group-lux">
+            <label class="form-label-lux">Phone / WhatsApp *</label>
+            <input type="tel" name="contactPhone" class="form-input-lux" placeholder="e.g. +91 98765 43210" required>
+          </div>
+          <div class="form-group-lux">
+            <label class="form-label-lux">Contact Email *</label>
+            <input type="email" name="contactEmail" class="form-input-lux" placeholder="operator@tripmozy.com" required>
+          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-header" onclick="closeModal('addOperatorModal')">Cancel</button>
-          <button type="submit" class="btn-action-primary" id="btnSubmitOperator">Create Operator Account</button>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Platform Commission (500 bps = 5%)</label>
+          <input type="number" name="commissionBps" class="form-input-lux" value="500" min="0" max="3000">
+        </div>
+        <div class="modal-footer-lux">
+          <button type="button" class="btn-header-luxury" onclick="closeModal('addOperatorModal')">Cancel</button>
+          <button type="submit" class="btn-action-gold" id="btnSubmitOperator">Verify &amp; Add Operator</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL: ADD FEATURED TOUR CARD -->
-  <!-- ========================================== -->
-  <div class="modal-overlay" id="addFeaturedModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">Add Featured Tour Circuit Card</div>
-        <button class="modal-close" onclick="closeModal('addFeaturedModal')">&times;</button>
+  <!-- ============================================================ -->
+  <!-- MODAL: ADD FEATURED TOUR CARD                                -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay-lux" id="addFeaturedModal">
+    <div class="modal-card-lux">
+      <div class="modal-header-lux">
+        <div class="modal-title-lux">Publish Featured Tour Circuit</div>
+        <button type="button" class="modal-close-lux" onclick="closeModal('addFeaturedModal')">&times;</button>
       </div>
       <form id="addFeaturedForm" onsubmit="submitAddFeatured(event)">
-        <div class="form-group">
-          <label class="form-label">Tour Title *</label>
-          <input type="text" name="title" class="form-input" placeholder="e.g. Heavenly Kashmir & Ladakh Explorer" required>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Circuit Title *</label>
+          <input type="text" name="title" class="form-input-lux" placeholder="e.g. Heavenly Kashmir & Ladakh Explorer" required>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Destination *</label>
-            <input type="text" name="destination" class="form-input" placeholder="e.g. Kashmir" required>
+        <div class="form-row-lux">
+          <div class="form-group-lux">
+            <label class="form-label-lux">Destination *</label>
+            <input type="text" name="destination" class="form-input-lux" placeholder="e.g. Kashmir" required>
           </div>
-          <div class="form-group">
-            <label class="form-label">Badge Label</label>
-            <input type="text" name="badge" class="form-input" placeholder="e.g. Trending 2026 / Bestseller" value="Trending 2026">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Duration String * (Shown on Popup)</label>
-            <input type="text" name="duration" class="form-input" placeholder="e.g. 6 Days / 5 Nights" value="6 Days / 5 Nights" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Starting Price INR *</label>
-            <input type="number" name="startingPriceINR" class="form-input" placeholder="24999" required>
+          <div class="form-group-lux">
+            <label class="form-label-lux">Badge Label</label>
+            <input type="text" name="badge" class="form-input-lux" placeholder="e.g. Trending 2026 / Bestseller" value="Trending 2026">
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Cover Image URL *</label>
-          <input type="url" name="imageUrl" class="form-input" placeholder="https://images.unsplash.com/..." required>
+        <div class="form-row-lux">
+          <div class="form-group-lux">
+            <label class="form-label-lux">Duration String * (Shown on Popup)</label>
+            <input type="text" name="duration" class="form-input-lux" placeholder="e.g. 6 Days / 5 Nights" value="6 Days / 5 Nights" required>
+          </div>
+          <div class="form-group-lux">
+            <label class="form-label-lux">Starting Price INR *</label>
+            <input type="number" name="startingPriceINR" class="form-input-lux" placeholder="28000" required>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Tour Overview</label>
-          <textarea name="overview" class="form-textarea" rows="2" placeholder="Experience the breathtaking Dal Lake, Gulmarg gondola ride, and Pahalgam valleys."></textarea>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Cover Image URL *</label>
+          <input type="url" name="imageUrl" class="form-input-lux" placeholder="https://images.unsplash.com/..." required>
         </div>
-        <div class="form-group">
-          <label class="form-label">Day-by-Day Highlights (One per line)</label>
-          <textarea name="highlights" class="form-textarea" rows="3" placeholder="Day 1: Srinagar Shikara ride&#10;Day 2: Gulmarg snow gondola&#10;Day 3: Pahalgam Betaab Valley"></textarea>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Tour Overview</label>
+          <textarea name="overview" class="form-textarea-lux" rows="2" placeholder="Experience the breathtaking Dal Lake, Gulmarg gondola ride, and Pahalgam valleys."></textarea>
         </div>
-        <div class="form-group">
-          <label class="form-label">Package Inclusions (One per line)</label>
-          <textarea name="inclusions" class="form-textarea" rows="3" placeholder="Deluxe 4-Star Stays&#10;Daily Breakfast & Dinner&#10;Private Cab with Chauffeur&#10;Toll, Parking, Permits"></textarea>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Day-by-Day Highlights (One per line)</label>
+          <textarea name="highlights" class="form-textarea-lux" rows="3" placeholder="Day 1: Srinagar Shikara ride&#10;Day 2: Gulmarg snow gondola&#10;Day 3: Pahalgam Betaab Valley"></textarea>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-header" onclick="closeModal('addFeaturedModal')">Cancel</button>
-          <button type="submit" class="btn-action-primary" id="btnSubmitFeatured">Publish Featured Tour</button>
+        <div class="form-group-lux">
+          <label class="form-label-lux">Package Inclusions (One per line)</label>
+          <textarea name="inclusions" class="form-textarea-lux" rows="3" placeholder="Deluxe 4-Star Stays&#10;Daily Breakfast & Dinner&#10;Private Cab with Chauffeur&#10;Toll, Parking, Permits"></textarea>
+        </div>
+        <div class="modal-footer-lux">
+          <button type="button" class="btn-header-luxury" onclick="closeModal('addFeaturedModal')">Cancel</button>
+          <button type="submit" class="btn-action-gold" id="btnSubmitFeatured">Publish Featured Circuit</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL / GATE: DIRECT ADMIN AUTHENTICATION -->
-  <!-- ========================================== -->
+  <!-- ============================================================ -->
+  <!-- AUTH GATE: PRIVATE MASTER CONSOLE LOGIN                      -->
+  <!-- ============================================================ -->
   <div id="authGateOverlay">
-    <div class="gate-box">
-      <div style="font-size: 28px; margin-bottom: 12px;">🔐</div>
-      <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px;">TripMozy Super Admin</h2>
-      <p style="font-size: 13px; color: #9ca3af; margin-bottom: 24px;">Please authenticate with your master administrator credentials to access live movements and operations.</p>
+    <div class="gate-box-lux">
+      <div style="font-size: 32px; margin-bottom: 8px;">👑</div>
+      <h2 style="font-family:'Playfair Display',serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px;">TripMozy Sovereign Vault</h2>
+      <p style="font-size: 13px; color: #94a3b8; margin-bottom: 22px;">Executive administrator credentials required for private access.</p>
       <form onsubmit="handleGateLogin(event)">
-        <div class="form-group" style="text-align: left;">
-          <label class="form-label">Admin ID / Email</label>
-          <input type="text" id="gateAdminId" class="form-input" value="tripmozy@gmail.com" required>
+        <div class="form-group-lux" style="text-align: left;">
+          <label class="form-label-lux">Admin ID / Email</label>
+          <input type="text" id="gateAdminId" class="form-input-lux" value="tripmozy@gmail.com" required>
         </div>
-        <div class="form-group" style="text-align: left;">
-          <label class="form-label">Admin Password</label>
-          <input type="password" id="gatePassword" class="form-input" placeholder="••••••••••••" required>
+        <div class="form-group-lux" style="text-align: left;">
+          <label class="form-label-lux">Master Password</label>
+          <input type="password" id="gatePassword" class="form-input-lux" placeholder="••••••••••••" required>
         </div>
-        <div id="gateError" style="color: #f87171; font-size: 12px; margin-bottom: 14px; display: none;"></div>
-        <button type="submit" class="btn-action-primary" style="width: 100%; justify-content: center; padding: 12px;" id="btnGateSubmit">
+        <div id="gateError" style="color: #f87171; font-size: 12.5px; margin-bottom: 14px; display: none;"></div>
+        <button type="submit" class="btn-action-gold" style="width: 100%;" id="btnGateSubmit">
           Unlock Master Console
         </button>
       </form>
@@ -438,12 +1330,12 @@
     let featuredData = [];
     let activeMovementFilter = 'all';
 
-    // On Load
     document.addEventListener('DOMContentLoaded', () => {
       checkAdminSession();
       // Auto-refresh every 20 seconds
       setInterval(() => {
-        if (!document.getElementById('authGateOverlay').style.display || document.getElementById('authGateOverlay').style.display === 'none') {
+        const gate = document.getElementById('authGateOverlay');
+        if (!gate.style.display || gate.style.display === 'none') {
           loadAllAdminData(true);
         }
       }, 20000);
@@ -462,7 +1354,6 @@
           }
         }
       } catch (_) {}
-      // Show Gate
       document.getElementById('authGateOverlay').style.display = 'flex';
     }
 
@@ -508,17 +1399,17 @@
 
     // Switch Tabs
     function switchAdminTab(tabKey) {
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-tab-luxury').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
 
       if (tabKey === 'movements') {
-        document.querySelectorAll('.nav-tab')[0].classList.add('active');
+        document.querySelectorAll('.nav-tab-luxury')[0].classList.add('active');
         document.getElementById('tabMovements').style.display = 'block';
       } else if (tabKey === 'operators') {
-        document.querySelectorAll('.nav-tab')[1].classList.add('active');
+        document.querySelectorAll('.nav-tab-luxury')[1].classList.add('active');
         document.getElementById('tabOperators').style.display = 'block';
       } else if (tabKey === 'featured') {
-        document.querySelectorAll('.nav-tab')[2].classList.add('active');
+        document.querySelectorAll('.nav-tab-luxury')[2].classList.add('active');
         document.getElementById('tabFeatured').style.display = 'block';
       }
     }
@@ -539,21 +1430,21 @@
 
         if (movRes.ok) {
           const movJson = await movRes.json();
-          movementsData = movJson.requests || [];
+          movementsData = movJson.requests || movJson.movements || [];
           updateStats(movJson.summary || {});
           renderMovements();
         }
 
         if (venRes.ok) {
           const venJson = await venRes.json();
-          operatorsData = venJson.vendors || [];
+          operatorsData = venJson.vendors || venJson.operators || [];
           document.getElementById('badgeOperators').textContent = operatorsData.length;
           renderOperators();
         }
 
         if (featRes.ok) {
           const featJson = await featRes.json();
-          featuredData = featJson.featuredTours || [];
+          featuredData = featJson.featuredTours || featJson.tours || [];
           document.getElementById('badgeFeatured').textContent = featuredData.length;
           renderFeatured();
         }
@@ -577,7 +1468,7 @@
     // ==========================================
     function setMovementFilter(filter, el) {
       activeMovementFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       renderMovements();
     }
@@ -591,12 +1482,10 @@
       const container = document.getElementById('movementsContainer');
 
       const filtered = movementsData.filter(r => {
-        // Status filter
         if (activeMovementFilter === 'awaiting' && r.status !== 'awaiting_responses') return false;
         if (activeMovementFilter === 'quoted' && r.status !== 'offers_available') return false;
         if (activeMovementFilter === 'booked' && r.status !== 'booked') return false;
 
-        // Search text
         if (!q) return true;
         const custName = (r.customer && r.customer.name || '').toLowerCase();
         const custPhone = (r.customer && r.customer.phone || '').toLowerCase();
@@ -610,7 +1499,7 @@
 
       if (!filtered.length) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 48px; background: var(--surface); border: 1px dashed var(--navy-border); border-radius: var(--radius); color: var(--text-muted);">
+          <div style="text-align: center; padding: 48px 20px; background: var(--bg-card); border: 1px dashed var(--gold-border-subtle); border-radius: var(--radius); color: var(--text-muted);">
             No tour movements matching the selected filter.
           </div>
         `;
@@ -618,9 +1507,9 @@
       }
 
       container.innerHTML = filtered.map(r => {
-        let statusBadge = '<span class="status-badge status-awaiting">Awaiting Operator</span>';
-        if (r.status === 'offers_available') statusBadge = '<span class="status-badge status-quoted">Offer Quoted / Ready</span>';
-        if (r.status === 'booked') statusBadge = '<span class="status-badge status-booked">Advance Paid & Confirmed</span>';
+        let statusBadge = '<span class="status-gem gem-awaiting">⏳ Awaiting Operator</span>';
+        if (r.status === 'offers_available') statusBadge = '<span class="status-gem gem-quoted">📋 Offer Quoted</span>';
+        if (r.status === 'booked' || (r.payment && r.payment.isPaid)) statusBadge = '<span class="status-gem gem-booked">💎 Confirmed &amp; Paid</span>';
 
         const cust = r.customer || {};
         const tour = r.tour || {};
@@ -632,139 +1521,155 @@
         const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone}` : null;
         const bookingPortalUrl = `/booking?id=${r.id}`;
 
+        const createdDate = new Date(r.created_at || r.createdAt || Date.now()).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const durationStr = tour.duration || (tour.duration_nights ? `${tour.duration_nights + 1} Days / ${tour.duration_nights} Nights` : 'Custom');
+
         return `
-          <div class="movement-card">
-            <div class="card-top">
-              <div class="card-ref-group">
-                <span class="ref-badge">${r.reference || r.id.slice(0, 8).toUpperCase()}</span>
-                <span class="timestamp">Created: ${new Date(r.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}</span>
+          <div class="movement-dossier">
+            <div class="dossier-top">
+              <div class="ref-block">
+                <span class="ref-stamp">${r.reference || r.id.slice(0, 8).toUpperCase()}</span>
+                <span class="dossier-time">🕒 ${createdDate}</span>
               </div>
-              <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
                 ${statusBadge}
-                <a href="${bookingPortalUrl}" target="_blank" class="contact-link-btn" title="View Customer Portal">
-                  🔗 Open Portal
+                <a href="${bookingPortalUrl}" target="_blank" class="btn-pill-action" style="color:var(--text-gold); border-color:var(--gold-border);" title="Open Customer Portal">
+                  🔗 Portal
                 </a>
               </div>
             </div>
 
-            <div class="movement-grid">
-              <!-- Customer Profile & Unmasked PII -->
-              <div>
-                <div class="section-title">👤 Traveler Details (Unmasked)</div>
-                <div class="info-box">
-                  <div class="info-row">
-                    <span class="info-label">Full Name:</span>
-                    <span class="info-val">${cust.name || 'Anonymous Traveler'}</span>
+            <div class="dossier-grid">
+              <!-- Column 1: Traveler Profile (Unmasked PII) -->
+              <div class="dossier-col">
+                <div>
+                  <div class="col-header">👤 Traveler (Unmasked PII)</div>
+                  <div class="data-row">
+                    <span class="data-lbl">Name:</span>
+                    <span class="data-val" style="font-size:13px; color:#fff;">${cust.name || 'Anonymous Traveler'}</span>
                   </div>
-                  <div class="info-row">
-                    <span class="info-label">Phone:</span>
-                    <span class="info-val unmasked-val">${cust.phone || 'N/A'}</span>
+                  <div class="data-row">
+                    <span class="data-lbl">Phone:</span>
+                    <span class="data-val unmasked-gold">${cust.phone || 'N/A'}</span>
                   </div>
-                  <div class="info-row">
-                    <span class="info-label">Email:</span>
-                    <span class="info-val unmasked-val">${cust.email || 'N/A'}</span>
+                  <div class="data-row">
+                    <span class="data-lbl">Email:</span>
+                    <span class="data-val unmasked-gold" style="font-size:11px; word-break:break-all;">${cust.email || 'N/A'}</span>
                   </div>
-                  <div class="contact-links">
-                    ${cust.phone ? `<a href="tel:${cust.phone}" class="contact-link-btn">📞 Call</a>` : ''}
-                    ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="contact-link-btn" style="color: #34d399; border-color: rgba(52, 211, 153, 0.3);">💬 WhatsApp</a>` : ''}
-                    ${cust.email ? `<a href="mailto:${cust.email}" class="contact-link-btn">✉️ Email</a>` : ''}
+                </div>
+
+                <div class="contact-action-bar">
+                  ${cust.phone ? `<a href="tel:${cust.phone}" class="btn-contact-pill phone">📞 Call</a>` : ''}
+                  ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="btn-contact-pill whatsapp">💬 WhatsApp</a>` : ''}
+                </div>
+              </div>
+
+              <!-- Column 2: Tour Circuit & Specs -->
+              <div class="dossier-col">
+                <div>
+                  <div class="col-header">🗺️ Circuit Specs</div>
+                  <div class="data-row">
+                    <span class="data-lbl">Destination:</span>
+                    <span class="data-val" style="color: #60a5fa;">${tour.destination || 'India Tour'}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="data-lbl">Duration:</span>
+                    <span class="data-val" style="color: var(--text-gold); font-weight: 800;">⏱️ ${durationStr}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="data-lbl">Dates:</span>
+                    <span class="data-val">${tour.check_in_date || 'Flexible'} → ${tour.check_out_date || ''}</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="data-lbl">Travelers:</span>
+                    <span class="data-val">${tour.adults || 2} Adults, ${tour.children || 0} Kids (${tour.rooms_required || 1} Rooms)</span>
+                  </div>
+                  <div class="data-row">
+                    <span class="data-lbl">Budget:</span>
+                    <span class="data-val">₹${(tour.budget_min_inr || 0).toLocaleString('en-IN')} - ₹${(tour.budget_max_inr || 0).toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Tour Circuit & Requirements -->
-              <div>
-                <div class="section-title">🗺️ Tour Circuit & Specs</div>
-                <div class="info-box">
-                  <div class="info-row">
-                    <span class="info-label">Destination:</span>
-                    <span class="info-val" style="color: #60a5fa;">${tour.destination || 'India Tour'}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Duration:</span>
-                    <span class="info-val">${tour.duration_nights ? `${tour.duration_nights} Nights / ${tour.duration_nights + 1} Days` : 'Custom'}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Dates:</span>
-                    <span class="info-val">${tour.check_in_date || 'Flexible'} → ${tour.check_out_date || ''}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Guests & Rooms:</span>
-                    <span class="info-val">${tour.adults || 2} Adults, ${tour.children || 0} Kids (${tour.rooms_required || 1} Rooms)</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Budget:</span>
-                    <span class="info-val">₹${(tour.budget_min_inr || 0).toLocaleString('en-IN')} - ₹${(tour.budget_max_inr || 0).toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Accepting Tour Operator -->
-              <div>
-                <div class="section-title">🏢 Accepting Tour Operator</div>
-                <div class="info-box">
+              <!-- Column 3: Accepting Operator -->
+              <div class="dossier-col">
+                <div>
+                  <div class="col-header">🏢 Assigned Operator</div>
                   ${op ? `
-                    <div class="info-row">
-                      <span class="info-label">Operator:</span>
-                      <span class="info-val" style="color: #fbbf24;">${op.business_name}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Agency:</span>
+                      <span class="data-val" style="color: #fbbf24;">${op.business_name || op.businessName}</span>
                     </div>
-                    <div class="info-row">
-                      <span class="info-label">Contact:</span>
-                      <span class="info-val">${op.contact_person || 'N/A'}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Contact:</span>
+                      <span class="data-val">${op.contact_person || op.contactPerson || 'N/A'}</span>
                     </div>
-                    <div class="info-row">
-                      <span class="info-label">Operator Phone:</span>
-                      <span class="info-val unmasked-val">${op.phone || 'N/A'}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Operator Tel:</span>
+                      <span class="data-val unmasked-gold">${op.phone || op.contactPhone || 'N/A'}</span>
                     </div>
-                    <div class="info-row">
-                      <span class="info-label">Operator ID:</span>
-                      <span class="info-val" style="font-family: monospace; font-size: 11px;">${op.vendor_id ? op.vendor_id.slice(0, 8) : 'N/A'}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Operator ID:</span>
+                      <span class="data-val" style="font-family:monospace; font-size:11px;">${(op.vendor_id || op.vendorId || '').slice(0, 8)}</span>
                     </div>
-                    <div class="info-row">
-                      <span class="info-label">Fleet / Property:</span>
-                      <span class="info-val">${op.property_name || 'Fleet'} (${op.city || ''})</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Fleet:</span>
+                      <span class="data-val" style="font-size:11.5px;">${op.property_name || op.propertyName || 'Fleet'}</span>
                     </div>
                   ` : `
-                    <div style="text-align: center; padding: 12px; color: var(--text-muted);">
-                      <em>Waiting for an operator to claim and quote...</em>
+                    <div style="text-align: center; padding: 20px 10px; color: #64748b; font-size: 12px;">
+                      <em>Waiting for a tour operator to claim and quote...</em>
                     </div>
                   `}
                 </div>
+                ${op && (op.phone || op.contactPhone) ? `
+                  <div class="contact-action-bar">
+                    <a href="tel:${op.phone || op.contactPhone}" class="btn-contact-pill phone">📞 Dial</a>
+                    <a href="https://wa.me/${(op.phone || op.contactPhone).replace(/\D/g, '')}" target="_blank" class="btn-contact-pill whatsapp">💬 Chat</a>
+                  </div>
+                ` : ''}
               </div>
 
-              <!-- Offer & Payment Status -->
-              <div>
-                <div class="section-title">💳 Quote & Payment Status</div>
-                <div class="info-box">
+              <!-- Column 4: Pricing & Payment Ledger -->
+              <div class="dossier-col">
+                <div>
+                  <div class="col-header">💳 Financial &amp; Escrow</div>
                   ${offer ? `
-                    <div class="info-row">
-                      <span class="info-label">Total Tour Price:</span>
-                      <span class="info-val" style="color: #60a5fa; font-size: 14px;">₹${(offer.total_price_inr || 0).toLocaleString('en-IN')}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Total Tour:</span>
+                      <span class="data-val" style="color:#60a5fa; font-size:14px;">₹${(offer.total_price_inr || offer.totalPackageINR || 0).toLocaleString('en-IN')}</span>
                     </div>
-                    <div class="info-row">
-                      <span class="info-label">30% Advance Deposit:</span>
-                      <span class="info-val" style="color: #fbbf24; font-weight: 800;">₹${(offer.advance_deposit_inr || 0).toLocaleString('en-IN')}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">30% Advance:</span>
+                      <span class="data-val" style="color:var(--text-gold); font-weight:800;">₹${(offer.advance_deposit_inr || offer.advancePayableINR || 0).toLocaleString('en-IN')}</span>
                     </div>
-                    <div class="info-row">
-                      <span class="info-label">Payment Status:</span>
-                      <span class="info-val">
-                        ${pay.payment_status === 'captured' || r.status === 'booked' 
-                          ? '<span style="color: #34d399; font-weight: 800;">✅ Advance Paid</span>' 
-                          : '<span style="color: #f87171;">⏳ Pending</span>'}
+                    <div class="data-row">
+                      <span class="data-lbl">Escrow Status:</span>
+                      <span class="data-val">
+                        ${pay.payment_status === 'captured' || pay.isPaid || r.status === 'booked' 
+                          ? '<span style="color:#34d399; font-weight:800;">✅ Advance Paid</span>' 
+                          : '<span style="color:#fbbf24;">⏳ Awaiting Payment</span>'}
                       </span>
                     </div>
-                    ${pay.gateway_payment_id ? `
-                      <div class="info-row">
-                        <span class="info-label">Razorpay ID:</span>
-                        <span class="info-val" style="font-family: monospace; font-size: 11px;">${pay.gateway_payment_id}</span>
+                    ${pay.gateway_payment_id || pay.paymentReference ? `
+                      <div class="data-row">
+                        <span class="data-lbl">Razorpay ID:</span>
+                        <span class="data-val" style="font-family:monospace; font-size:10.5px;">${pay.gateway_payment_id || pay.paymentReference}</span>
                       </div>
                     ` : ''}
-                    <div class="info-row">
-                      <span class="info-label">Balance on Arrival:</span>
-                      <span class="info-val">₹${(offer.remaining_balance_inr || 0).toLocaleString('en-IN')}</span>
+                    <div class="data-row">
+                      <span class="data-lbl">Due on Arrival:</span>
+                      <span class="data-val">₹${(offer.remaining_balance_inr || offer.remainingBalanceINR || 0).toLocaleString('en-IN')}</span>
                     </div>
                   ` : `
-                    <div style="text-align: center; padding: 12px; color: var(--text-muted);">
+                    <div style="text-align: center; padding: 20px 10px; color: #64748b; font-size: 12px;">
                       <em>No quote submitted yet</em>
                     </div>
                   `}
@@ -777,7 +1682,7 @@
     }
 
     // ==========================================
-    // RENDER TAB 2: OPERATORS
+    // RENDER TAB 2: OPERATORS (CARDS & TABLE)
     // ==========================================
     function filterOperators() {
       renderOperators();
@@ -786,59 +1691,125 @@
     function renderOperators() {
       const q = (document.getElementById('operatorSearch').value || '').toLowerCase();
       const tbody = document.getElementById('operatorsTableBody');
+      const cardsContainer = document.getElementById('operatorsCardsContainer');
 
       const filtered = operatorsData.filter(v => {
         if (!q) return true;
-        const b = (v.business_name || '').toLowerCase();
-        const p = (v.contact_person || '').toLowerCase();
-        const ph = (v.contact_phone || '').toLowerCase();
+        const b = (v.business_name || v.businessName || '').toLowerCase();
+        const p = (v.contact_person || v.contactPerson || '').toLowerCase();
+        const ph = (v.contact_phone || v.contactPhone || '').toLowerCase();
         const c = (v.city || '').toLowerCase();
         return b.includes(q) || p.includes(q) || ph.includes(q) || c.includes(q);
       });
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">No tour operators found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No tour operators found.</td></tr>`;
+        cardsContainer.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); background:var(--bg-card); border-radius:var(--radius);">No tour operators found.</div>`;
         return;
       }
 
+      // 1. Render Desktop Table
       tbody.innerHTML = filtered.map(v => {
         const isActive = v.status === 'active';
+        const bName = v.business_name || v.businessName || 'Operator';
+        const cPerson = v.contact_person || v.contactPerson || 'N/A';
+        const cPhone = v.contact_phone || v.contactPhone || 'N/A';
+        const cEmail = v.contact_email || v.contactEmail || 'N/A';
+        const propName = v.property_name || v.propertyName || `${bName} Fleet`;
+
         return `
           <tr>
             <td>
-              <div style="font-weight: 700; color: #fff;">${v.business_name}</div>
-              <div style="font-size: 11px; font-family: monospace; color: #9ca3af;">ID: ${v.id.slice(0, 8)}</div>
+              <div style="font-weight: 700; color: #fff;">${bName}</div>
+              <div style="font-size: 11px; font-family: monospace; color: var(--text-gold);">ID: ${v.id.slice(0, 8)}</div>
             </td>
-            <td>${v.contact_person || 'N/A'}</td>
+            <td>${cPerson}</td>
             <td>
-              <div>${v.contact_phone || 'N/A'}</div>
-              <div style="font-size: 11px; color: #9ca3af;">${v.contact_email || 'N/A'}</div>
+              <div>${cPhone}</div>
+              <div style="font-size: 11px; color: #94a3b8;">${cEmail}</div>
             </td>
             <td>${v.city || 'India'}</td>
             <td>
-              <div style="font-weight: 600;">${v.property_name || 'Tour Fleet'}</div>
-              <div style="font-size: 11px; color: #9ca3af;">Mode: instant_confirmed</div>
+              <div style="font-weight: 600;">${propName}</div>
+              <div style="font-size: 11px; color: #94a3b8;">Instant Quote Active</div>
             </td>
             <td>
-              <span class="${isActive ? 'badge-active' : 'badge-suspended'}">
+              <span class="status-gem ${isActive ? 'gem-booked' : 'gem-awaiting'}">
                 ${isActive ? 'Active' : 'Suspended'}
               </span>
             </td>
             <td>
-              <div style="font-size: 12px;"><strong>${v.total_received || 0}</strong> received</div>
-              <div style="font-size: 11px; color: #34d399;"><strong>${v.total_accepted || 0}</strong> accepted</div>
+              <div style="font-size: 12px;"><strong>${v.total_received || v.requestsReceived || 0}</strong> received</div>
+              <div style="font-size: 11px; color: #34d399;"><strong>${v.total_accepted || v.requestsAccepted || 0}</strong> accepted</div>
             </td>
             <td>
               <div style="display: flex; gap: 6px;">
-                <button class="btn-table" onclick="toggleOperatorStatus('${v.id}', '${isActive ? 'suspended' : 'active'}')">
+                <button class="btn-pill-action" onclick="toggleOperatorStatus('${v.id}', '${isActive ? 'suspended' : 'active'}')">
                   ${isActive ? 'Suspend' : 'Activate'}
                 </button>
-                <button class="btn-table btn-table-danger" onclick="deleteOperator('${v.id}', '${v.business_name.replace(/'/g, "\\'")}')">
+                <button class="btn-pill-action btn-pill-danger" onclick="deleteOperator('${v.id}', '${bName.replace(/'/g, "\\'")}')">
                   Remove
                 </button>
               </div>
             </td>
           </tr>
+        `;
+      }).join('');
+
+      // 2. Render Mobile Cards (for phones)
+      cardsContainer.innerHTML = filtered.map(v => {
+        const isActive = v.status === 'active';
+        const bName = v.business_name || v.businessName || 'Operator';
+        const cPerson = v.contact_person || v.contactPerson || 'N/A';
+        const cPhone = v.contact_phone || v.contactPhone || '';
+        const cEmail = v.contact_email || v.contactEmail || '';
+        const propName = v.property_name || v.propertyName || `${bName} Fleet`;
+
+        return `
+          <div class="operator-card-luxury">
+            <div class="op-card-top">
+              <div>
+                <div class="op-biz-title">${bName}</div>
+                <div class="op-biz-id">ID: ${v.id.slice(0, 8)} · 📍 ${v.city || 'India'}</div>
+              </div>
+              <span class="status-gem ${isActive ? 'gem-booked' : 'gem-awaiting'}">
+                ${isActive ? 'Active' : 'Suspended'}
+              </span>
+            </div>
+
+            <div class="op-details-grid">
+              <div>
+                <span style="color:#94a3b8;">Contact:</span>
+                <strong style="display:block; color:#fff;">${cPerson}</strong>
+              </div>
+              <div>
+                <span style="color:#94a3b8;">Fleet:</span>
+                <strong style="display:block; color:#fff;">${propName}</strong>
+              </div>
+              <div>
+                <span style="color:#94a3b8;">Requests:</span>
+                <strong style="display:block; color:#34d399;">${v.total_accepted || v.requestsAccepted || 0} accepted / ${v.total_received || v.requestsReceived || 0}</strong>
+              </div>
+              <div>
+                <span style="color:#94a3b8;">Commission:</span>
+                <strong style="display:block; color:var(--text-gold);">${(v.commission_rate_basis_points || v.commissionRateBps || 500) / 100}%</strong>
+              </div>
+            </div>
+
+            <div class="contact-action-bar" style="margin-bottom: 12px;">
+              ${cPhone ? `<a href="tel:${cPhone}" class="btn-contact-pill phone">📞 Dial</a>` : ''}
+              ${cPhone ? `<a href="https://wa.me/${cPhone.replace(/\D/g, '')}" target="_blank" class="btn-contact-pill whatsapp">💬 WhatsApp</a>` : ''}
+            </div>
+
+            <div class="op-action-btns">
+              <button class="btn-pill-action" style="flex:1;" onclick="toggleOperatorStatus('${v.id}', '${isActive ? 'suspended' : 'active'}')">
+                ${isActive ? 'Suspend Operator' : 'Activate Operator'}
+              </button>
+              <button class="btn-pill-action btn-pill-danger" onclick="deleteOperator('${v.id}', '${bName.replace(/'/g, "\\'")}')">
+                Remove
+              </button>
+            </div>
+          </div>
         `;
       }).join('');
     }
@@ -914,7 +1885,7 @@
         alert('Error: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Create Operator Account';
+        btn.textContent = 'Verify & Add Operator';
       }
     }
 
@@ -925,8 +1896,8 @@
       const container = document.getElementById('featuredGridContainer');
       if (!featuredData.length) {
         container.innerHTML = `
-          <div style="grid-column: 1/-1; text-align: center; padding: 48px; background: var(--surface); border: 1px dashed var(--navy-border); border-radius: var(--radius); color: var(--text-muted);">
-            No featured tour cards added yet.
+          <div style="grid-column: 1/-1; text-align: center; padding: 48px 20px; background: var(--bg-card); border: 1px dashed var(--gold-border-subtle); border-radius: var(--radius); color: var(--text-muted);">
+            No featured tour cards published yet.
           </div>
         `;
         return;
@@ -939,27 +1910,27 @@
         } catch (_) {}
 
         return `
-          <div class="feat-card">
-            <div class="feat-img-wrap">
-              <img src="${f.image_url || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'}" class="feat-img" alt="${f.title}" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'">
-              ${f.badge ? `<div class="feat-badge">${f.badge}</div>` : ''}
-              <div class="feat-duration-badge">⏱️ ${f.duration || '6 Days / 5 Nights'}</div>
+          <div class="feat-card-luxury">
+            <div class="feat-hero-wrap">
+              <img src="${f.image_url || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'}" class="feat-hero-img" alt="${f.title}" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'">
+              ${f.badge ? `<div class="feat-badge-top">${f.badge}</div>` : ''}
+              <div class="feat-duration-pill">⏱️ ${f.duration || '6 Days / 5 Nights'}</div>
             </div>
-            <div class="feat-body">
+            <div class="feat-body-luxury">
               <div>
-                <div class="feat-title">${f.title}</div>
-                <div class="feat-dest">📍 ${f.destination}</div>
-                <div class="feat-price">₹${(f.starting_price_inr || 0).toLocaleString('en-IN')} <span style="font-size: 11px; color: #9ca3af; font-weight: 500;">/ person</span></div>
-                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 12px;">${f.overview || ''}</p>
+                <div class="feat-title-lux">${f.title}</div>
+                <div class="feat-dest-lux">📍 ${f.destination}</div>
+                <div class="feat-price-lux">₹${(f.starting_price_inr || 0).toLocaleString('en-IN')} <span style="font-size: 11.5px; color: #94a3b8; font-weight: 500;">/ person</span></div>
+                <p style="font-size: 12.5px; color: #94a3b8; margin-bottom: 12px; line-height: 1.5;">${f.overview || ''}</p>
                 ${highlights.length ? `
-                  <ul style="font-size: 11px; color: #d1d5db; padding-left: 16px; margin-bottom: 12px;">
+                  <ul style="font-size: 11.5px; color: #cbd5e1; padding-left: 18px; margin-bottom: 14px; line-height: 1.5;">
                     ${highlights.slice(0, 3).map(h => `<li>${h}</li>`).join('')}
                   </ul>
                 ` : ''}
               </div>
-              <div class="feat-actions">
-                <span style="font-size: 11px; color: #34d399; font-weight: 700;">Active on Booking Page</span>
-                <button class="btn-table btn-table-danger" onclick="deleteFeaturedTour('${f.id}', '${f.title.replace(/'/g, "\\'")}')">
+              <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">
+                <span style="font-size: 11.5px; color: #34d399; font-weight: 700;">● Active on Client Page</span>
+                <button class="btn-pill-action btn-pill-danger" onclick="deleteFeaturedTour('${f.id}', '${f.title.replace(/'/g, "\\'")}')">
                   Remove Card
                 </button>
               </div>
@@ -1013,7 +1984,7 @@
         alert('Error: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Publish Featured Tour';
+        btn.textContent = 'Publish Featured Circuit';
       }
     }
 

@@ -993,7 +993,29 @@
       margin-bottom: 22px;
     }
     @media (max-width: 600px) {
-      .tour-modal-grid { grid-template-columns: 1fr; }
+      .tour-modal-backdrop {
+        padding: 0;
+        align-items: flex-end;
+      }
+      .tour-modal-card {
+        border-radius: 22px 22px 0 0;
+        max-height: 88vh;
+        width: 100%;
+      }
+      .tour-modal-hero { height: 180px; }
+      .tour-modal-content { padding: 18px 16px; }
+      .tour-modal-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .tour-modal-price-box {
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .tour-modal-grid { grid-template-columns: 1fr; gap: 12px; }
     }
     .tour-modal-section {
       background: #ffffff;
