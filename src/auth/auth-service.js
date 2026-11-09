@@ -365,13 +365,15 @@ class AuthService {
   }
 
   // Direct Admin Password Authentication
-  adminPasswordLogin({ identifier, password }) {
-    if (!identifier || !password) {
+  adminPasswordLogin(payload = {}) {
+    const rawIdentifier = payload.identifier || payload.email || payload.adminId || payload.username || payload.id;
+    const rawPassword = payload.password;
+    if (!rawIdentifier || !rawPassword) {
       throw new Error('Please provide both Admin ID and Password');
     }
 
-    const cleanId = this.normalizeIdentifier(identifier).toLowerCase();
-    const cleanPassword = String(password).trim();
+    const cleanId = this.normalizeIdentifier(rawIdentifier).toLowerCase();
+    const cleanPassword = String(rawPassword).trim();
     const passHash = crypto.createHash('sha256').update(cleanPassword).digest('hex');
 
     // 1. Check in admin_credentials

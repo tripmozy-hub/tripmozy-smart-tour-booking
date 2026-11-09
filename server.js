@@ -254,6 +254,16 @@ const appHandler = async (req, res) => {
     return;
   }
 
+  // Secret Sovereign Admin Console (Not linked in public navigation)
+  if (
+    pathname === '/admin' ||
+    pathname === '/admin.html' ||
+    pathname === '/tripmozy-admin'
+  ) {
+    sendHtml(path.join(__dirname, 'public', 'admin.html'));
+    return;
+  }
+
   // --------------------------------------------------------------------------
   // ROUTING: WhatsApp 1-Click Action Portal (No Login Required)
   // Vendors tap this link in WhatsApp to Accept or Decline immediately
@@ -515,7 +525,7 @@ const appHandler = async (req, res) => {
     return;
   }
 
-  if (pathname === '/api/requests' && method === 'POST') {
+  if ((pathname === '/api/requests' || pathname === '/api/tour-requests' || pathname === '/api/hotel-requests') && method === 'POST') {
     readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
       try {
@@ -1046,8 +1056,8 @@ const appHandler = async (req, res) => {
     return;
   }
 
-  // POST /api/admin/vendors/:id/status — Toggle operator status
-  if (pathname.match(/^\/api\/admin\/vendors\/[^/]+\/status$/) && method === 'POST') {
+  // POST or PATCH /api/admin/vendors/:id/status — Toggle operator status
+  if (pathname.match(/^\/api\/admin\/vendors\/[^/]+\/status$/) && (method === 'POST' || method === 'PATCH')) {
     const vendorId = pathname.split('/')[4];
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
