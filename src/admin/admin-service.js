@@ -320,8 +320,18 @@ class AdminService {
   }
 
   // Add a new tour operator
-  addVendor({ businessName, contactPerson, contactPhone, contactEmail, city = 'All Destinations', state = 'India', propertyName = null, commissionBps = 1500, actorContext }) {
+  addVendor(payload = {}) {
+    const actorContext = payload.actorContext;
     this.assertAdmin(actorContext);
+
+    const businessName = payload.businessName || payload.companyName || payload.name;
+    const contactPerson = payload.contactPerson || payload.person || businessName;
+    const contactPhone = payload.contactPhone || payload.phone;
+    const contactEmail = payload.contactEmail || payload.email;
+    const city = payload.city || 'All Destinations';
+    const state = payload.state || 'India';
+    const propertyName = payload.propertyName || null;
+    const commissionBps = payload.commissionBps || 1500;
 
     if (!businessName || !contactPhone || !contactEmail) {
       throw new Error('Business name, contact phone, and contact email are required');
@@ -444,13 +454,26 @@ class AdminService {
   }
 
   // Featured Tours: Add a new card
-  addFeaturedTour({ title, destination, duration, nights = 5, days = 6, startingPriceINR, badge = 'Featured', imageUrl, overview, highlights = [], inclusions = [], actorContext }) {
+  addFeaturedTour(payload = {}) {
+    const actorContext = payload.actorContext;
     this.assertAdmin(actorContext);
     const id = this.db.uuid();
-    const nightsNum = parseInt(nights) || 5;
-    const daysNum = parseInt(days) || (nightsNum + 1);
-    const durationStr = duration || `${daysNum} Days / ${nightsNum} Nights`;
-    const priceNum = parseInt(startingPriceINR) || 35000;
+    const title = payload.title || 'Exclusive Tour Circuit';
+    const destination = payload.destination || payload.location || payload.city || 'India';
+    const nightsNum = parseInt(payload.nights) || 5;
+    const daysNum = parseInt(payload.days) || (nightsNum + 1);
+    const durationStr = payload.duration || `${daysNum} Days / ${nightsNum} Nights`;
+
+    let rawPrice = payload.startingPriceINR || payload.starting_price_inr || payload.price || 35000;
+    if (typeof rawPrice === 'string') {
+      rawPrice = parseInt(rawPrice.replace(/[^\d]/g, ''), 10) || 35000;
+    }
+    const priceNum = rawPrice;
+    const badge = payload.badge || 'Featured';
+    const imageUrl = payload.imageUrl || payload.image || '';
+    const overview = payload.overview || '';
+    const highlights = payload.highlights || [];
+    const inclusions = payload.inclusions || [];
 
     this.db.execute(`
       INSERT INTO featured_tour_cards (
@@ -458,10 +481,18 @@ class AdminService {
         badge, image_url, overview, highlights_json, inclusions_json, is_active
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `, [
-      id, title, destination, durationStr, nightsNum, daysNum, priceNum,
-      badge || 'Featured', imageUrl || '', overview || '',
-      JSON.stringify(Array.isArray(highlights) ? highlights : [highlights]),
-      JSON.stringify(Array.isArray(inclusions) ? inclusions : [inclusions])
+      id,
+      title,
+      destination,
+      durationStr,
+      nightsNum,
+      daysNum,
+      priceNum,
+      badge,
+      imageUrl,
+      overview,
+      JSON.stringify(Array.isArray(highlights) ? highlights : (highlights ? [highlights] : [])),
+      JSON.stringify(Array.isArray(inclusions) ? inclusions : (inclusions ? [inclusions] : []))
     ]);
 
     return { id, title, destination, duration: durationStr, starting_price_inr: priceNum };
