@@ -370,8 +370,11 @@ const appHandler = async (req, res) => {
         sendJson(200, safeResult);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -391,8 +394,11 @@ const appHandler = async (req, res) => {
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -504,8 +510,11 @@ const appHandler = async (req, res) => {
         sendJson(200, { success: true, vendor: updated });
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -585,8 +594,11 @@ const appHandler = async (req, res) => {
         sendJson(201, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -615,8 +627,11 @@ const appHandler = async (req, res) => {
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -830,8 +845,11 @@ const appHandler = async (req, res) => {
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -981,8 +999,11 @@ const appHandler = async (req, res) => {
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,
@@ -1008,8 +1029,11 @@ const appHandler = async (req, res) => {
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
+        const errMsg = e.acceptedByOther
+          ? `Sorry, this tour request has already been accepted by other partner (${e.acceptedByName || 'Another Partner'}).`
+          : (e.message || 'Could not accept request');
         sendJson(statusCode, {
-          error: e.message || 'Accepted by other partner',
+          error: errMsg,
           acceptedByOther: !!e.acceptedByOther,
           acceptedByName: e.acceptedByName || 'Another Partner',
           needsSignup: !!e.needsSignup,

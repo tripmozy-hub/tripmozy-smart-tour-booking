@@ -228,7 +228,7 @@ class VendorService {
         `, [recipient.request_id, recipient.vendor_id]);
 
         const partnerName = otherWinner?.business_name || 'Another Partner';
-        const err = new Error(`Accepted by other partner (${partnerName})`);
+        const err = new Error(`Sorry, this tour request has already been accepted by other partner (${partnerName})`);
         err.acceptedByOther = true;
         err.acceptedByName = partnerName;
         throw err;
@@ -257,7 +257,7 @@ class VendorService {
 
       if (otherAccepted) {
         const partnerName = otherAccepted.business_name || 'Another Partner';
-        const err = new Error(`Accepted by other partner (${partnerName})`);
+        const err = new Error(`Sorry, this tour request has already been accepted by other partner (${partnerName})`);
         err.acceptedByOther = true;
         err.acceptedByName = partnerName;
         throw err;
@@ -275,7 +275,7 @@ class VendorService {
 
       if (otherOffer) {
         const partnerName = otherOffer.business_name || 'Another Partner';
-        const err = new Error(`Accepted by other partner (${partnerName})`);
+        const err = new Error(`Sorry, this tour request has already been accepted by other partner (${partnerName})`);
         err.acceptedByOther = true;
         err.acceptedByName = partnerName;
         throw err;

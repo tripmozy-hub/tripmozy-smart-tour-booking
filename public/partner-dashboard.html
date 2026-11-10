@@ -613,6 +613,36 @@ async function loadDashboard(isAuto = false) {
     }
     prevRequestsCount = fetched.length;
 
+    // Check if any previously displayed pending requests were accepted by another partner in real time
+    if (isAuto && allRequests.length > 0) {
+      allRequests.forEach(oldR => {
+        if (oldR.response_status === 'pending' && !fetched.some(f => f.request_id === oldR.request_id)) {
+          const card = document.getElementById(`card-${oldR.recipient_id}`);
+          if (card) {
+            const badgeCol = card.querySelector('.card-right');
+            if (badgeCol) {
+              badgeCol.innerHTML = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-weight:800;">⚠️ Accepted by other partner</span>`;
+            }
+            const footerElem = card.querySelector('.card-footer');
+            if (footerElem) {
+              footerElem.innerHTML = `
+                <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
+                  <div class="outcome-text">
+                    <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Sorry, this request has been accepted by other partner</div>
+                    <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;line-height:1.4;">This tour request was just accepted by another partner and has been removed from your active pool.</div>
+                  </div>
+                </div>`;
+            }
+            setTimeout(() => {
+              animateCardOut(oldR.recipient_id, () => {
+                renderPage();
+              });
+            }, 3000);
+          }
+        }
+      });
+    }
+
     allRequests = fetched;
     updateCounts();
     renderPage();
@@ -750,7 +780,7 @@ function buildCard(r) {
     footer = `
       <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
         <div class="outcome-text">
-          <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Accepted by other partner</div>
+          <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Sorry, this request has been accepted by other partner</div>
           <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;">This tour request has already been claimed by another partner. It is no longer available.</div>
         </div>
       </div>`;
@@ -919,14 +949,14 @@ async function acceptRequest(recipientId, btn) {
           footerElem.innerHTML = `
             <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
               <div class="outcome-text">
-                <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Accepted by other partner</div>
+                <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Sorry, this request has been accepted by other partner</div>
                 <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;line-height:1.4;">This tour request has already been claimed by <strong>${esc(partnerName)}</strong> and is no longer available.</div>
               </div>
             </div>`;
         }
       }
 
-      showToast(`⚠️ Accepted by other partner (${partnerName}). Request is no longer available.`, 'error');
+      showToast(`⚠️ Sorry, the request has been accepted by other partner (${partnerName}).`, 'error');
 
       // Remove from local allRequests
       allRequests = allRequests.filter(x => x.recipient_id !== recipientId);
