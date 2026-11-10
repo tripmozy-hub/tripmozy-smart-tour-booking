@@ -404,7 +404,7 @@ const appHandler = async (req, res) => {
   }
 
   // POST /api/auth/admin-login — Secret Admin Direct Password Authentication
-  if ((pathname === '/api/auth/admin-login' || pathname === '/api/auth/login') && method === 'POST') {
+  if (pathname === '/api/auth/admin-login' && method === 'POST') {
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
       try {
@@ -413,6 +413,55 @@ const appHandler = async (req, res) => {
         sendJson(200, result);
       } catch (e) {
         sendJson(401, { error: e.message || 'Invalid admin credentials' });
+      }
+    });
+    return;
+  }
+
+  // POST /api/auth/login or /api/auth/password-login — Universal Password Sign-In for Customer, Operator, Admin
+  if ((pathname === '/api/auth/login' || pathname === '/api/auth/password-login') && method === 'POST') {
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      try {
+        const result = authService.passwordLogin(body);
+        res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+        sendJson(200, result);
+      } catch (e) {
+        sendJson(401, { error: e.message || 'Invalid email or password' });
+      }
+    });
+    return;
+  }
+
+  // POST /api/auth/forgot-password — Request Password Reset via Email OTP Confirmation
+  if ((pathname === '/api/auth/forgot-password' || pathname === '/api/auth/request-password-reset') && method === 'POST') {
+    readBody(async (err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      try {
+        const result = authService.requestPasswordReset(body);
+        if (notifService && notifService.waitForPendingDispatches) {
+          await notifService.waitForPendingDispatches();
+        }
+        sendJson(200, result);
+      } catch (e) {
+        sendJson(400, { error: e.message || 'Failed to dispatch password reset code' });
+      }
+    });
+    return;
+  }
+
+  // POST /api/auth/reset-password — Confirm OTP & Update to New Password (Invalidating Old)
+  if ((pathname === '/api/auth/reset-password' || pathname === '/api/auth/confirm-password-reset') && method === 'POST') {
+    readBody(async (err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      try {
+        const result = authService.resetPassword(body);
+        if (notifService && notifService.waitForPendingDispatches) {
+          await notifService.waitForPendingDispatches();
+        }
+        sendJson(200, result);
+      } catch (e) {
+        sendJson(400, { error: e.message || 'Failed to reset password' });
       }
     });
     return;

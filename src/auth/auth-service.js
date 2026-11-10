@@ -441,6 +441,277 @@ class AuthService {
     };
   }
 
+
+  // Request Password Reset via Email OTP Confirmation
+  requestPasswordReset(payload = {}) {
+    const rawEmail = payload.email || payload.identifier;
+    if (!rawEmail || !rawEmail.includes('@')) {
+      throw new Error('Please enter a valid email address');
+    }
+
+    const cleanEmail = this.normalizeIdentifier(rawEmail).toLowerCase();
+
+    // Check across user_profiles, admin_credentials, vendor_accounts
+    let user = this.db.queryOne('SELECT * FROM user_profiles WHERE LOWER(email) = ?', [cleanEmail]);
+    let adminCred = this.db.queryOne('SELECT * FROM admin_credentials WHERE LOWER(email) = ?', [cleanEmail]);
+    let vendor = this.db.queryOne('SELECT * FROM vendor_accounts WHERE LOWER(contact_email) = ?', [cleanEmail]);
+    const isMasterAdmin = cleanEmail === 'tripmozy@gmail.com' || cleanEmail === 'admin@tripmozy.com';
+
+    if (!user && !adminCred && !vendor && !isMasterAdmin) {
+      throw new Error('No account found registered with this email address. Please check your spelling or create an account.');
+    }
+
+    let role = 'customer';
+    if (isMasterAdmin || adminCred || (user && user.role === 'admin')) {
+      role = 'admin';
+    } else if (vendor || (user && user.role === 'vendor')) {
+      role = 'vendor';
+    } else if (user) {
+      role = user.role;
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const otpId = this.db.uuid();
+
+    // Mark previous reset OTPs as used
+    this.db.execute("UPDATE auth_otps SET is_used = 1 WHERE LOWER(identifier) = ? AND role = 'password_reset'", [cleanEmail]);
+
+    // Insert new OTP record
+    this.db.execute(`
+      INSERT INTO auth_otps (id, identifier, otp_code, role, expires_at)
+      VALUES (?, ?, ?, 'password_reset', ?)
+    `, [otpId, cleanEmail, otpCode, expiresAt]);
+
+    // Dispatch email
+    if (this.notifService) {
+      try {
+        this.notifService.send({
+          destination: cleanEmail,
+          channel: 'email',
+          templateCode: 'password_reset_otp',
+          eventType: 'auth.password_reset_otp',
+          payload: { otpCode, destination: cleanEmail, role }
+        });
+      } catch (err) {
+        console.error('[AuthService] Error dispatching password reset email:', err.message);
+      }
+    }
+    console.log(`[AuthService] Password Reset OTP for ${cleanEmail} (${role}): ${otpCode}`);
+
+    return {
+      success: true,
+      message: `A 6-digit password reset verification code has been dispatched to ${this.maskIdentifier(cleanEmail)}`,
+      email: cleanEmail,
+      role,
+      otpCode: process.env.NODE_ENV !== 'production' ? otpCode : undefined
+    };
+  }
+
+  // Reset and Update Password using Email OTP confirmation
+  resetPassword(payload = {}) {
+    const rawEmail = payload.email || payload.identifier;
+    const rawOtp = payload.otp || payload.otpCode || payload.code;
+    const rawPassword = payload.newPassword || payload.password;
+    const confirmPassword = payload.confirmPassword;
+
+    if (!rawEmail || !rawEmail.includes('@')) {
+      throw new Error('Please enter a valid email address');
+    }
+    const cleanEmail = this.normalizeIdentifier(rawEmail).toLowerCase();
+    const code = String(rawOtp || '').trim();
+    const cleanPassword = String(rawPassword || '').trim();
+
+    if (!code || code.length !== 6) {
+      throw new Error('Please enter a valid 6-digit verification code');
+    }
+    if (!cleanPassword || cleanPassword.length < 6) {
+      throw new Error('New password must be at least 6 characters long');
+    }
+    if (confirmPassword && String(confirmPassword).trim() !== cleanPassword) {
+      throw new Error('New passwords do not match');
+    }
+
+    // Verify OTP
+    const otpRecord = this.db.queryOne(`
+      SELECT * FROM auth_otps
+      WHERE LOWER(identifier) = ? AND otp_code = ? AND role = 'password_reset' AND is_used = 0
+      ORDER BY created_at DESC LIMIT 1
+    `, [cleanEmail, code]);
+
+    if (!otpRecord) {
+      throw new Error('Invalid verification code. Please check the code or request a new one.');
+    }
+
+    const now = new Date().toISOString();
+    if (otpRecord.expires_at < now) {
+      this.db.execute('UPDATE auth_otps SET is_used = 1 WHERE id = ?', [otpRecord.id]);
+      throw new Error('Verification code has expired. Please request a new code.');
+    }
+
+    // Invalidate the used OTP
+    this.db.execute('UPDATE auth_otps SET is_used = 1 WHERE id = ?', [otpRecord.id]);
+
+    // Hash the new password using SHA-256
+    const newPassHash = crypto.createHash('sha256').update(cleanPassword).digest('hex');
+
+    // Update in user_profiles
+    let user = this.db.queryOne('SELECT * FROM user_profiles WHERE LOWER(email) = ?', [cleanEmail]);
+    const isMasterAdmin = cleanEmail === 'tripmozy@gmail.com' || cleanEmail === 'admin@tripmozy.com';
+
+    let role = isMasterAdmin ? 'admin' : 'customer';
+    if (user) {
+      role = user.role;
+      this.db.execute(`
+        UPDATE user_profiles
+        SET password_hash = ?, updated_at = datetime('now')
+        WHERE id = ?
+      `, [newPassHash, user.id]);
+    } else {
+      const uid = this.db.uuid();
+      this.db.execute(`
+        INSERT INTO user_profiles (id, email, role, display_name, password_hash, status, is_phone_verified, is_email_verified)
+        VALUES (?, ?, ?, ?, ?, 'active', 1, 1)
+      `, [uid, cleanEmail, role, isMasterAdmin ? 'TripMozy Super Admin' : cleanEmail.split('@')[0], newPassHash]);
+      user = this.db.queryOne('SELECT * FROM user_profiles WHERE id = ?', [uid]);
+    }
+
+    // If admin or master admin, also update admin_credentials
+    if (role === 'admin' || isMasterAdmin) {
+      let cred = this.db.queryOne('SELECT * FROM admin_credentials WHERE LOWER(email) = ?', [cleanEmail]);
+      if (cred) {
+        this.db.execute(`
+          UPDATE admin_credentials
+          SET password_hash = ?, updated_at = datetime('now')
+          WHERE LOWER(email) = ?
+        `, [newPassHash, cleanEmail]);
+      } else {
+        const credId = this.db.uuid();
+        this.db.execute(`
+          INSERT INTO admin_credentials (id, email, password_hash, role)
+          VALUES (?, ?, ?, 'admin')
+        `, [credId, cleanEmail, newPassHash]);
+      }
+    }
+
+    // Invalidate all existing sessions for this user so old logins are revoked
+    this.db.execute('DELETE FROM auth_sessions WHERE user_id = ?', [user.id]);
+
+    // Send confirmation email
+    if (this.notifService) {
+      try {
+        this.notifService.send({
+          destination: cleanEmail,
+          channel: 'email',
+          templateCode: 'password_reset_confirmed',
+          eventType: 'auth.password_reset_confirmed',
+          payload: { destination: cleanEmail, role }
+        });
+      } catch (_) {}
+    }
+
+    return {
+      success: true,
+      message: 'Password successfully updated! Your previous password has been removed and you can now log in with your new password.',
+      email: cleanEmail,
+      role
+    };
+  }
+
+  // Universal Password Login for Customer, Tour Operator, and Super Admin
+  passwordLogin(payload = {}) {
+    const rawIdentifier = payload.identifier || payload.email || payload.phone || payload.adminId || payload.username || payload.id;
+    const rawPassword = payload.password;
+    if (!rawIdentifier || !rawPassword) {
+      throw new Error('Please provide both Email / ID and Password');
+    }
+
+    const cleanId = this.normalizeIdentifier(rawIdentifier).toLowerCase();
+    const cleanPassword = String(rawPassword).trim();
+    const passHash = crypto.createHash('sha256').update(cleanPassword).digest('hex');
+
+    // 1. Check Admin credentials
+    let adminCred = null;
+    try {
+      adminCred = this.db.queryOne('SELECT * FROM admin_credentials WHERE LOWER(email) = ?', [cleanId]);
+    } catch (_) {}
+    const isMasterAdmin = cleanId === 'tripmozy@gmail.com' || cleanId === 'admin@tripmozy.com' || cleanId === 'admin';
+
+    if (adminCred || isMasterAdmin) {
+      return this.adminPasswordLogin(payload);
+    }
+
+    // 2. Look up user profile by email or phone
+    let user = this.db.queryOne('SELECT * FROM user_profiles WHERE LOWER(email) = ?', [cleanId]);
+    if (!user) {
+      const digits = cleanId.replace(/\D/g, '').slice(-10);
+      if (digits.length === 10) {
+        user = this.db.queryOne('SELECT * FROM user_profiles WHERE phone LIKE ?', [`%${digits}`]);
+      }
+    }
+
+    // If vendor account exists with this contact_email
+    if (!user) {
+      const vendorAcc = this.db.queryOne('SELECT * FROM vendor_accounts WHERE LOWER(contact_email) = ?', [cleanId]);
+      if (vendorAcc && vendorAcc.user_id) {
+        user = this.db.queryOne('SELECT * FROM user_profiles WHERE id = ?', [vendorAcc.user_id]);
+      }
+    }
+
+    if (!user) {
+      throw new Error('No account found with this email. Please check your spelling or sign up.');
+    }
+
+    if (user.status === 'suspended') {
+      throw new Error('This account has been suspended. Please contact TripMozy Support.');
+    }
+
+    if (!user.password_hash) {
+      const err = new Error('No password configured for this account yet. Please use "Forgot / Reset Password" to set a password using email OTP confirmation.');
+      err.needsPasswordSet = true;
+      throw err;
+    }
+
+    if (user.password_hash !== passHash) {
+      throw new Error('Invalid password. Please check your password or use "Forgot / Reset Password".');
+    }
+
+    // Create session
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
+    const sessionId = this.db.uuid();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    this.db.execute(`
+      INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
+      VALUES (?, ?, ?, ?, ?)
+    `, [sessionId, user.id, user.role, tokenHash, expiresAt]);
+
+    let vendor = null;
+    if (user.role === 'vendor') {
+      vendor = this.db.queryOne('SELECT * FROM vendor_accounts WHERE user_id = ?', [user.id]);
+    }
+
+    const redirectUrl = user.role === 'admin' ? '/admin' : (user.role === 'vendor' ? '/partner/dashboard' : '/');
+
+    return {
+      success: true,
+      token: sessionToken,
+      sessionToken,
+      role: user.role,
+      redirectUrl,
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        displayName: user.display_name,
+        role: user.role
+      },
+      vendor
+    };
+  }
+
   // Verify OTP code and establish user/vendor session
   verifyOtp({ identifier, otpCode, role = 'customer' }) {
     const cleanId = this.normalizeIdentifier(identifier);

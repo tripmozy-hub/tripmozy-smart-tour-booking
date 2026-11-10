@@ -44,6 +44,9 @@ class TripMozyDatabase {
   init() {
     try {
       this.db.exec(DDL_STATEMENTS);
+      try {
+        this.db.exec("ALTER TABLE user_profiles ADD COLUMN password_hash TEXT;");
+      } catch (_) {}
       this.seedDefaultSettings();
     } catch (e) {
       console.warn('[TripMozy DB] Init warning:', e.message);
@@ -59,7 +62,7 @@ class TripMozyDatabase {
       systemUser.run();
 
       // Ensure Admin Profiles & Credentials
-      const adminPassHash = '466748976afcd72bec8a7c9bd0a7f25033e811fec64f541e86611435b987946a'; // SHA-256 of TripMozy@Admin2026!
+      const adminPassHash = '466748976afcd72bec8a7c9bd0a7f25033e811fec64f541e86611435b987946a'; // Default SHA-256 of TripMozy@Admin2026!
       const adminUsers = [
         ['admin_user_001', 'tripmozy@gmail.com', 'TripMozy Main Admin'],
         ['admin_user_002', 'admin@tripmozy.com', 'TripMozy Super Admin']
@@ -72,11 +75,12 @@ class TripMozyDatabase {
           ON CONFLICT(email) DO UPDATE SET role = 'admin', status = 'active'
         `).run(uid, email, dName);
 
+        // Use DO NOTHING so custom updated passwords are never overwritten on boot
         this.db.prepare(`
           INSERT INTO admin_credentials (id, email, password_hash, role)
           VALUES (?, ?, ?, 'admin')
-          ON CONFLICT(email) DO UPDATE SET password_hash = ?
-        `).run(uid, email, adminPassHash, adminPassHash);
+          ON CONFLICT(email) DO NOTHING
+        `).run(uid, email, adminPassHash);
       }
 
       // Seed Default Featured Tour Cards if empty

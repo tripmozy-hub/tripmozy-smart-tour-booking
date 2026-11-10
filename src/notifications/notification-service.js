@@ -158,7 +158,7 @@ class NotificationService {
         `👉 View your booking: ${payload.dashboardUrl || 'http://localhost:8080/partner/dashboard'}`;
     }
 
-    if (templateCode === 'auth_otp_code') {
+    if (templateCode === 'auth_otp_code' || templateCode === 'password_reset_otp') {
       return `🔐 *TripMozy Verification Code*\n\n` +
         `Your TripMozy verification code is: *${payload.otpCode}*\n\n` +
         `Valid for 10 minutes. Do not share this code with anyone.`;
@@ -169,7 +169,7 @@ class NotificationService {
 
   // Generate clean SMS text content (optimized for SMS carriers & DLT standards)
   generateSmsText(templateCode, payload) {
-    if (templateCode === 'auth_otp_code') {
+    if (templateCode === 'auth_otp_code' || templateCode === 'password_reset_otp') {
       return `${payload.otpCode} is your TripMozy verification code for sign in. Valid for 10 minutes. Please do not share this OTP with anyone. - TripMozy`;
     }
     if (templateCode === 'booking_confirmed') {
@@ -802,6 +802,43 @@ class NotificationService {
       `;
     }
 
+        if (templateCode === 'password_reset_otp') {
+      return `
+        <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif; max-width:480px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+          <div style="background:#0f172a; padding:24px; text-align:center;">
+            <div style="font-size:24px; font-weight:800; color:#ffffff;">Trip<span style="color:#d8ba7a;">Mozy</span></div>
+            <div style="color:#d8ba7a; font-size:11px; margin-top:4px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Password Reset Security</div>
+          </div>
+          <div style="padding:32px 24px; text-align:center;">
+            <h2 style="color:#0f172a; margin:0 0 8px; font-size:20px;">Password Reset Verification</h2>
+            <p style="color:#64748b; font-size:14px; margin:0 0 20px;">Use the 6-digit verification code below to reset your password:</p>
+            <div style="background:#fdfcf7; border:2px dashed #d8ba7a; border-radius:12px; padding:16px; margin-bottom:20px;">
+              <span style="font-size:36px; font-weight:800; letter-spacing:8px; color:#b8924b; font-family:monospace;">${payload.otpCode}</span>
+            </div>
+            <p style="color:#64748b; font-size:12.5px; margin:0 0 10px;">This code is valid for 10 minutes. Once confirmed, your previous password will be completely removed.</p>
+            <p style="color:#94a3b8; font-size:11.5px; margin:0;">If you did not request a password reset, you can safely ignore this email.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    if (templateCode === 'password_reset_confirmed') {
+      return `
+        <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif; max-width:480px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+          <div style="background:#0f172a; padding:24px; text-align:center;">
+            <div style="font-size:24px; font-weight:800; color:#ffffff;">Trip<span style="color:#10b981;">Mozy</span></div>
+            <div style="color:#10b981; font-size:11px; margin-top:4px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Security Notification</div>
+          </div>
+          <div style="padding:32px 24px; text-align:center;">
+            <div style="font-size:36px; margin-bottom:12px;">🛡️</div>
+            <h2 style="color:#0f172a; margin:0 0 8px; font-size:20px;">Password Successfully Updated</h2>
+            <p style="color:#64748b; font-size:14px; margin:0 0 20px;">Your TripMozy account password has been changed. Your previous password has been removed and cannot be used again.</p>
+            <p style="color:#94a3b8; font-size:12px; margin:0;">If you did not perform this change, please contact TripMozy Concierge immediately at tripmozy@gmail.com.</p>
+          </div>
+        </div>
+      `;
+    }
+
     if (templateCode === 'auth_otp_code') {
       return `
         <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif; max-width:480px; margin:20px auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
@@ -1264,7 +1301,7 @@ class NotificationService {
           ? `🎒 Tour Request Dispatched: ${payload.requestReference} - TripMozy`
           : templateCode === 'hotel_request_received_vendor'
           ? `🎒 New Tour Request: ${payload.destination} (Budget: ₹${(payload.totalBudgetINR || 0).toLocaleString('en-IN')}) - TripMozy Partner Alert`
-          : templateCode === 'auth_otp_code'
+          : templateCode === 'password_reset_otp' ? `🔐 ${payload.otpCode} is your TripMozy Password Reset Code` : templateCode === 'password_reset_confirmed' ? '[TripMozy Security] Your Password Has Been Successfully Updated' : templateCode === 'auth_otp_code'
           ? `🔐 ${payload.otpCode} is your TripMozy Verification Code`
           : templateCode === 'hotel_request_declined'
           ? `TripMozy Update: Tour Request for ${payload.propertyName}`

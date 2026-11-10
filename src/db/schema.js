@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     phone TEXT,
     role TEXT NOT NULL DEFAULT 'customer' CHECK(role IN ('customer', 'vendor', 'support', 'admin')),
     display_name TEXT NOT NULL,
+    password_hash TEXT,
     status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'suspended', 'pending_verification')),
     is_phone_verified INTEGER NOT NULL DEFAULT 0,
     is_email_verified INTEGER NOT NULL DEFAULT 0,

@@ -1312,7 +1312,10 @@
           <input type="text" id="gateAdminId" class="form-input-lux" value="tripmozy@gmail.com" required>
         </div>
         <div class="form-group-lux" style="text-align: left;">
-          <label class="form-label-lux">Master Password</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label class="form-label-lux" style="margin-bottom:0;">Master Password</label>
+            <a href="javascript:void(0)" onclick="openResetPasswordModal()" style="font-size:11.5px; color:#d8ba7a; text-decoration:none; font-weight:600;">Forgot / Reset Password? 🔐</a>
+          </div>
           <input type="password" id="gatePassword" class="form-input-lux" placeholder="••••••••••••" required>
         </div>
         <div id="gateError" style="color: #f87171; font-size: 12.5px; margin-bottom: 14px; display: none;"></div>
@@ -2006,6 +2009,214 @@
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('active');
     }
+
+    function openResetPasswordModal() {
+      const emailVal = (document.getElementById('gateAdminId') ? document.getElementById('gateAdminId').value : '').trim();
+      const resetEmailInput = document.getElementById('resetEmailInput');
+      if (emailVal) resetEmailInput.value = emailVal;
+
+      document.getElementById('resetAlertA').style.display = 'none';
+      document.getElementById('resetAlertB').style.display = 'none';
+      document.getElementById('resetModalStepA').style.display = 'block';
+      document.getElementById('resetModalStepB').style.display = 'none';
+      document.getElementById('resetModalStepC').style.display = 'none';
+
+      document.getElementById('resetPasswordModal').style.display = 'flex';
+    }
+
+    function closeResetPasswordModal() {
+      document.getElementById('resetPasswordModal').style.display = 'none';
+    }
+
+    function backToResetStepA() {
+      document.getElementById('resetModalStepA').style.display = 'block';
+      document.getElementById('resetModalStepB').style.display = 'none';
+      document.getElementById('resetModalStepC').style.display = 'none';
+    }
+
+    async function sendPasswordResetOtp() {
+      const email = (document.getElementById('resetEmailInput').value || '').trim();
+      const alertEl = document.getElementById('resetAlertA');
+      const btn = document.getElementById('btnSendResetOtp');
+
+      alertEl.style.display = 'none';
+      if (!email || !email.includes('@')) {
+        alertEl.textContent = 'Please enter a valid email address';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Dispatching 6-Digit Code…';
+
+      try {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('resetTargetDisplay').textContent = email;
+          document.getElementById('resetModalStepA').style.display = 'none';
+          document.getElementById('resetModalStepB').style.display = 'block';
+
+          if (data.otpCode) {
+            document.getElementById('resetOtpCode').value = data.otpCode;
+          }
+        } else {
+          alertEl.textContent = data.error || 'Failed to dispatch verification code';
+          alertEl.style.display = 'block';
+        }
+      } catch (err) {
+        alertEl.textContent = 'Network error: ' + err.message;
+        alertEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send 6-Digit Reset Code →';
+      }
+    }
+
+    async function confirmPasswordReset() {
+      const email = (document.getElementById('resetEmailInput').value || '').trim();
+      const otp = (document.getElementById('resetOtpCode').value || '').trim();
+      const newPassword = (document.getElementById('resetNewPassword').value || '').trim();
+      const confirmPassword = (document.getElementById('resetConfirmPassword').value || '').trim();
+      const alertEl = document.getElementById('resetAlertB');
+      const btn = document.getElementById('btnUpdatePassword');
+
+      alertEl.style.display = 'none';
+
+      if (!otp || otp.length !== 6) {
+        alertEl.textContent = 'Please enter the 6-digit verification code';
+        alertEl.style.display = 'block';
+        return;
+      }
+      if (!newPassword || newPassword.length < 6) {
+        alertEl.textContent = 'New password must be at least 6 characters long';
+        alertEl.style.display = 'block';
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alertEl.textContent = 'Passwords do not match';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Updating & Invalidating Old Password…';
+
+      try {
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, newPassword, confirmPassword })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('resetModalStepB').style.display = 'none';
+          document.getElementById('resetModalStepC').style.display = 'block';
+        } else {
+          alertEl.textContent = data.error || 'Failed to update password';
+          alertEl.style.display = 'block';
+        }
+      } catch (err) {
+        alertEl.textContent = 'Network error: ' + err.message;
+        alertEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update Password & Invalidate Old →';
+      }
+    }
+
+    function finishResetAndLogin() {
+      const email = (document.getElementById('resetEmailInput').value || '').trim();
+      closeResetPasswordModal();
+
+      if (document.getElementById('gateAdminId')) {
+        document.getElementById('gateAdminId').value = email;
+      }
+      const passInput = document.getElementById('gatePassword');
+      if (passInput) {
+        passInput.value = '';
+        passInput.focus();
+      }
+    }
+
   </script>
+
+  <!-- UNIVERSAL PASSWORD RESET MODAL FOR ADMIN CONSOLE -->
+  <div id="resetPasswordModal" class="modal-overlay-lux" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-content-lux" style="max-width: 440px; text-align: left;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 id="resetModalTitle" style="font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:#fff; margin:0;">🔐 Reset Account Password</h3>
+        <button type="button" class="btn-close-modal" onclick="closeResetPasswordModal()" style="color:#94a3b8; font-size:20px; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <!-- Step A -->
+      <div id="resetModalStepA">
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 18px;">
+          Applicable for <strong>Super Admin</strong>, <strong>Tour Operators</strong>, and <strong>Travelers</strong>. Enter your email address to receive a 6-digit confirmation code.
+        </p>
+
+        <div id="resetAlertA" style="display:none; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5;"></div>
+
+        <div class="form-group-lux">
+          <label class="form-label-lux">Registered Email Address</label>
+          <input type="email" id="resetEmailInput" class="form-input-lux" value="tripmozy@gmail.com" required>
+        </div>
+
+        <button type="button" class="btn-action-gold" style="width:100%; margin-top:10px;" id="btnSendResetOtp" onclick="sendPasswordResetOtp()">
+          Send 6-Digit Reset Code →
+        </button>
+      </div>
+
+      <!-- Step B -->
+      <div id="resetModalStepB" style="display:none;">
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
+          Verification code sent to <strong id="resetTargetDisplay" style="color:#d8ba7a;">...</strong>
+        </p>
+
+        <div id="resetAlertB" style="display:none; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5;"></div>
+
+        <div class="form-group-lux">
+          <label class="form-label-lux">6-Digit Verification Code</label>
+          <input type="text" id="resetOtpCode" class="form-input-lux" maxlength="6" placeholder="123456" style="letter-spacing:6px; font-size:20px; text-align:center; font-family:monospace; font-weight:800;">
+        </div>
+
+        <div class="form-group-lux">
+          <label class="form-label-lux">New Password</label>
+          <input type="password" id="resetNewPassword" class="form-input-lux" placeholder="Minimum 6 characters">
+        </div>
+
+        <div class="form-group-lux">
+          <label class="form-label-lux">Confirm New Password</label>
+          <input type="password" id="resetConfirmPassword" class="form-input-lux" placeholder="Re-enter new password">
+        </div>
+
+        <button type="button" class="btn-action-gold" style="width:100%; margin-top:10px;" id="btnUpdatePassword" onclick="confirmPasswordReset()">
+          Update Password &amp; Invalidate Old →
+        </button>
+
+        <div style="margin-top:12px; text-align:center;">
+          <a href="javascript:void(0)" onclick="backToResetStepA()" style="font-size:12px; color:#94a3b8; text-decoration:underline;">← Re-enter Email Address</a>
+        </div>
+      </div>
+
+      <!-- Step C -->
+      <div id="resetModalStepC" style="display:none; text-align:center;">
+        <div style="font-size:42px; margin-bottom:12px;">✅</div>
+        <h3 style="font-family:'Playfair Display',serif; font-size:20px; color:#10b981; margin:0 0 8px;">Password Updated!</h3>
+        <p style="font-size:13px; color:#94a3b8; margin-bottom:20px;">
+          Your previous password has been removed and invalidated. You can now unlock the console with your new password.
+        </p>
+        <button type="button" class="btn-action-gold" style="width:100%;" onclick="finishResetAndLogin()">
+          Proceed to Sign In →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </body>
 </html>

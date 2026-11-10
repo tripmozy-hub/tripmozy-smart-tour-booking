@@ -721,6 +721,62 @@
         padding-top: 14px;
       }
     }
+  
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-wrapper input {
+      padding-right: 42px;
+      width: 100%;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #64748b;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .password-toggle-btn:hover {
+      color: #1e293b;
+    }
+    .forgot-pass-link {
+      font-size: 12px;
+      color: #b8924b;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .forgot-pass-link:hover {
+      color: #926f2d;
+      text-decoration: underline;
+    }
+    .login-method-toggle {
+      text-align: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8f0;
+    }
+    .login-method-btn {
+      background: none;
+      border: none;
+      font-size: 12.5px;
+      color: #2563eb;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .login-method-btn:hover {
+      color: #1d4ed8;
+    }
+
   </style>
 </head>
 <body>
@@ -785,10 +841,10 @@
           </div>
 
           <form id="authForm" onsubmit="handleSendOtp(event)">
-            <!-- Sign In Fields (Returning Users: Gmail + Mobile Phone) -->
+            <!-- Sign In Fields (Customer, Tour Operator, Super Admin) -->
             <div id="loginFieldsGroup">
               <div class="form-group">
-                <label for="signinEmail">Gmail / Email Address</label>
+                <label for="signinEmail">Email Address / Gmail</label>
                 <input
                   type="email"
                   id="signinEmail"
@@ -798,30 +854,36 @@
                   autocomplete="email"
                   oninput="handleAdminEmailDetection(this.value)"
                 >
-                <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Your 6-digit verification OTP will be sent to this Gmail.</div>
               </div>
 
-              <!-- Master Admin Password (Dynamically Revealed for Admin ID) -->
-              <div class="form-group" id="adminPasswordGroup" style="display:none; margin-top:-6px; margin-bottom:16px;">
-                <label for="adminPassword" style="color:#b8924b; font-weight:700;">Admin Master Password</label>
-                <input
-                  type="password"
-                  id="adminPassword"
-                  placeholder="Enter administrator password"
-                  autocomplete="current-password"
-                >
-                <div style="font-size:11.5px;color:#b8924b;margin-top:4px;">Enter password for instant Super Admin Console access.</div>
+              <!-- Universal Password Input (Customer, Tour Operator, Super Admin) -->
+              <div class="form-group" id="universalPasswordGroup" style="margin-top: 14px; margin-bottom: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label for="signinPassword" style="margin-bottom:0; font-weight:700;">Account Password</label>
+                  <a href="javascript:void(0)" onclick="openResetPasswordModal()" class="forgot-pass-link">Forgot / Reset Password? 🔐</a>
+                </div>
+                <div class="password-wrapper">
+                  <input
+                    type="password"
+                    id="signinPassword"
+                    placeholder="Enter your account password"
+                    autocomplete="current-password"
+                  >
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('signinPassword', this)" title="Show/Hide Password">👁️</button>
+                </div>
+                <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Applicable for Traveler, Tour Operator, and Super Admin accounts.</div>
               </div>
 
-              <div class="form-group">
+              <!-- Phone field (Used for OTP verification mode) -->
+              <div class="form-group" id="signinPhoneGroup" style="display:none; margin-top: 14px;">
                 <label for="signinPhone">Mobile Phone Number</label>
                 <input
                   type="tel"
                   id="signinPhone"
                   placeholder="e.g. +91 98765 43210"
-                  required
                   autocomplete="tel"
                 >
+                <div style="font-size:11.5px;color:#64748b;margin-top:4px;">Required for instant OTP SMS / WhatsApp dispatch.</div>
               </div>
             </div>
 
@@ -870,8 +932,14 @@
             </div>
 
             <button type="submit" class="btn" id="sendBtn">
-              <span id="sendBtnText">Send Code to Gmail</span>
+              <span id="sendBtnText">Sign In with Password →</span>
             </button>
+
+            <div class="login-method-toggle" id="loginMethodToggleBox">
+              <button type="button" class="login-method-btn" id="btnToggleMethod" onclick="toggleLoginMethod()">
+                Or Sign In via Instant 6-Digit Email OTP instead
+              </button>
+            </div>
           </form>
 
           <div class="switch-mode-note" id="switchModeNote">
@@ -1140,13 +1208,73 @@
         };
       } else {
         const email = (signinEmailInput.value || '').trim();
-        const phone = (signinPhoneInput.value || '').trim();
-        const adminPassEl = document.getElementById('adminPassword');
-        const adminPass = adminPassEl ? adminPassEl.value : '';
+        const passInput = document.getElementById('signinPassword');
+        const password = passInput ? passInput.value : '';
         const isAdmin = email.toLowerCase() === 'tripmozy@gmail.com' || email.toLowerCase() === 'admin@tripmozy.com' || email.toLowerCase() === 'admin';
 
-        // Direct Master Admin Password Sign-In
-        if (isAdmin && adminPass) {
+        // Universal Password Sign-In (Customer, Tour Operator, Super Admin)
+        if (activeLoginMethod === 'password' || password) {
+          if (!email || !email.includes('@')) {
+            showAlert('Please enter your valid email address', 'error');
+            signinEmailInput.focus();
+            return;
+          }
+          if (!password) {
+            showAlert('Please enter your account password or use Forgot / Reset Password', 'error');
+            passInput.focus();
+            return;
+          }
+
+          sendBtn.disabled = true;
+          sendBtnText.innerHTML = `Authenticating…`;
+
+          try {
+            const loginEndpoint = isAdmin ? '/api/auth/admin-login' : '/api/auth/login';
+            const loginRes = await fetch(loginEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ identifier: email, email, password })
+            });
+            const loginData = await loginRes.json();
+            if (loginRes.ok && (loginData.success || loginData.role)) {
+              const activeRole = loginData.role || (loginData.user && loginData.user.role) || 'customer';
+              const sessionToken = loginData.token || loginData.sessionToken;
+              if (sessionToken) {
+                localStorage.setItem('tm_session_token', sessionToken);
+                document.cookie = `tm_session_token=${sessionToken}; path=/; max-age=2592000; SameSite=Lax`;
+              }
+              localStorage.setItem('tm_user_role', activeRole);
+              document.cookie = `tm_user_role=${activeRole}; path=/; max-age=2592000; SameSite=Lax`;
+              if (loginData.user) {
+                localStorage.setItem('tm_user_info', JSON.stringify(loginData.user));
+              }
+              if (loginData.vendor) {
+                localStorage.setItem('tm_vendor_info', JSON.stringify(loginData.vendor));
+              }
+              showAlert('✅ Logged in successfully! Redirecting…', 'success');
+              setTimeout(() => {
+                let targetUrl = loginData.redirectUrl;
+                if (!targetUrl) {
+                  targetUrl = activeRole === 'admin' ? '/admin' : (activeRole === 'vendor' ? '/partner/dashboard' : '/');
+                }
+                window.location.href = targetUrl;
+              }, 400);
+              return;
+            } else {
+              showAlert(loginData.error || 'Invalid email or password', 'error');
+              sendBtn.disabled = false;
+              sendBtnText.textContent = 'Sign In with Password →';
+              return;
+            }
+          } catch (err) {
+            showAlert('Login error: ' + err.message, 'error');
+            sendBtn.disabled = false;
+            sendBtnText.textContent = 'Sign In with Password →';
+            return;
+          }
+        }
+
+        const phone = (signinPhoneInput.value || '').trim();
           sendBtn.disabled = true;
           sendBtnText.innerHTML = `Authenticating Master Console…`;
           try {
@@ -1538,6 +1666,300 @@
         }
       } catch (_) {}
     });
+
+    let activeLoginMethod = 'password'; // 'password' | 'otp'
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    function toggleLoginMethod(forceMethod) {
+      if (forceMethod) {
+        activeLoginMethod = forceMethod;
+      } else {
+        activeLoginMethod = activeLoginMethod === 'password' ? 'otp' : 'password';
+      }
+
+      const passGroup = document.getElementById('universalPasswordGroup');
+      const phoneGroup = document.getElementById('signinPhoneGroup');
+      const sendBtnText = document.getElementById('sendBtnText');
+      const toggleBtn = document.getElementById('btnToggleMethod');
+      const phoneInput = document.getElementById('signinPhone');
+
+      if (activeLoginMethod === 'password') {
+        passGroup.style.display = 'block';
+        phoneGroup.style.display = 'none';
+        phoneInput.required = false;
+        sendBtnText.textContent = 'Sign In with Password →';
+        toggleBtn.textContent = 'Or Sign In via Instant 6-Digit Email OTP instead';
+      } else {
+        passGroup.style.display = 'none';
+        phoneGroup.style.display = 'block';
+        phoneInput.required = true;
+        sendBtnText.textContent = 'Send 6-Digit Code to Gmail →';
+        toggleBtn.textContent = 'Or Sign In with Password instead';
+      }
+    }
+
+    function openResetPasswordModal() {
+      const emailVal = (document.getElementById('signinEmail').value || '').trim();
+      const resetEmailInput = document.getElementById('resetEmailInput');
+      if (emailVal) resetEmailInput.value = emailVal;
+
+      document.getElementById('resetAlertA').style.display = 'none';
+      document.getElementById('resetAlertB').style.display = 'none';
+      document.getElementById('resetModalStepA').style.display = 'block';
+      document.getElementById('resetModalStepB').style.display = 'none';
+      document.getElementById('resetModalStepC').style.display = 'none';
+
+      document.getElementById('resetPasswordModal').style.display = 'flex';
+      setTimeout(() => resetEmailInput.focus(), 100);
+    }
+
+    function closeResetPasswordModal() {
+      document.getElementById('resetPasswordModal').style.display = 'none';
+    }
+
+    function backToResetStepA() {
+      document.getElementById('resetModalStepA').style.display = 'block';
+      document.getElementById('resetModalStepB').style.display = 'none';
+      document.getElementById('resetModalStepC').style.display = 'none';
+    }
+
+    async function sendPasswordResetOtp() {
+      const email = (document.getElementById('resetEmailInput').value || '').trim();
+      const alertEl = document.getElementById('resetAlertA');
+      const btn = document.getElementById('btnSendResetOtp');
+
+      alertEl.style.display = 'none';
+      if (!email || !email.includes('@')) {
+        alertEl.className = 'alert-box alert-error';
+        alertEl.textContent = 'Please enter a valid email address';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Dispatching 6-Digit Code…</span>';
+
+      try {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('resetTargetDisplay').textContent = email;
+          document.getElementById('resetModalStepA').style.display = 'none';
+          document.getElementById('resetModalStepB').style.display = 'block';
+
+          if (data.otpCode) {
+            document.getElementById('resetOtpCode').value = data.otpCode;
+          }
+          setTimeout(() => document.getElementById('resetNewPassword').focus(), 150);
+        } else {
+          alertEl.className = 'alert-box alert-error';
+          alertEl.textContent = data.error || 'Failed to dispatch verification code';
+          alertEl.style.display = 'block';
+        }
+      } catch (err) {
+        alertEl.className = 'alert-box alert-error';
+        alertEl.textContent = 'Network error: ' + err.message;
+        alertEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Send 6-Digit Reset Code →</span>';
+      }
+    }
+
+    async function confirmPasswordReset() {
+      const email = (document.getElementById('resetEmailInput').value || '').trim();
+      const otp = (document.getElementById('resetOtpCode').value || '').trim();
+      const newPassword = (document.getElementById('resetNewPassword').value || '').trim();
+      const confirmPassword = (document.getElementById('resetConfirmPassword').value || '').trim();
+      const alertEl = document.getElementById('resetAlertB');
+      const btn = document.getElementById('btnUpdatePassword');
+
+      alertEl.style.display = 'none';
+
+      if (!otp || otp.length !== 6) {
+        alertEl.className = 'alert-box alert-error';
+        alertEl.textContent = 'Please enter the 6-digit verification code';
+        alertEl.style.display = 'block';
+        return;
+      }
+      if (!newPassword || newPassword.length < 6) {
+        alertEl.className = 'alert-box alert-error';
+        alertEl.textContent = 'New password must be at least 6 characters long';
+        alertEl.style.display = 'block';
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alertEl.className = 'alert-box alert-error';
+        alertEl.textContent = 'Passwords do not match';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Updating & Invalidating Old Password…</span>';
+
+      try {
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, newPassword, confirmPassword })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('resetModalStepB').style.display = 'none';
+          document.getElementById('resetModalStepC').style.display = 'block';
+        } else {
+          alertEl.className = 'alert-box alert-error';
+          alertEl.textContent = data.error || 'Failed to update password';
+          alertEl.style.display = 'block';
+        }
+      } catch (err) {
+        alertEl.className = 'alert-box alert-error';
+        alertEl.textContent = 'Network error: ' + err.message;
+        alertEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Update Password &amp; Invalidate Old →</span>';
+      }
+    }
+
+    function finishResetAndLogin() {
+      const email = (document.getElementById('resetEmailInput').value || '').trim();
+      closeResetPasswordModal();
+
+      document.getElementById('signinEmail').value = email;
+      const passInput = document.getElementById('signinPassword');
+      passInput.value = '';
+
+      toggleLoginMethod('password');
+      showAlert('✅ Password reset successful! Enter your new password to sign in.', 'success');
+      passInput.focus();
+    }
+
   </script>
+
+  <!-- ============================================================ -->
+  <!-- UNIVERSAL PASSWORD RESET MODAL (Customer, Partner, Admin)    -->
+  <!-- ============================================================ -->
+  <div id="resetPasswordModal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+    <div class="modal-card" style="max-width: 440px;">
+      <button type="button" class="modal-close-btn" onclick="closeResetPasswordModal()" aria-label="Close dialog">&times;</button>
+      
+      <div class="modal-badge" style="background:#fef3c7; border: 1.5px solid #fde68a;">
+        <span style="font-size:26px;">🔐</span>
+      </div>
+
+      <!-- Step A: Enter Email to Request Reset OTP -->
+      <div id="resetModalStepA">
+        <h2 id="resetModalTitle" class="modal-title" style="font-size: 20px;">Reset Account Password</h2>
+        <p class="modal-desc" style="font-size: 13px; margin-bottom: 18px;">
+          Applicable for <strong>Travelers</strong>, <strong>Tour Operators</strong>, and <strong>Super Admin</strong>. Enter your registered email to receive a 6-digit confirmation code.
+        </p>
+
+        <div id="resetAlertA" class="alert-box" style="display:none; margin-bottom:14px;"></div>
+
+        <div class="form-group" style="text-align:left; margin-bottom: 16px;">
+          <label for="resetEmailInput" style="font-weight:700; font-size:13px;">Registered Email Address</label>
+          <input
+            type="email"
+            id="resetEmailInput"
+            placeholder="e.g. yourname@gmail.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <button type="button" class="btn modal-primary-btn" id="btnSendResetOtp" onclick="sendPasswordResetOtp()">
+          <span>Send 6-Digit Reset Code →</span>
+        </button>
+      </div>
+
+      <!-- Step B: Enter OTP & New Password -->
+      <div id="resetModalStepB" style="display:none;">
+        <h2 class="modal-title" style="font-size: 20px;">Enter Code &amp; New Password</h2>
+        <p class="modal-desc" style="font-size: 13px; margin-bottom: 14px;">
+          Verification code sent to <strong id="resetTargetDisplay" style="color:var(--navy);">...</strong>
+        </p>
+
+        <div id="resetAlertB" class="alert-box" style="display:none; margin-bottom:14px;"></div>
+
+        <div class="form-group" style="text-align:left; margin-bottom: 14px;">
+          <label for="resetOtpCode" style="font-weight:700; font-size:13px;">6-Digit Verification Code</label>
+          <input
+            type="text"
+            id="resetOtpCode"
+            maxlength="6"
+            placeholder="123456"
+            style="letter-spacing: 6px; font-weight:800; font-size: 20px; text-align:center; font-family:monospace;"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          >
+        </div>
+
+        <div class="form-group" style="text-align:left; margin-bottom: 14px;">
+          <label for="resetNewPassword" style="font-weight:700; font-size:13px;">New Password</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="resetNewPassword"
+              placeholder="Minimum 6 characters"
+              autocomplete="new-password"
+            >
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('resetNewPassword', this)">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="text-align:left; margin-bottom: 18px;">
+          <label for="resetConfirmPassword" style="font-weight:700; font-size:13px;">Confirm New Password</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="resetConfirmPassword"
+              placeholder="Re-enter new password"
+              autocomplete="new-password"
+            >
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('resetConfirmPassword', this)">👁️</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn modal-primary-btn" id="btnUpdatePassword" onclick="confirmPasswordReset()">
+          <span>Update Password &amp; Invalidate Old →</span>
+        </button>
+
+        <div style="margin-top:12px; text-align:center;">
+          <a href="javascript:void(0)" onclick="backToResetStepA()" style="font-size:12px; color:#64748b; text-decoration:underline;">← Re-enter Email Address</a>
+        </div>
+      </div>
+
+      <!-- Step C: Success Confirmation -->
+      <div id="resetModalStepC" style="display:none; text-align:center;">
+        <div style="font-size:42px; margin-bottom:12px;">✅</div>
+        <h2 class="modal-title" style="font-size: 20px; color:#059669;">Password Updated!</h2>
+        <p class="modal-desc" style="font-size: 13.5px; margin-bottom: 20px;">
+          Your previous password has been removed and invalidated. You can now sign in using your new password.
+        </p>
+        <button type="button" class="btn modal-primary-btn" onclick="finishResetAndLogin()">
+          <span>Proceed to Sign In →</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </body>
 </html>
