@@ -45,6 +45,8 @@ const { PaymentGatewayAdapter } = require('./src/payments/payment-gateway-adapte
 const { NotificationService } = require('./src/notifications/notification-service');
 const { AdminService } = require('./src/admin/admin-service');
 const { AuthService } = require('./src/auth/auth-service');
+const { applySecurityHeaders } = require('./src/security/headers');
+const { rateLimiter } = require('./src/security/rate-limiter');
 
 const PORT = process.env.PORT || 8080;
 let DB_PATH = process.env.DATABASE_FILE || path.join(__dirname, 'tripmozy.db');
@@ -141,13 +143,19 @@ const appHandler = async (req, res) => {
   }
   const method = req.method;
 
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  // Apply defense-in-depth security headers (HSTS, clickjacking, MIME sniffing, CSP) & dynamic CORS
+  applySecurityHeaders(req, res);
 
   if (method === 'OPTIONS') {
     res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // Canonical Redirect: If accessed via preview deployment hash URL, redirect to canonical production domain
+  if (reqHost.includes('-tripmozy.vercel.app') && !reqHost.startsWith('tripmozy-smart-tour-booking.vercel.app')) {
+    const prodUrl = `https://tripmozy-smart-tour-booking.vercel.app${req.url}`;
+    res.writeHead(301, { Location: prodUrl });
     res.end();
     return;
   }
@@ -171,7 +179,44 @@ const appHandler = async (req, res) => {
     });
   };
 
-  // Helper to read JSON request body (supports standard HTTP streams and pre-parsed serverless req.body)
+  // Client IP extraction helper
+  const getClientIp = () => {
+    const xff = req.headers['x-forwarded-for'];
+    if (xff) return xff.split(',')[0].trim();
+    return req.socket?.remoteAddress || req.connection?.remoteAddress || '127.0.0.1';
+  };
+
+  // Auth token extraction helper (Header or Cookie)
+  const getAuthToken = () => {
+    const authHeader = req.headers['authorization'] || '';
+    let token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      const cookieHeader = req.headers['cookie'] || '';
+      const match = cookieHeader.match(/(^|;\s*)tm_session_token=([^;]*)/);
+      if (match) token = decodeURIComponent(match[2]).trim();
+    }
+    return token;
+  };
+
+  // Strict Admin Context Validator: Ensures private admin endpoints cannot be accessed without valid session
+  const verifyAdminAuth = () => {
+    const token = getAuthToken();
+    if (!token) {
+      sendJson(401, { error: 'Administrator authorization required. Please sign in.' });
+      return null;
+    }
+    const session = authService.validateSession(token);
+    if (!session || !session.authenticated || session.role !== 'admin') {
+      sendJson(403, { error: 'Access Denied: Administrator privileges required.' });
+      return null;
+    }
+    return new SecurityContext({
+      user: { id: session.user?.id || 'admin', email: session.user?.email || 'tripmozy@gmail.com', role: ROLES.ADMIN },
+      role: ROLES.ADMIN
+    });
+  };
+
+  // Helper to read JSON request body with DoS payload size limits
   const readBody = (callback) => {
     if (req.body !== undefined && req.body !== null) {
       if (typeof req.body === 'object') {
@@ -184,8 +229,22 @@ const appHandler = async (req, res) => {
       }
     }
     let body = '';
-    req.on('data', chunk => { body += chunk; });
+    let bytesRead = 0;
+    const MAX_BODY_BYTES = 1024 * 1024; // 1MB payload limit (DoS protection)
+
+    req.on('data', chunk => {
+      bytesRead += chunk.length;
+      if (bytesRead > MAX_BODY_BYTES) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Payload Too Large: maximum allowed body size is 1MB' }));
+        req.destroy();
+        return;
+      }
+      body += chunk;
+    });
+
     req.on('end', () => {
+      if (bytesRead > MAX_BODY_BYTES) return;
       try {
         const parsedData = body ? JSON.parse(body) : {};
         callback(null, parsedData);
@@ -361,8 +420,22 @@ const appHandler = async (req, res) => {
   // AUTHENTICATION & LOGIN API ENDPOINTS (Customer & Tour Operator)
   // --------------------------------------------------------------------------
   if (pathname === '/api/auth/send-otp' && method === 'POST') {
+    const clientIp = getClientIp();
+    const ipLimit = rateLimiter.checkLimit(`otp_ip:${clientIp}`, 15, 10 * 60 * 1000, 10 * 60 * 1000);
+    if (!ipLimit.allowed) {
+      sendJson(429, { error: `Too many verification code requests from this network. Please wait ${ipLimit.retryAfterSeconds} seconds.` });
+      return;
+    }
     readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const targetId = (body.identifier || body.email || body.phone || '').trim().toLowerCase();
+      if (targetId) {
+        const idLimit = rateLimiter.checkLimit(`otp_target:${targetId}`, 5, 10 * 60 * 1000, 10 * 60 * 1000);
+        if (!idLimit.allowed) {
+          sendJson(429, { error: `Too many verification codes requested for this account. Please wait ${idLimit.retryAfterSeconds} seconds.` });
+          return;
+        }
+      }
       try {
         const result = authService.sendOtp(body);
         await notifService.waitForPendingDispatches();
@@ -388,8 +461,17 @@ const appHandler = async (req, res) => {
   if (pathname === '/api/auth/verify-otp' && method === 'POST') {
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const targetId = (body.identifier || body.email || body.phone || '').trim().toLowerCase();
+      if (targetId) {
+        const verifyLimit = rateLimiter.checkLimit(`verify_otp:${targetId}`, 8, 10 * 60 * 1000, 10 * 60 * 1000);
+        if (!verifyLimit.allowed) {
+          sendJson(429, { error: `Too many failed verification attempts. Please wait ${verifyLimit.retryAfterSeconds} seconds before trying again.` });
+          return;
+        }
+      }
       try {
         const result = authService.verifyOtp(body);
+        if (targetId) rateLimiter.reset(`verify_otp:${targetId}`);
         res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
         sendJson(200, result);
       } catch (e) {
@@ -411,10 +493,26 @@ const appHandler = async (req, res) => {
 
   // POST /api/auth/admin-login — Secret Admin Direct Password Authentication
   if (pathname === '/api/auth/admin-login' && method === 'POST') {
+    const clientIp = getClientIp();
+    const ipLimit = rateLimiter.checkLimit(`admin_login_ip:${clientIp}`, 10, 15 * 60 * 1000, 15 * 60 * 1000);
+    if (!ipLimit.allowed) {
+      sendJson(429, { error: `Too many admin login attempts from this network. Please wait ${ipLimit.retryAfterSeconds} seconds.` });
+      return;
+    }
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const targetId = (body.identifier || body.email || body.adminId || '').trim().toLowerCase();
+      if (targetId) {
+        const targetLimit = rateLimiter.checkLimit(`admin_login_user:${targetId}`, 5, 15 * 60 * 1000, 15 * 60 * 1000);
+        if (!targetLimit.allowed) {
+          sendJson(429, { error: `Too many failed admin login attempts. Access temporarily locked for ${targetLimit.retryAfterSeconds} seconds.` });
+          return;
+        }
+      }
       try {
         const result = authService.adminPasswordLogin(body);
+        if (targetId) rateLimiter.reset(`admin_login_user:${targetId}`);
+        rateLimiter.reset(`admin_login_ip:${clientIp}`);
         res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
         sendJson(200, result);
       } catch (e) {
@@ -426,10 +524,26 @@ const appHandler = async (req, res) => {
 
   // POST /api/auth/login or /api/auth/password-login — Universal Password Sign-In for Customer, Operator, Admin
   if ((pathname === '/api/auth/login' || pathname === '/api/auth/password-login') && method === 'POST') {
+    const clientIp = getClientIp();
+    const ipLimit = rateLimiter.checkLimit(`login_ip:${clientIp}`, 20, 15 * 60 * 1000, 15 * 60 * 1000);
+    if (!ipLimit.allowed) {
+      sendJson(429, { error: `Too many sign in attempts from this network. Please wait ${ipLimit.retryAfterSeconds} seconds.` });
+      return;
+    }
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const targetId = (body.identifier || body.email || body.phone || '').trim().toLowerCase();
+      if (targetId) {
+        const targetLimit = rateLimiter.checkLimit(`login_user:${targetId}`, 6, 15 * 60 * 1000, 15 * 60 * 1000);
+        if (!targetLimit.allowed) {
+          sendJson(429, { error: `Too many failed sign in attempts for this account. Please wait ${targetLimit.retryAfterSeconds} seconds before trying again.` });
+          return;
+        }
+      }
       try {
         const result = authService.passwordLogin(body);
+        if (targetId) rateLimiter.reset(`login_user:${targetId}`);
+        rateLimiter.reset(`login_ip:${clientIp}`);
         res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
         sendJson(200, result);
       } catch (e) {
@@ -441,8 +555,22 @@ const appHandler = async (req, res) => {
 
   // POST /api/auth/forgot-password — Request Password Reset via Email OTP Confirmation
   if ((pathname === '/api/auth/forgot-password' || pathname === '/api/auth/request-password-reset') && method === 'POST') {
+    const clientIp = getClientIp();
+    const ipLimit = rateLimiter.checkLimit(`forgot_ip:${clientIp}`, 15, 10 * 60 * 1000, 10 * 60 * 1000);
+    if (!ipLimit.allowed) {
+      sendJson(429, { error: `Too many password reset requests from this network. Please wait ${ipLimit.retryAfterSeconds} seconds.` });
+      return;
+    }
     readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const targetEmail = (body.email || body.identifier || '').trim().toLowerCase();
+      if (targetEmail) {
+        const emailLimit = rateLimiter.checkLimit(`forgot_email:${targetEmail}`, 5, 10 * 60 * 1000, 10 * 60 * 1000);
+        if (!emailLimit.allowed) {
+          sendJson(429, { error: `Too many password reset codes sent to this email. Please wait ${emailLimit.retryAfterSeconds} seconds.` });
+          return;
+        }
+      }
       try {
         const result = authService.requestPasswordReset(body);
         if (notifService && notifService.waitForPendingDispatches) {
@@ -460,8 +588,17 @@ const appHandler = async (req, res) => {
   if ((pathname === '/api/auth/reset-password' || pathname === '/api/auth/confirm-password-reset') && method === 'POST') {
     readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      const targetEmail = (body.email || body.identifier || '').trim().toLowerCase();
+      if (targetEmail) {
+        const resetLimit = rateLimiter.checkLimit(`reset_attempt:${targetEmail}`, 8, 10 * 60 * 1000, 10 * 60 * 1000);
+        if (!resetLimit.allowed) {
+          sendJson(429, { error: `Too many reset verification attempts. Please wait ${resetLimit.retryAfterSeconds} seconds.` });
+          return;
+        }
+      }
       try {
         const result = authService.resetPassword(body);
+        if (targetEmail) rateLimiter.reset(`reset_attempt:${targetEmail}`);
         if (notifService && notifService.waitForPendingDispatches) {
           await notifService.waitForPendingDispatches();
         }
@@ -584,6 +721,12 @@ const appHandler = async (req, res) => {
   }
 
   if ((pathname === '/api/requests' || pathname === '/api/tour-requests' || pathname === '/api/hotel-requests') && method === 'POST') {
+    const clientIp = getClientIp();
+    const reqLimit = rateLimiter.checkLimit(`new_req_ip:${clientIp}`, 12, 10 * 60 * 1000, 10 * 60 * 1000);
+    if (!reqLimit.allowed) {
+      sendJson(429, { error: `You have submitted multiple tour requests recently. Please wait ${reqLimit.retryAfterSeconds} seconds before submitting again.` });
+      return;
+    }
     readBody(async (err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON request body' });
       try {
@@ -1044,8 +1187,10 @@ const appHandler = async (req, res) => {
     return;
   }
 
-  // GET /api/notifications  — View dispatched WhatsApp, Email and SMS notifications
+  // GET /api/notifications  — View dispatched WhatsApp, Email and SMS notifications (Admin Only)
   if (pathname === '/api/notifications' && method === 'GET') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     try {
       const limit = parseInt(reqUrl.searchParams.get('limit') || '20', 10);
       const rows = db.query('SELECT * FROM notifications ORDER BY created_at DESC LIMIT ?', [limit]);
@@ -1057,10 +1202,14 @@ const appHandler = async (req, res) => {
   }
 
   // --------------------------------------------------------------------------
+  // ADMIN API ENDPOINTS (Protected with Session Authentication)
+  // --------------------------------------------------------------------------
 
   if (pathname === '/api/admin/metrics' && method === 'GET') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     try {
-      const metrics = adminService.getOperationalMetrics(systemAdminContext);
+      const metrics = adminService.getOperationalMetrics(adminCtx);
       sendJson(200, metrics);
     } catch (e) {
       sendJson(403, { error: e.message });
@@ -1070,8 +1219,10 @@ const appHandler = async (req, res) => {
 
   // GET /api/admin/movements — Full Movement & Request Oversight
   if (pathname === '/api/admin/movements' && method === 'GET') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     try {
-      const movements = adminService.getAllMovements(systemAdminContext);
+      const movements = adminService.getAllMovements(adminCtx);
       let awaiting_operators = 0;
       let quoted_active = 0;
       let completed_booked = 0;
@@ -1106,8 +1257,10 @@ const appHandler = async (req, res) => {
 
   // GET /api/admin/vendors — List all registered tour operators
   if (pathname === '/api/admin/vendors' && method === 'GET') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     try {
-      const vendors = adminService.getAllVendors(systemAdminContext);
+      const vendors = adminService.getAllVendors(adminCtx);
       sendJson(200, { success: true, vendors, operators: vendors });
     } catch (e) {
       sendJson(403, { error: e.message });
@@ -1117,10 +1270,12 @@ const appHandler = async (req, res) => {
 
   // POST /api/admin/vendors — Add a new tour operator
   if (pathname === '/api/admin/vendors' && method === 'POST') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
       try {
-        const vendor = adminService.addVendor({ ...body, actorContext: systemAdminContext });
+        const vendor = adminService.addVendor({ ...body, actorContext: adminCtx });
         sendJson(201, { success: true, vendor });
       } catch (e) {
         sendJson(400, { error: e.message });
@@ -1131,11 +1286,13 @@ const appHandler = async (req, res) => {
 
   // POST or PATCH /api/admin/vendors/:id/status — Toggle operator status
   if (pathname.match(/^\/api\/admin\/vendors\/[^/]+\/status$/) && (method === 'POST' || method === 'PATCH')) {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     const vendorId = pathname.split('/')[4];
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
       try {
-        const result = adminService.updateVendorStatus({ vendorId, ...body, actorContext: systemAdminContext });
+        const result = adminService.updateVendorStatus({ vendorId, ...body, actorContext: adminCtx });
         sendJson(200, result);
       } catch (e) {
         sendJson(400, { error: e.message });
@@ -1146,9 +1303,11 @@ const appHandler = async (req, res) => {
 
   // DELETE /api/admin/vendors/:id — Remove tour operator
   if (pathname.match(/^\/api\/admin\/vendors\/[^/]+$/) && method === 'DELETE') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     const vendorId = pathname.split('/')[4];
     try {
-      const result = adminService.removeVendor({ vendorId, actorContext: systemAdminContext });
+      const result = adminService.removeVendor({ vendorId, actorContext: adminCtx });
       sendJson(200, result);
     } catch (e) {
       sendJson(400, { error: e.message });
@@ -1169,10 +1328,12 @@ const appHandler = async (req, res) => {
 
   // POST /api/admin/featured-tours — Add a featured tour card
   if (pathname === '/api/admin/featured-tours' && method === 'POST') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
       try {
-        const tour = adminService.addFeaturedTour({ ...body, actorContext: systemAdminContext });
+        const tour = adminService.addFeaturedTour({ ...body, actorContext: adminCtx });
         sendJson(201, { success: true, tour });
       } catch (e) {
         sendJson(400, { error: e.message });
@@ -1183,9 +1344,11 @@ const appHandler = async (req, res) => {
 
   // DELETE /api/admin/featured-tours/:id — Remove a featured tour card
   if (pathname.match(/^\/api\/admin\/featured-tours\/[^/]+$/) && method === 'DELETE') {
+    const adminCtx = verifyAdminAuth();
+    if (!adminCtx) return;
     const id = pathname.split('/')[4];
     try {
-      const result = adminService.removeFeaturedTour({ id, actorContext: systemAdminContext });
+      const result = adminService.removeFeaturedTour({ id, actorContext: adminCtx });
       sendJson(200, result);
     } catch (e) {
       sendJson(400, { error: e.message });
@@ -1194,6 +1357,13 @@ const appHandler = async (req, res) => {
   }
 
   if (pathname === '/api/cron/release-holds' && method === 'POST') {
+    const token = getAuthToken();
+    const cronSecret = req.headers['x-cron-secret'];
+    const isAuthorized = cronSecret === (process.env.CRON_SECRET || 'tripmozy_cron_secret') || (token && authService.validateSession(token)?.role === 'admin');
+    if (!isAuthorized) {
+      sendJson(403, { error: 'Unauthorized to trigger inventory hold release cron' });
+      return;
+    }
     try {
       const res = holdEngine.releaseExpiredHolds();
       sendJson(200, res);
@@ -1204,13 +1374,34 @@ const appHandler = async (req, res) => {
   }
 
   // --------------------------------------------------------------------------
-  // ROUTING: Legacy AI Trip Planner Static Assets
+  // ROUTING: Legacy AI Trip Planner Static Assets (Hardened against Traversal)
   // --------------------------------------------------------------------------
-  let staticFile = pathname === '/' ? 'index.html' : pathname.replace(/^\//, '');
-  let resolvedPath = path.join(__dirname, 'public', staticFile);
+  const safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+  let staticFile = (safePath === '/' || safePath === '' || safePath === '\\') ? 'index.html' : safePath.replace(/^[\/\\]+/, '');
 
-  if (!fs.existsSync(resolvedPath)) {
-    resolvedPath = path.join(TRIP_PLANNER_DIR, staticFile);
+  if (staticFile.includes('\0') || staticFile.includes('..')) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('Access Denied');
+    return;
+  }
+
+  let resolvedPath = path.resolve(__dirname, 'public', staticFile);
+  const allowedPublicDir = path.resolve(__dirname, 'public');
+
+  if (!resolvedPath.startsWith(allowedPublicDir)) {
+    if (TRIP_PLANNER_DIR && fs.existsSync(TRIP_PLANNER_DIR)) {
+      const allowedAltDir = path.resolve(TRIP_PLANNER_DIR);
+      resolvedPath = path.resolve(TRIP_PLANNER_DIR, staticFile);
+      if (!resolvedPath.startsWith(allowedAltDir)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Access Denied');
+        return;
+      }
+    } else {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Access Denied');
+      return;
+    }
   }
 
   if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
@@ -1222,7 +1413,10 @@ const appHandler = async (req, res) => {
       '.json': 'application/json; charset=utf-8',
       '.png': 'image/png',
       '.jpg': 'image/jpeg',
-      '.svg': 'image/svg+xml'
+      '.jpeg': 'image/jpeg',
+      '.svg': 'image/svg+xml',
+      '.ico': 'image/x-icon',
+      '.webp': 'image/webp'
     };
     res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
     fs.createReadStream(resolvedPath).pipe(res);

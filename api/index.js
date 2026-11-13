@@ -5,6 +5,12 @@
 
 let appHandler = null;
 let bootError = null;
+let applySecurityHeaders = null;
+
+try {
+  const security = require('../src/security/headers');
+  applySecurityHeaders = security.applySecurityHeaders;
+} catch (_) {}
 
 try {
   const serverModule = require('../server');
@@ -15,10 +21,18 @@ try {
 }
 
 module.exports = (req, res) => {
-  // Always attach CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  // Apply comprehensive security and CORS headers
+  if (applySecurityHeaders) {
+    applySecurityHeaders(req, res);
+  } else {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Admin-Role');
+  }
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);

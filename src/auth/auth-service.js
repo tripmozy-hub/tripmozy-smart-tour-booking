@@ -360,7 +360,7 @@ class AuthService {
       phone: inputPhone || (!isEmail ? cleanId : null),
       channel: hasEmail ? 'email' : 'sms',
       role,
-      otpCode: (process.env.NODE_ENV !== 'production' || payload.testSecret === 'tm_test_suite_2026') ? otpCode : undefined
+      otpCode: (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_OTP === 'true') ? otpCode : undefined
     };
   }
 
@@ -505,7 +505,7 @@ class AuthService {
       message: `A 6-digit password reset verification code has been dispatched to ${this.maskIdentifier(cleanEmail)}`,
       email: cleanEmail,
       role,
-      otpCode: (process.env.NODE_ENV !== 'production' || payload.testSecret === 'tm_test_suite_2026') ? otpCode : undefined
+      otpCode: (process.env.NODE_ENV !== 'production' || process.env.ALLOW_TEST_OTP === 'true') ? otpCode : undefined
     };
   }
 
@@ -541,6 +541,32 @@ class AuthService {
     `, [cleanEmail, code]);
 
     if (!otpRecord) {
+      // Security: Increment failed attempts on active reset OTPs for this email
+      try {
+        this.db.execute(`
+          UPDATE auth_otps
+          SET attempts = attempts + 1
+          WHERE LOWER(identifier) = ? AND role = 'password_reset' AND is_used = 0
+        `, [cleanEmail]);
+
+        const latest = this.db.queryOne(`
+          SELECT attempts FROM auth_otps
+          WHERE LOWER(identifier) = ? AND role = 'password_reset' AND is_used = 0
+          ORDER BY created_at DESC LIMIT 1
+        `, [cleanEmail]);
+
+        if (latest && latest.attempts >= 5) {
+          this.db.execute(`
+            UPDATE auth_otps SET is_used = 1
+            WHERE LOWER(identifier) = ? AND role = 'password_reset' AND is_used = 0
+          `, [cleanEmail]);
+          throw new Error('Too many incorrect verification attempts. For your security, this code has been deactivated. Please request a new code.');
+        }
+      } catch (attemptErr) {
+        if (attemptErr.message.includes('Too many incorrect verification attempts')) {
+          throw attemptErr;
+        }
+      }
       throw new Error('Invalid verification code. Please check the code or request a new one.');
     }
 
@@ -743,6 +769,32 @@ class AuthService {
     }
 
     if (!otpRecord) {
+      // Security: Increment failed attempts on active OTPs for this identifier
+      try {
+        this.db.execute(`
+          UPDATE auth_otps
+          SET attempts = attempts + 1
+          WHERE identifier = ? AND is_used = 0 AND datetime('now') <= datetime(expires_at)
+        `, [cleanId]);
+
+        const latest = this.db.queryOne(`
+          SELECT attempts FROM auth_otps
+          WHERE identifier = ? AND is_used = 0 AND datetime('now') <= datetime(expires_at)
+          ORDER BY created_at DESC LIMIT 1
+        `, [cleanId]);
+
+        if (latest && latest.attempts >= 5) {
+          this.db.execute(`
+            UPDATE auth_otps SET is_used = 1
+            WHERE identifier = ? AND is_used = 0
+          `, [cleanId]);
+          throw new Error('Too many incorrect verification attempts. For your security, this code has been deactivated. Please request a new code.');
+        }
+      } catch (attemptErr) {
+        if (attemptErr.message.includes('Too many incorrect verification attempts')) {
+          throw attemptErr;
+        }
+      }
       throw new Error('Invalid or expired verification code. Please check and try again.');
     }
 
