@@ -10,6 +10,28 @@ class AuthService {
   constructor(db, notifService = null) {
     this.db = db;
     this.notifService = notifService;
+    this.sessionSecret = process.env.SESSION_SECRET || 'tripmozy_auth_secure_hmac_signing_key_2026_super_secret';
+  }
+
+  // Generate cryptographically signed token (resilient across serverless instances)
+  generateSignedToken({ userId, role, email, phone, displayName, vendorId, expiresAtMs } = {}) {
+    const exp = expiresAtMs || (Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const iat = Date.now();
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const payloadObj = {
+      uid: userId || '',
+      role: role || 'customer',
+      email: email || '',
+      phone: phone || '',
+      name: displayName || '',
+      vid: vendorId || null,
+      iat,
+      exp,
+      nonce
+    };
+    const payloadStr = Buffer.from(JSON.stringify(payloadObj)).toString('base64url');
+    const sig = crypto.createHmac('sha256', this.sessionSecret).update(payloadStr).digest('hex');
+    return `${payloadStr}.${sig}`;
   }
 
   // Normalize phone or email identifier
@@ -415,16 +437,24 @@ class AuthService {
       this.db.execute("UPDATE user_profiles SET role = 'admin', status = 'active' WHERE id = ?", [user.id]);
     }
 
-    // Generate secure session token
-    const sessionToken = crypto.randomBytes(32).toString('hex');
+    // Generate secure session token (stateless HMAC-signed for serverless resilience)
+    const sessionToken = this.generateSignedToken({
+      userId: user.id,
+      role: 'admin',
+      email: user.email,
+      phone: user.phone,
+      displayName: user.display_name || 'TripMozy Super Admin'
+    });
     const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
     const sessionId = this.db.uuid();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    this.db.execute(`
-      INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
-      VALUES (?, ?, 'admin', ?, ?)
-    `, [sessionId, user.id, tokenHash, expiresAt]);
+    try {
+      this.db.execute(`
+        INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
+        VALUES (?, ?, 'admin', ?, ?)
+      `, [sessionId, user.id, tokenHash, expiresAt]);
+    } catch (_) {}
 
     return {
       success: true,
@@ -703,21 +733,30 @@ class AuthService {
       throw new Error('Invalid password. Please check your password or use "Forgot / Reset Password".');
     }
 
-    // Create session
-    const sessionToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
-    const sessionId = this.db.uuid();
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-    this.db.execute(`
-      INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
-      VALUES (?, ?, ?, ?, ?)
-    `, [sessionId, user.id, user.role, tokenHash, expiresAt]);
-
     let vendor = null;
     if (user.role === 'vendor') {
       vendor = this.db.queryOne('SELECT * FROM vendor_accounts WHERE user_id = ?', [user.id]);
     }
+
+    // Create session (stateless HMAC-signed for serverless resilience)
+    const sessionToken = this.generateSignedToken({
+      userId: user.id,
+      role: user.role,
+      email: user.email,
+      phone: user.phone,
+      displayName: user.display_name,
+      vendorId: vendor ? vendor.id : null
+    });
+    const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
+    const sessionId = this.db.uuid();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    try {
+      this.db.execute(`
+        INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
+        VALUES (?, ?, ?, ?, ?)
+      `, [sessionId, user.id, user.role, tokenHash, expiresAt]);
+    } catch (_) {}
 
     const redirectUrl = user.role === 'admin' ? '/admin' : (user.role === 'vendor' ? '/partner/dashboard' : '/');
 
@@ -824,10 +863,6 @@ class AuthService {
     // Mark consumed
     this.db.execute('UPDATE auth_otps SET is_used = 1 WHERE id = ?', [otpRecord.id]);
 
-    // Create session token
-    const sessionToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
-    const sessionId = this.db.uuid();
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
 
     if (role === 'vendor') {
@@ -876,10 +911,23 @@ class AuthService {
         }
       }
 
-      this.db.execute(`
-        INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
-        VALUES (?, ?, 'vendor', ?, ?)
-      `, [sessionId, sessionUserId, tokenHash, expiresAt]);
+      const sessionToken = this.generateSignedToken({
+        userId: sessionUserId,
+        role: 'vendor',
+        email: vendor.contact_email || cleanId,
+        phone: vendor.contact_phone || null,
+        displayName: vendor.business_name,
+        vendorId: vendor.id
+      });
+      const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
+      const sessionId = this.db.uuid();
+
+      try {
+        this.db.execute(`
+          INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
+          VALUES (?, ?, 'vendor', ?, ?)
+        `, [sessionId, sessionUserId, tokenHash, expiresAt]);
+      } catch (_) {}
 
       return {
         success: true,
@@ -910,10 +958,22 @@ class AuthService {
         user = this.db.queryOne('SELECT * FROM user_profiles WHERE id = ?', [userId]);
       }
 
-      this.db.execute(`
-        INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
-        VALUES (?, ?, 'customer', ?, ?)
-      `, [sessionId, user.id, tokenHash, expiresAt]);
+      const sessionToken = this.generateSignedToken({
+        userId: user.id,
+        role: 'customer',
+        email: user.email,
+        phone: user.phone,
+        displayName: user.display_name
+      });
+      const tokenHash = crypto.createHash('sha256').update(sessionToken).digest('hex');
+      const sessionId = this.db.uuid();
+
+      try {
+        this.db.execute(`
+          INSERT INTO auth_sessions (id, user_id, role, token_hash, expires_at)
+          VALUES (?, ?, 'customer', ?, ?)
+        `, [sessionId, user.id, tokenHash, expiresAt]);
+      } catch (_) {}
 
       return {
         success: true,
@@ -933,37 +993,94 @@ class AuthService {
 
   // Validate session token from Cookie or Bearer header
   validateSession(token) {
-    if (!token) return { authenticated: false };
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    if (!token || typeof token !== 'string') return { authenticated: false };
 
-    const session = this.db.queryOne(`
-      SELECT s.*, u.email, u.phone, u.display_name, u.role as user_role,
-             v.id as vendor_id, v.business_name, v.contact_phone, v.contact_email
-      FROM auth_sessions s
-      JOIN user_profiles u ON s.user_id = u.id
-      LEFT JOIN vendor_accounts v ON u.id = v.user_id
-      WHERE s.token_hash = ? AND datetime('now') <= datetime(s.expires_at)
-    `, [tokenHash]);
+    // 1. Stateless HMAC Signed Token Check (serverless-resilient across all ephemeral instances)
+    if (token.includes('.')) {
+      const parts = token.split('.');
+      if (parts.length === 2) {
+        const [payloadStr, sig] = parts;
+        try {
+          const expectedSig = crypto.createHmac('sha256', this.sessionSecret).update(payloadStr).digest('hex');
+          const sigBuf = Buffer.from(sig);
+          const expSigBuf = Buffer.from(expectedSig);
+          if (sigBuf.length === expSigBuf.length && crypto.timingSafeEqual(sigBuf, expSigBuf)) {
+            const payload = JSON.parse(Buffer.from(payloadStr, 'base64url').toString('utf8'));
+            if (payload && payload.exp && Date.now() <= payload.exp) {
+              let dbUser = null;
+              try {
+                if (payload.uid) {
+                  dbUser = this.db.queryOne('SELECT * FROM user_profiles WHERE id = ?', [payload.uid]);
+                } else if (payload.email) {
+                  dbUser = this.db.queryOne('SELECT * FROM user_profiles WHERE LOWER(email) = LOWER(?)', [payload.email]);
+                }
+              } catch (_) {}
 
-    if (!session) return { authenticated: false };
+              let vendorObj = null;
+              if (payload.vid) {
+                try {
+                  vendorObj = this.db.queryOne('SELECT * FROM vendor_accounts WHERE id = ?', [payload.vid]);
+                } catch (_) {}
+              }
 
-    return {
-      authenticated: true,
-      role: session.role,
-      user: {
-        id: session.user_id,
-        email: session.email,
-        phone: session.phone,
-        displayName: session.display_name
-      },
-      vendorId: session.vendor_id || null,
-      vendor: session.vendor_id ? {
-        id: session.vendor_id,
-        businessName: session.business_name,
-        contactPhone: session.contact_phone,
-        contactEmail: session.contact_email
-      } : null
-    };
+              const role = (dbUser && dbUser.role) || payload.role;
+              return {
+                authenticated: true,
+                role,
+                user: {
+                  id: (dbUser && dbUser.id) || payload.uid,
+                  email: (dbUser && dbUser.email) || payload.email,
+                  phone: (dbUser && dbUser.phone) || payload.phone,
+                  displayName: (dbUser && dbUser.display_name) || payload.name
+                },
+                vendorId: payload.vid || (vendorObj && vendorObj.id) || null,
+                vendor: vendorObj ? {
+                  id: vendorObj.id,
+                  businessName: vendorObj.business_name,
+                  contactPhone: vendorObj.contact_phone,
+                  contactEmail: vendorObj.contact_email
+                } : null
+              };
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    // 2. Database session check fallback (for legacy tokens)
+    try {
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      const session = this.db.queryOne(`
+        SELECT s.*, u.email, u.phone, u.display_name, u.role as user_role,
+               v.id as vendor_id, v.business_name, v.contact_phone, v.contact_email
+        FROM auth_sessions s
+        JOIN user_profiles u ON s.user_id = u.id
+        LEFT JOIN vendor_accounts v ON u.id = v.user_id
+        WHERE s.token_hash = ? AND datetime('now') <= datetime(s.expires_at)
+      `, [tokenHash]);
+
+      if (session) {
+        return {
+          authenticated: true,
+          role: session.role,
+          user: {
+            id: session.user_id,
+            email: session.email,
+            phone: session.phone,
+            displayName: session.display_name
+          },
+          vendorId: session.vendor_id || null,
+          vendor: session.vendor_id ? {
+            id: session.vendor_id,
+            businessName: session.business_name,
+            contactPhone: session.contact_phone,
+            contactEmail: session.contact_email
+          } : null
+        };
+      }
+    } catch (_) {}
+
+    return { authenticated: false };
   }
 
   // Invalidate session

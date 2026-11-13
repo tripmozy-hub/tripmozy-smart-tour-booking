@@ -1344,8 +1344,17 @@
       }, 20000);
     });
 
+    function getAdminToken() {
+      let token = localStorage.getItem('tm_session_token');
+      if (!token) {
+        const match = document.cookie.match(/(^|;\s*)tm_session_token=([^;]*)/);
+        if (match) token = decodeURIComponent(match[2]);
+      }
+      return (token || '').trim();
+    }
+
     function getAdminHeaders(extra = {}) {
-      const token = localStorage.getItem('tm_session_token') || '';
+      const token = getAdminToken();
       return {
         ...extra,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -1353,12 +1362,18 @@
     }
 
     async function checkAdminSession() {
+      const token = getAdminToken();
+      if (!token) {
+        document.getElementById('authGateOverlay').style.display = 'flex';
+        return;
+      }
       try {
         const res = await fetch('/api/auth/me', { headers: getAdminHeaders() });
         if (res.ok) {
           const user = await res.json();
-          if (user && user.role === 'admin') {
-            document.getElementById('headerAdminEmail').textContent = user.email || 'tripmozy@gmail.com';
+          if (user && user.authenticated && user.role === 'admin') {
+            const email = (user.user && user.user.email) || user.email || 'tripmozy@gmail.com';
+            document.getElementById('headerAdminEmail').textContent = email;
             document.getElementById('authGateOverlay').style.display = 'none';
             loadAllAdminData();
             return;
@@ -1392,7 +1407,7 @@
             document.cookie = `tm_session_token=${token}; Path=/; max-age=2592000; SameSite=Lax`;
           }
           document.getElementById('authGateOverlay').style.display = 'none';
-          document.getElementById('headerAdminEmail').textContent = data.email || identifier;
+          document.getElementById('headerAdminEmail').textContent = (data.user && data.user.email) || data.email || identifier;
           loadAllAdminData();
         } else {
           errEl.textContent = data.error || 'Invalid admin credentials.';
@@ -1442,7 +1457,9 @@
         ]);
 
         if (movRes.status === 401 || movRes.status === 403) {
-          document.getElementById('authGateOverlay').style.display = 'flex';
+          if (!isBackground) {
+            document.getElementById('authGateOverlay').style.display = 'flex';
+          }
           return;
         }
 
