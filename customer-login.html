@@ -278,7 +278,7 @@
       color: var(--text);
       letter-spacing: 0.1px;
     }
-    input[type="text"], input[type="email"], input[type="tel"] {
+    input[type="text"], input[type="email"], input[type="tel"], input[type="password"] {
       width: 100%;
       padding: 13px 16px;
       border: 1.5px solid var(--border);
@@ -289,8 +289,9 @@
       background: #ffffff;
       outline: none;
       transition: all 0.2s ease;
+      box-sizing: border-box;
     }
-    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus {
+    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, input[type="password"]:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(184, 146, 75, 0.18);
     }
@@ -666,7 +667,7 @@
       }
 
       /* iOS Safari Auto-Zoom Prevention (font-size >= 16px) */
-      input[type="text"], input[type="email"], input[type="tel"] {
+      input[type="text"], input[type="email"], input[type="tel"], input[type="password"] {
         font-size: 16px !important;
         padding: 12px 14px !important;
         border-radius: 9px;
@@ -726,52 +727,78 @@
       position: relative;
       display: flex;
       align-items: center;
+      width: 100%;
     }
     .password-wrapper input {
-      padding-right: 42px;
+      padding-right: 48px !important;
       width: 100%;
+      box-sizing: border-box;
     }
     .password-toggle-btn {
       position: absolute;
-      right: 12px;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 16px;
-      color: #64748b;
-      padding: 4px;
+      font-size: 17px;
+      color: #94a3b8;
+      padding: 6px 8px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: color 0.2s ease, transform 0.1s ease;
+      z-index: 3;
+      border-radius: 6px;
+      line-height: 1;
     }
     .password-toggle-btn:hover {
-      color: #1e293b;
+      color: var(--accent);
+    }
+    .password-toggle-btn:active {
+      transform: translateY(-50%) scale(0.92);
     }
     .forgot-pass-link {
       font-size: 12px;
-      color: #b8924b;
+      color: var(--accent);
       font-weight: 700;
       text-decoration: none;
-      transition: color 0.2s;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
     .forgot-pass-link:hover {
-      color: #926f2d;
+      color: var(--accent-hover);
       text-decoration: underline;
     }
     .login-method-toggle {
       text-align: center;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px dashed #e2e8f0;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(226, 232, 240, 0.8);
     }
     .login-method-btn {
       background: none;
       border: none;
-      font-size: 12.5px;
-      color: #2563eb;
-      font-weight: 600;
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 700;
       cursor: pointer;
+      font-family: inherit;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .login-method-btn:hover {
+      color: var(--navy);
+      background: rgba(184, 146, 75, 0.08);
       text-decoration: underline;
+    }
     }
     .login-method-btn:hover {
       color: #1d4ed8;
@@ -1093,13 +1120,20 @@
         businessNameGroup.style.display = 'none';
 
         if (signinEmailInput) signinEmailInput.required = true;
-        if (signinPhoneInput) signinPhoneInput.required = true;
+        if (signinPhoneInput) signinPhoneInput.required = (activeLoginMethod === 'otp');
         if (signupNameInput) signupNameInput.required = false;
         if (signupEmailInput) signupEmailInput.required = false;
         if (signupPhoneInput) signupPhoneInput.required = false;
 
+        const methodToggleBox = document.getElementById('loginMethodToggleBox');
+        if (methodToggleBox) methodToggleBox.style.display = 'block';
+
         sendBtn.classList.remove('partner-btn');
-        sendBtnText.textContent = 'Send Code to Gmail';
+        if (activeLoginMethod === 'password') {
+          sendBtnText.textContent = 'Sign In with Password →';
+        } else {
+          sendBtnText.textContent = 'Send 6-Digit Code to Gmail →';
+        }
 
         switchModeNote.innerHTML = `Don't have an account yet? <a href="javascript:void(0)" onclick="switchMode('signup')">Sign Up as New User →</a>`;
         if (signinEmailInput) signinEmailInput.focus();
@@ -1123,8 +1157,11 @@
         if (signupEmailInput) signupEmailInput.required = true;
         if (signupPhoneInput) signupPhoneInput.required = true;
 
+        const methodToggleBox = document.getElementById('loginMethodToggleBox');
+        if (methodToggleBox) methodToggleBox.style.display = 'none';
+
         updateSignupRoleUI();
-        sendBtnText.textContent = 'Register & Send Code to Gmail';
+        sendBtnText.textContent = 'Register & Send Code to Gmail →';
 
         switchModeNote.innerHTML = `Already have an account? <a href="javascript:void(0)" onclick="switchMode('login')">Log In here →</a>`;
         if (signupNameInput) signupNameInput.focus();
@@ -1275,43 +1312,6 @@
         }
 
         const phone = (signinPhoneInput.value || '').trim();
-          sendBtn.disabled = true;
-          sendBtnText.innerHTML = `Authenticating Master Console…`;
-          try {
-            const adminRes = await fetch('/api/auth/admin-login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ identifier: email, password: adminPass })
-            });
-            const adminData = await adminRes.json();
-            if (adminRes.ok && adminData.role === 'admin') {
-              if (adminData.token) {
-                localStorage.setItem('tm_session_token', adminData.token);
-                document.cookie = `tm_session_token=${adminData.token}; path=/; max-age=2592000; SameSite=Lax`;
-              }
-              localStorage.setItem('tm_user_role', 'admin');
-              document.cookie = `tm_user_role=admin; path=/; max-age=2592000; SameSite=Lax`;
-              if (adminData.user) {
-                localStorage.setItem('tm_user_info', JSON.stringify(adminData.user));
-              }
-              showAlert('✅ Master Admin Authenticated! Redirecting to Console…', 'success');
-              setTimeout(() => {
-                window.location.href = adminData.redirectUrl || '/admin';
-              }, 400);
-              return;
-            } else {
-              showAlert(adminData.error || 'Invalid administrator password', 'error');
-              sendBtn.disabled = false;
-              sendBtnText.textContent = 'Log In to Console';
-              return;
-            }
-          } catch (err) {
-            showAlert('Login error: ' + err.message, 'error');
-            sendBtn.disabled = false;
-            sendBtnText.textContent = 'Log In to Console';
-            return;
-          }
-        }
 
         if (!email || !email.includes('@')) {
           showAlert('Please enter your valid Gmail address', 'error');
