@@ -1436,15 +1436,48 @@ async function init() {
   startPolling();
 }
 
+// Auto-polling for live quotes & offers
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  if (tickerTimer) clearInterval(tickerTimer);
+
+  countdownSec = 6;
+  const updateTicker = () => {
+    const el = document.getElementById('tickerText');
+    if (el) el.textContent = `Auto-checking in ${countdownSec}s...`;
+  };
+
+  tickerTimer = setInterval(() => {
+    countdownSec--;
+    if (countdownSec <= 0) {
+      countdownSec = 6;
+    }
+    updateTicker();
+  }, 1000);
+
+  pollTimer = setInterval(async () => {
+    if (requestData && (requestData.request?.status === 'booked' || requestData.request?.status === 'cancelled')) {
+      if (pollTimer) clearInterval(pollTimer);
+      if (tickerTimer) clearInterval(tickerTimer);
+      return;
+    }
+    await loadRequest(true);
+    countdownSec = 6;
+    updateTicker();
+  }, 6000);
+}
+
 // Fetch request + offers (supports admin oversight mode)
-async function loadRequest() {
+async function loadRequest(isBackground = false) {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const isAdmin = urlParams.get('admin') === '1' || urlParams.get('role') === 'admin' || localStorage.getItem('tm_is_admin') === '1' || localStorage.getItem('tm_user_role') === 'admin';
     const fetchUrl = `/api/requests/${requestId}${isAdmin ? '?admin=1' : ''}`;
     const res = await fetch(fetchUrl);
     if (!res.ok) {
-      renderErrorScreen('Stay request not found. Please check your request reference.');
+      if (!isBackground) {
+        renderErrorScreen('Stay request not found. Please check your request reference.');
+      }
       return;
     }
     const data = await res.json();
@@ -1459,7 +1492,9 @@ async function loadRequest() {
       }, 350);
     }
   } catch (err) {
-    renderErrorScreen('Cannot connect to TripMozy servers: ' + err.message);
+    if (!isBackground) {
+      renderErrorScreen('Cannot connect to TripMozy servers: ' + err.message);
+    }
   }
 }
 
