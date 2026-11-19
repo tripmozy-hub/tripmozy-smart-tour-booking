@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "TripMozy Smart Tour & Holiday Package Marketplace",
   "scripts": {
+    "dev": "node server.js",
     "start": "node server.js",
     "test": "node --test"
   },
