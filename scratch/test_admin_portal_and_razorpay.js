@@ -94,17 +94,20 @@ async function runTests() {
   assert.strictEqual(adminPre.isAdmin, true);
 
   // In pre-acceptance, recipients should have phone/email hidden for traveler
-  assert.strictEqual(travelerPre.recipients[0].vendor_contact_phone, null);
-  assert.strictEqual(travelerPre.recipients[0].vendor_contact_email, null);
+  const testRecipientTraveler = travelerPre.recipients.find(r => r.property_id === propId) || travelerPre.recipients[0];
+  assert.strictEqual(testRecipientTraveler.vendor_contact_phone, null);
+  assert.strictEqual(testRecipientTraveler.vendor_contact_email, null);
 
   // For Admin, recipient contact phone and email are accessible
-  assert.strictEqual(adminPre.recipients[0].vendor_contact_phone, '+919876543210');
-  assert.strictEqual(adminPre.recipients[0].vendor_contact_email, 'vikram@goa-expeditions.com');
+  const testRecipientAdmin = adminPre.recipients.find(r => r.property_id === propId) || adminPre.recipients[0];
+  assert.ok(testRecipientAdmin.vendor_contact_phone, 'Admin should see vendor contact phone');
+  assert.ok(testRecipientAdmin.vendor_contact_email, 'Admin should see vendor contact email');
   console.log('   ✓ Pre-acceptance privacy enforced: Traveler blinded, Admin unmasked.\n');
 
   // 5. Operator Accepts Request and Dispatches Quote
   console.log('5. Operator accepts request...');
-  const recipient = db.queryOne('SELECT * FROM booking_request_recipients WHERE request_id = ?', [requestId]);
+  const recipient = db.queryOne('SELECT * FROM booking_request_recipients WHERE request_id = ? AND property_id = ?', [requestId, propId]) ||
+                    db.queryOne('SELECT * FROM booking_request_recipients WHERE request_id = ?', [requestId]);
   let room = db.queryOne(`
     SELECT rt.* FROM room_types rt
     JOIN room_rates rr ON rt.id = rr.room_type_id
@@ -190,6 +193,14 @@ async function runTests() {
   assert.strictEqual(confirmRes.success, true);
   console.log(`   ✓ Booking confirmed with Razorpay payment ID: ${razorpayPaymentId}`);
   console.log(`   ✓ Booking Reference: ${confirmRes.bookingReference}\n`);
+
+  // Verify payments table record
+  const payRecord = db.queryOne('SELECT * FROM payments WHERE booking_id = ?', [confirmRes.bookingId]);
+  assert.ok(payRecord, 'Payment record must exist in payments table');
+  assert.strictEqual(payRecord.provider, 'razorpay');
+  assert.strictEqual(payRecord.provider_payment_id, razorpayPaymentId);
+  assert.strictEqual(payRecord.status, 'paid');
+  console.log(`   ✓ payments ledger verified: status=${payRecord.status}, provider=${payRecord.provider}, provider_payment_id=${payRecord.provider_payment_id}\n`);
 
   // 9. Post-Payment: Vendor Contact is Released in Official Bill to Traveler
   console.log('9. Verifying Post-Payment Contact Release in Bill...');

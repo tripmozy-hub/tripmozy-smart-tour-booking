@@ -1415,6 +1415,8 @@ let pollTimer = null;
 let countdownSec = 6;
 let tickerTimer = null;
 let activeHoldId = null;
+let activeHoldOfferId = null;
+let activeHoldOffer = null;
 let activeHoldTimer = null;
 let selectedPaymentMethod = 'UPI_VERIFIED';
 
@@ -2020,6 +2022,8 @@ async function openCheckoutModal(offerId) {
     }
 
     activeHoldId = holdRes.holdId;
+    activeHoldOfferId = offerId;
+    activeHoldOffer = offer;
 
     const totalINR = offer.total_payable_paise / 100;
     const tp = offer.tourPricing || {
@@ -2105,7 +2109,34 @@ function startHoldTimer(expiresAt) {
 }
 
 // ── Razorpay Live Gateway Integration (rzp_live_RYrXNuT77Ns4gT) ─────────────
-const RAZORPAY_LIVE_KEY = 'rzp_live_RYrXNuT77Ns4gT';
+let RAZORPAY_LIVE_KEY = 'rzp_live_RYrXNuT77Ns4gT';
+
+// Dynamic sync of payment gateway configuration from server
+fetch('/api/payment/config')
+  .then(res => res.json())
+  .then(cfg => {
+    if (cfg && cfg.keyId) RAZORPAY_LIVE_KEY = cfg.keyId;
+  })
+  .catch(() => {});
+
+// Ensure Razorpay SDK is loaded
+async function ensureRazorpayLoaded() {
+  if (typeof window.Razorpay === 'function') return true;
+  return new Promise((resolve) => {
+    const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(typeof window.Razorpay === 'function'));
+      existing.addEventListener('error', () => resolve(false));
+      setTimeout(() => resolve(typeof window.Razorpay === 'function'), 2000);
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload = () => resolve(typeof window.Razorpay === 'function');
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+}
 
 // Direct / Admin / Quick Razorpay checkout for any tour offer
 async function initiateRazorpayPayment(offerId) {
@@ -2131,6 +2162,8 @@ async function initiateRazorpayPayment(offerId) {
       }
       holdId = hData.holdId;
       activeHoldId = holdId;
+      activeHoldOfferId = offerId;
+      activeHoldOffer = offer;
     } catch (err) {
       alert('Network error initiating tour booking: ' + err.message);
       return;
@@ -2145,6 +2178,8 @@ async function initiateRazorpayPayment(offerId) {
   const amountPaise = Math.round(tp.payableNowINR * 100);
 
   // 2. Launch Razorpay Live modal
+  await ensureRazorpayLoaded();
+
   if (typeof window.Razorpay === 'function') {
     const options = {
       key: RAZORPAY_LIVE_KEY,
@@ -2220,13 +2255,15 @@ async function executeBookingConfirmation() {
   btn.disabled = true;
   btn.innerHTML = '<span>Opening Razorpay Live Gateway...</span>';
 
-  const offer = (requestData && requestData.offers) ? requestData.offers[0] : null;
+  const offer = activeHoldOffer || ((requestData && requestData.offers) ? (requestData.offers.find(x => x.id === (activeHoldOfferId || '')) || requestData.offers[0]) : null);
   const totalINR = offer ? offer.total_payable_paise / 100 : (requestData.request.total_budget_paise / 100);
   const tp = (offer && offer.tourPricing) ? offer.tourPricing : {
     totalTourINR: totalINR,
     payableNowINR: Math.round(totalINR * 0.315)
   };
   const amountPaise = Math.round(tp.payableNowINR * 100);
+
+  await ensureRazorpayLoaded();
 
   if (typeof window.Razorpay === 'function') {
     const options = {

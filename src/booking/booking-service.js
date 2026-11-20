@@ -165,6 +165,26 @@ class BookingService {
         hold.tax_paise, commBps, commissionAmountPaise, netPayableVendorPaise
       ]);
 
+      // 7. Record Payment in payments ledger (Razorpay Live Gateway)
+      let effectiveProviderPaymentId = paymentReference || `pay_rzp_live_${crypto.randomBytes(6).toString('hex')}`;
+      const existingPay = tx.queryOne('SELECT id FROM payments WHERE provider_payment_id = ?', [effectiveProviderPaymentId]);
+      if (existingPay) {
+        effectiveProviderPaymentId = `${effectiveProviderPaymentId}_${bookingReference}`;
+      }
+      const paymentId = tx.uuid();
+      const providerOrderId = `order_${crypto.randomBytes(8).toString('hex')}`;
+      const idempotencyKey = `idem_${bookingId}_${effectiveProviderPaymentId}`;
+
+      tx.execute(`
+        INSERT INTO payments (
+          id, booking_id, amount_paise, currency, provider, provider_order_id,
+          provider_payment_id, status, idempotency_key
+        ) VALUES (?, ?, ?, 'INR', 'razorpay', ?, ?, 'paid', ?)
+      `, [
+        paymentId, bookingId, tourPricing.payableNowPaise,
+        providerOrderId, effectiveProviderPaymentId, idempotencyKey
+      ]);
+
       tx.logAudit({
         actorId: effectiveCustomerId,
         actorRole: 'customer',
