@@ -78,8 +78,9 @@ const reqService = new RequestService(db, notifService);
 const vendorService = new VendorService(db, notifService);
 const holdEngine = new InventoryHoldEngine(db);
 const bookingService = new BookingService(db);
+const isGatewayPaused = process.env.PAYMENT_GATEWAY_PAUSED !== 'false';
 const paymentAdapter = new PaymentGatewayAdapter(db, {
-  provider: 'razorpay',
+  provider: isGatewayPaused ? 'demo' : 'razorpay',
   keyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT'
 });
 const adminService = new AdminService(db);
@@ -785,14 +786,36 @@ const appHandler = async (req, res) => {
     return;
   }
 
-  // Payment Gateway Configuration
+  // Payment Gateway Configuration (Supports Live Razorpay & Paused Demo Sandbox)
   if (pathname === '/api/payment/config' && method === 'GET') {
+    const isPaused = process.env.PAYMENT_GATEWAY_PAUSED !== 'false';
     sendJson(200, {
-      provider: 'razorpay',
-      keyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT',
+      provider: isPaused ? 'demo' : 'razorpay',
+      mode: isPaused ? 'demo' : 'live',
+      isPaused,
+      keyId: isPaused ? 'rzp_test_demo_paused' : (process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT'),
+      liveKeyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT',
       currency: 'INR',
-      name: 'TripMozy',
-      description: 'TripMozy Tour Advance Booking Deposit (30% + 5% GST)'
+      name: isPaused ? 'TripMozy Demo Gateway' : 'TripMozy',
+      description: isPaused ? 'TripMozy Tour Advance Booking (Demo Sandbox Testing Mode)' : 'TripMozy Tour Advance Booking Deposit (30% + 5% GST)'
+    });
+    return;
+  }
+
+  // POST /api/payment/toggle-pause — Toggle between Demo Sandbox and Live Razorpay
+  if (pathname === '/api/payment/toggle-pause' && method === 'POST') {
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON' });
+      const currentPaused = process.env.PAYMENT_GATEWAY_PAUSED !== 'false';
+      const targetPause = (body && body.pause !== undefined) ? !!body.pause : !currentPaused;
+      process.env.PAYMENT_GATEWAY_PAUSED = targetPause ? 'true' : 'false';
+      sendJson(200, {
+        success: true,
+        isPaused: targetPause,
+        mode: targetPause ? 'demo' : 'live',
+        keyId: targetPause ? 'rzp_test_demo_paused' : (process.env.RAZORPAY_KEY_ID || 'rzp_live_RYrXNuT77Ns4gT'),
+        message: targetPause ? 'Live payment gateway paused. Demo sandbox active.' : 'Live payment gateway unpaused. Razorpay active.'
+      });
     });
     return;
   }

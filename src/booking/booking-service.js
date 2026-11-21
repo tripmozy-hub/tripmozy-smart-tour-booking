@@ -165,8 +165,9 @@ class BookingService {
         hold.tax_paise, commBps, commissionAmountPaise, netPayableVendorPaise
       ]);
 
-      // 7. Record Payment in payments ledger (Razorpay Live Gateway)
-      let effectiveProviderPaymentId = paymentReference || `pay_rzp_live_${crypto.randomBytes(6).toString('hex')}`;
+      // 7. Record Payment in payments ledger (Razorpay Live or Demo Sandbox Gateway)
+      const isPaused = process.env.PAYMENT_GATEWAY_PAUSED !== 'false';
+      let effectiveProviderPaymentId = paymentReference || (isPaused ? `pay_demo_${crypto.randomBytes(6).toString('hex')}` : `pay_rzp_live_${crypto.randomBytes(6).toString('hex')}`);
       const existingPay = tx.queryOne('SELECT id FROM payments WHERE provider_payment_id = ?', [effectiveProviderPaymentId]);
       if (existingPay) {
         effectiveProviderPaymentId = `${effectiveProviderPaymentId}_${bookingReference}`;
@@ -174,15 +175,16 @@ class BookingService {
       const paymentId = tx.uuid();
       const providerOrderId = `order_${crypto.randomBytes(8).toString('hex')}`;
       const idempotencyKey = `idem_${bookingId}_${effectiveProviderPaymentId}`;
+      const providerName = (effectiveProviderPaymentId.startsWith('pay_demo_') || isPaused) ? 'demo' : 'razorpay';
 
       tx.execute(`
         INSERT INTO payments (
           id, booking_id, amount_paise, currency, provider, provider_order_id,
           provider_payment_id, status, idempotency_key
-        ) VALUES (?, ?, ?, 'INR', 'razorpay', ?, ?, 'paid', ?)
+        ) VALUES (?, ?, ?, 'INR', ?, ?, ?, 'paid', ?)
       `, [
         paymentId, bookingId, tourPricing.payableNowPaise,
-        providerOrderId, effectiveProviderPaymentId, idempotencyKey
+        providerName, providerOrderId, effectiveProviderPaymentId, idempotencyKey
       ]);
 
       tx.logAudit({

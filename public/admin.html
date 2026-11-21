@@ -1695,8 +1695,8 @@
                     </div>
                     ${pay.gateway_payment_id || pay.paymentReference ? `
                       <div class="data-row">
-                        <span class="data-lbl">Razorpay ID:</span>
-                        <span class="data-val" style="font-family:monospace; font-size:10.5px;">${pay.gateway_payment_id || pay.paymentReference}</span>
+                        <span class="data-lbl">${(pay.gateway_payment_id || pay.paymentReference || '').includes('demo') ? 'Demo Ref:' : 'Razorpay ID:'}</span>
+                        <span class="data-val" style="font-family:monospace; font-size:10.5px; color:${(pay.gateway_payment_id || pay.paymentReference || '').includes('demo') ? '#34d399' : '#cbd5e1'};">${pay.gateway_payment_id || pay.paymentReference}</span>
                       </div>
                     ` : ''}
                     <div class="data-row">

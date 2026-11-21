@@ -92,7 +92,7 @@ class PaymentGatewayAdapter {
 
   // Verify HMAC-SHA256 signature for Razorpay/Cashfree
   verifySignature({ orderId, paymentId, signature }) {
-    if (this.config.provider === 'test_sandbox' && signature === 'test_valid_sig') {
+    if ((this.config.provider === 'test_sandbox' || this.config.provider === 'demo') && (signature === 'test_valid_sig' || (typeof signature === 'string' && (signature.startsWith('demo_') || signature.startsWith('sig_demo_'))))) {
       return true;
     }
     if (!signature || typeof signature !== 'string') return false;

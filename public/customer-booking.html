@@ -1332,39 +1332,106 @@
       </div>
     </div>
 
-    <!-- Payment Gateway: Official Razorpay Live Integration -->
+    <!-- Payment Gateway: Official Razorpay Live or Demo Sandbox -->
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
       <div style="font-size:13px; font-weight:700; color:var(--navy);">Payment Gateway (TripMozy Account):</div>
-      <div class="rzp-badge">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        Razorpay Live (rzp_live_RYrXNuT77Ns4gT)
-      </div>
-    </div>
-    <div class="payment-option selected" onclick="selectPayment(this, 'UPI_VERIFIED')">
-      <div class="payment-icon">UPI</div>
-      <div>
-        <div>UPI (Google Pay, PhonePe, Paytm, Any UPI)</div>
-        <div style="font-size:11px; color:var(--text-muted)">Instant confirmation directly via Razorpay to TripMozy Account</div>
-      </div>
-    </div>
-    <div class="payment-option" onclick="selectPayment(this, 'CARD_VERIFIED')">
-      <div class="payment-icon">Card</div>
-      <div>
-        <div>Credit / Debit Card</div>
-        <div style="font-size:11px; color:var(--text-muted)">Visa, Mastercard, RuPay (Zero convenience fees via Razorpay)</div>
-      </div>
-    </div>
-    <div class="payment-option" onclick="selectPayment(this, 'NETBANKING')">
-      <div class="payment-icon">Bank</div>
-      <div>
-        <div>Net Banking</div>
-        <div style="font-size:11px; color:var(--text-muted)">All Major Indian Banks via Razorpay Live Gateway</div>
+      <div class="rzp-badge" id="gatewayBadge" style="background:#fef3c7; border:1px solid #fde68a; color:#92400e;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span id="gatewayBadgeText">Demo Sandbox Mode (Live Gateway Paused)</span>
       </div>
     </div>
 
-    <button class="confirm-btn" id="confirmPayBtn" onclick="executeBookingConfirmation()">
-      <span>Pay Advance &amp; Confirm Tour Booking</span>
+    <!-- Demo notice banner when Live Gateway is paused -->
+    <div id="demoNoticeBanner" style="background:#fefce8; border:1px solid #fef08a; border-radius:10px; padding:10px 14px; font-size:12px; color:#854d0e; margin-bottom:14px; display:flex; align-items:flex-start; gap:8px;">
+      <span style="font-size:16px; line-height:1;">🧪</span>
+      <div>
+        <div style="font-weight:700;">Live Gateway Paused · Demo Test Mode Active</div>
+        <div style="color:#713f12; margin-top:2px;">Live card/UPI charges are temporarily paused for testing. You can safely simulate advance deposits, test operator unlock, and verify official payment receipts in this demo sandbox.</div>
+      </div>
+    </div>
+
+    <div class="payment-option selected" id="optUpi" onclick="selectPayment(this, 'DEMO_UPI')">
+      <div class="payment-icon" style="background:#eff6ff; color:#2563eb;">UPI</div>
+      <div>
+        <div id="lblUpiTitle" style="font-weight:700; color:var(--navy);">UPI (Simulated Demo · Google Pay / PhonePe / Paytm)</div>
+        <div id="lblUpiSub" style="font-size:11px; color:var(--text-muted)">Instant 1-click sandbox authorization to TripMozy Account</div>
+      </div>
+    </div>
+    <div class="payment-option" id="optCard" onclick="selectPayment(this, 'DEMO_CARD')">
+      <div class="payment-icon" style="background:#f0fdf4; color:#16a34a;">Card</div>
+      <div>
+        <div id="lblCardTitle" style="font-weight:700; color:var(--navy);">Credit / Debit Card (Simulated Demo)</div>
+        <div id="lblCardSub" style="font-size:11px; color:var(--text-muted)">Test Visa •••• 4242 or Mastercard sandbox simulation</div>
+      </div>
+    </div>
+    <div class="payment-option" id="optNetbanking" onclick="selectPayment(this, 'DEMO_NETBANKING')">
+      <div class="payment-icon" style="background:#fefce8; color:#ca8a04;">Bank</div>
+      <div>
+        <div id="lblBankTitle" style="font-weight:700; color:var(--navy);">Net Banking (Simulated Demo)</div>
+        <div id="lblBankSub" style="font-size:11px; color:var(--text-muted)">Test All Major Indian Banks sandbox authorization</div>
+      </div>
+    </div>
+
+    <button class="confirm-btn" id="confirmPayBtn" onclick="executeBookingConfirmation()" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+      <span id="confirmPayBtnText">Pay Advance &amp; Confirm Tour Booking (Demo)</span>
     </button>
+  </div>
+</div>
+
+<!-- Interactive Demo Gateway Simulator Modal -->
+<div class="modal-overlay hidden" id="demoGatewayModal" style="z-index: 10000;">
+  <div class="checkout-modal" style="max-width:440px; border-radius:16px; border:2px solid #3b82f6; box-shadow:0 25px 50px -12px rgba(37,99,235,0.25);">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="background:#2563eb; color:#fff; border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">⚡</div>
+        <div>
+          <div style="font-size:15px; font-weight:800; color:var(--navy);">TripMozy Demo Gateway</div>
+          <div style="font-size:11px; color:#64748b;">Secure Sandbox Payment Simulator</div>
+        </div>
+      </div>
+      <button onclick="closeDemoGatewayModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted);">&times;</button>
+    </div>
+
+    <!-- Amount Card -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:center; margin-bottom:16px;">
+      <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Advance Payable to TripMozy</div>
+      <div style="font-size:26px; font-weight:800; color:#059669; margin:4px 0;" id="demoModalAmount">&#8377;0</div>
+      <div style="font-size:11px; color:#64748b;">30% Tour Deposit (+ 5% GST) · Safe Escrow Protected</div>
+    </div>
+
+    <!-- Simulation Details -->
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px; margin-bottom:16px; font-size:12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="color:#64748b;">Simulated Method:</span>
+        <strong id="demoModalMethod" style="color:#1e40af;">UPI (traveler@upi)</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="color:#64748b;">Destination / Tour:</span>
+        <strong id="demoModalDest" style="color:var(--navy);">-</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:#64748b;">Traveler:</span>
+        <strong id="demoModalTraveler" style="color:var(--navy);">-</strong>
+      </div>
+    </div>
+
+    <div id="demoProgressBox" style="display:none; margin-bottom:16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
+      <div class="live-spinner" style="margin:0 auto 8px; width:22px; height:22px; border-width:2px;"></div>
+      <div id="demoProgressStatus" style="font-size:13px; font-weight:700; color:#166534;">Authorizing Sandbox Payment...</div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="demoActionBtns" style="display:flex; flex-direction:column; gap:10px;">
+      <button class="confirm-btn" onclick="authorizeDemoPayment(true)" style="background:linear-gradient(135deg, #059669 0%, #047857 100%); margin:0; width:100%;">
+        <span>Authorize Demo Payment (Success)</span>
+      </button>
+      <button onclick="authorizeDemoPayment(false)" style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">
+        Simulate Payment Failure / Decline
+      </button>
+      <button onclick="closeDemoGatewayModal()" style="background:none; border:none; color:#64748b; font-size:12px; cursor:pointer; padding:4px;">
+        Cancel
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1682,10 +1749,10 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">Payment Gateway:</span>
-            <span class="prop-v" style="font-family:monospace; color:#f59e0b; font-weight:700;">Razorpay Live</span>
+            <span class="prop-v" style="font-family:monospace; color:#f59e0b; font-weight:700;">${isGatewayPaused ? 'Demo Sandbox (Live Paused)' : 'Razorpay Live'}</span>
           </div>
           <div class="admin-prop-row">
-            <span class="prop-k">Live Key ID:</span>
+            <span class="prop-k">${isGatewayPaused ? 'Live Key (Paused):' : 'Live Key ID:'}</span>
             <span class="prop-v" style="font-family:monospace; font-size:11px; color:#cbd5e1;">rzp_live_RYrXNuT77Ns4gT</span>
           </div>
           <div class="admin-prop-row">
@@ -1710,7 +1777,7 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           ${!isBooked && firstOffer ? `
             <button type="button" class="btn-admin-pay" onclick="initiateRazorpayPayment('${firstOffer.id}')">
-              💳 Pay Advance (₹${adminTp.payableNowINR.toLocaleString('en-IN')} via Razorpay Live)
+              💳 Pay Advance (₹${adminTp.payableNowINR.toLocaleString('en-IN')} ${isGatewayPaused ? '· Demo Simulator' : '· Razorpay Live'})
             </button>
           ` : ''}
           ${isBooked ? `
@@ -2047,7 +2114,10 @@ async function openCheckoutModal(offerId) {
     document.getElementById('billRemainingBalance').textContent = '₹' + tp.remainingBalanceINR.toLocaleString('en-IN');
     document.getElementById('balanceAmountLabel').textContent = '₹' + tp.remainingBalanceINR.toLocaleString('en-IN');
 
-    document.getElementById('confirmPayBtn').innerHTML = `<span>Pay Advance &#8377;${tp.payableNowINR.toLocaleString('en-IN')} to TripMozy &amp; Confirm Tour</span>`;
+    const payBtnLabel = isGatewayPaused
+      ? `<span>Pay Advance &#8377;${tp.payableNowINR.toLocaleString('en-IN')} (Demo Sandbox Payment)</span>`
+      : `<span>Pay Advance &#8377;${tp.payableNowINR.toLocaleString('en-IN')} to TripMozy &amp; Confirm Tour</span>`;
+    document.getElementById('confirmPayBtn').innerHTML = payBtnLabel;
 
     // Start 15-minute countdown clock
     startHoldTimer(holdRes.expiresAt);
@@ -2108,16 +2178,124 @@ function startHoldTimer(expiresAt) {
   }, 1000);
 }
 
-// ── Razorpay Live Gateway Integration (rzp_live_RYrXNuT77Ns4gT) ─────────────
+// ── Payment Gateway Integration (Supports Live Razorpay & Paused Demo Sandbox) ─────────────
+let isGatewayPaused = true;
 let RAZORPAY_LIVE_KEY = 'rzp_live_RYrXNuT77Ns4gT';
+let activeDemoTp = null;
 
 // Dynamic sync of payment gateway configuration from server
-fetch('/api/payment/config')
-  .then(res => res.json())
-  .then(cfg => {
-    if (cfg && cfg.keyId) RAZORPAY_LIVE_KEY = cfg.keyId;
-  })
-  .catch(() => {});
+function syncPaymentConfig() {
+  fetch('/api/payment/config')
+    .then(res => res.json())
+    .then(cfg => {
+      if (cfg) {
+        isGatewayPaused = cfg.isPaused !== false;
+        if (cfg.liveKeyId) RAZORPAY_LIVE_KEY = cfg.liveKeyId;
+        else if (cfg.keyId && !cfg.keyId.includes('paused')) RAZORPAY_LIVE_KEY = cfg.keyId;
+        updateGatewayUI(cfg);
+      }
+    })
+    .catch(() => {});
+}
+syncPaymentConfig();
+
+function updateGatewayUI(cfg) {
+  const isPaused = cfg ? cfg.isPaused !== false : isGatewayPaused;
+  const badge = document.getElementById('gatewayBadge');
+  const badgeText = document.getElementById('gatewayBadgeText');
+  const demoBanner = document.getElementById('demoNoticeBanner');
+  const upiTitle = document.getElementById('lblUpiTitle');
+  const upiSub = document.getElementById('lblUpiSub');
+  const cardTitle = document.getElementById('lblCardTitle');
+  const cardSub = document.getElementById('lblCardSub');
+  const bankTitle = document.getElementById('lblBankTitle');
+  const bankSub = document.getElementById('lblBankSub');
+
+  if (isPaused) {
+    if (badge) {
+      badge.style.background = '#fef3c7';
+      badge.style.borderColor = '#fde68a';
+      badge.style.color = '#92400e';
+    }
+    if (badgeText) badgeText.textContent = 'Demo Sandbox Mode (Live Paused)';
+    if (demoBanner) demoBanner.style.display = 'flex';
+    if (upiTitle) upiTitle.textContent = 'UPI (Simulated Demo · Google Pay / PhonePe / Paytm)';
+    if (upiSub) upiSub.textContent = 'Instant 1-click sandbox authorization to TripMozy Account';
+    if (cardTitle) cardTitle.textContent = 'Credit / Debit Card (Simulated Demo)';
+    if (cardSub) cardSub.textContent = 'Test Visa •••• 4242 / Mastercard sandbox authorization';
+    if (bankTitle) bankTitle.textContent = 'Net Banking (Simulated Demo)';
+    if (bankSub) bankSub.textContent = 'Test All Major Indian Banks sandbox authorization';
+  } else {
+    if (badge) {
+      badge.style.background = '#eff6ff';
+      badge.style.borderColor = '#bfdbfe';
+      badge.style.color = '#1e40af';
+    }
+    if (badgeText) badgeText.textContent = `Razorpay Live (${RAZORPAY_LIVE_KEY})`;
+    if (demoBanner) demoBanner.style.display = 'none';
+    if (upiTitle) upiTitle.textContent = 'UPI (Google Pay, PhonePe, Paytm, Any UPI)';
+    if (upiSub) upiSub.textContent = 'Instant confirmation directly via Razorpay to TripMozy Account';
+    if (cardTitle) cardTitle.textContent = 'Credit / Debit Card';
+    if (cardSub) cardSub.textContent = 'Visa, Mastercard, RuPay (Zero convenience fees via Razorpay)';
+    if (bankTitle) bankTitle.textContent = 'Net Banking';
+    if (bankSub) bankSub.textContent = 'All Major Indian Banks via Razorpay Live Gateway';
+  }
+}
+
+// Demo Gateway Modal Controls
+function openDemoGatewayModal(tp) {
+  activeDemoTp = tp;
+  const modal = document.getElementById('demoGatewayModal');
+  if (!modal) return;
+
+  const amtEl = document.getElementById('demoModalAmount');
+  const methodEl = document.getElementById('demoModalMethod');
+  const destEl = document.getElementById('demoModalDest');
+  const travelerEl = document.getElementById('demoModalTraveler');
+  const pBox = document.getElementById('demoProgressBox');
+  const aBtns = document.getElementById('demoActionBtns');
+
+  if (amtEl) amtEl.innerHTML = `&#8377;${tp.payableNowINR.toLocaleString('en-IN')}`;
+  if (methodEl) {
+    const m = selectedPaymentMethod || 'DEMO_UPI';
+    methodEl.textContent = m.replace('DEMO_', '').replace('_VERIFIED', '') + ' (Sandbox Simulation)';
+  }
+  if (destEl) destEl.textContent = requestData?.request?.destination || 'Tour Package';
+  if (travelerEl) travelerEl.textContent = requestData?.request?.guest_name || 'Traveler';
+
+  if (pBox) pBox.style.display = 'none';
+  if (aBtns) aBtns.style.display = 'flex';
+
+  modal.classList.remove('hidden');
+}
+
+function closeDemoGatewayModal() {
+  const modal = document.getElementById('demoGatewayModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function authorizeDemoPayment(isSuccess) {
+  const pBox = document.getElementById('demoProgressBox');
+  const pStatus = document.getElementById('demoProgressStatus');
+  const aBtns = document.getElementById('demoActionBtns');
+
+  if (!isSuccess) {
+    alert('Simulated Payment Declined: Sandbox transaction was cancelled. You may select another demo payment option and retry.');
+    return;
+  }
+
+  if (aBtns) aBtns.style.display = 'none';
+  if (pBox) pBox.style.display = 'block';
+  if (pStatus) pStatus.textContent = 'Connecting to Sandbox Payment Gateway...';
+
+  await new Promise(r => setTimeout(r, 600));
+  if (pStatus) pStatus.textContent = 'Sandbox Bank Approved! Generating Official TripMozy Bill...';
+
+  await new Promise(r => setTimeout(r, 500));
+  const demoPaymentRef = `pay_demo_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  closeDemoGatewayModal();
+  await finalizeBookingPayment(activeHoldId, demoPaymentRef);
+}
 
 // Ensure Razorpay SDK is loaded
 async function ensureRazorpayLoaded() {
@@ -2138,7 +2316,7 @@ async function ensureRazorpayLoaded() {
   });
 }
 
-// Direct / Admin / Quick Razorpay checkout for any tour offer
+// Direct / Admin / Quick checkout for any tour offer
 async function initiateRazorpayPayment(offerId) {
   const offer = (requestData && requestData.offers) ? requestData.offers.find(x => x.id === offerId) : null;
   if (!offer) {
@@ -2176,6 +2354,12 @@ async function initiateRazorpayPayment(offerId) {
     payableNowINR: Math.round(totalINR * 0.315)
   };
   const amountPaise = Math.round(tp.payableNowINR * 100);
+
+  // If live gateway is paused, use interactive demo simulation
+  if (isGatewayPaused) {
+    openDemoGatewayModal(tp);
+    return;
+  }
 
   // 2. Launch Razorpay Live modal
   await ensureRazorpayLoaded();
@@ -2218,11 +2402,11 @@ async function initiateRazorpayPayment(offerId) {
     rzp.open();
   } else {
     // Offline / testing fallback
-    await finalizeBookingPayment(holdId, `pay_rzp_live_${Date.now()}`);
+    await finalizeBookingPayment(holdId, `pay_demo_${Date.now()}`);
   }
 }
 
-// Finalize booking via API with Razorpay payment reference
+// Finalize booking via API with payment reference
 async function finalizeBookingPayment(holdId, paymentRef) {
   try {
     const res = await fetch('/api/bookings/confirm', {
@@ -2247,13 +2431,9 @@ async function finalizeBookingPayment(holdId, paymentRef) {
   }
 }
 
-// Confirm booking & finalize payment from checkout modal via Razorpay Live Gateway
+// Confirm booking & finalize payment from checkout modal
 async function executeBookingConfirmation() {
   if (!activeHoldId) return;
-
-  const btn = document.getElementById('confirmPayBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span>Opening Razorpay Live Gateway...</span>';
 
   const offer = activeHoldOffer || ((requestData && requestData.offers) ? (requestData.offers.find(x => x.id === (activeHoldOfferId || '')) || requestData.offers[0]) : null);
   const totalINR = offer ? offer.total_payable_paise / 100 : (requestData.request.total_budget_paise / 100);
@@ -2261,6 +2441,17 @@ async function executeBookingConfirmation() {
     totalTourINR: totalINR,
     payableNowINR: Math.round(totalINR * 0.315)
   };
+
+  // If live gateway is paused, use interactive demo simulation
+  if (isGatewayPaused) {
+    openDemoGatewayModal(tp);
+    return;
+  }
+
+  const btn = document.getElementById('confirmPayBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>Opening Razorpay Live Gateway...</span>';
+
   const amountPaise = Math.round(tp.payableNowINR * 100);
 
   await ensureRazorpayLoaded();
@@ -2305,8 +2496,8 @@ async function executeBookingConfirmation() {
     });
     rzp.open();
   } else {
-    // Fallback for automated test runners or environments without external script
-    await finalizeBookingPayment(activeHoldId, `${selectedPaymentMethod}_rzp_live_${Date.now()}`);
+    // Offline / testing fallback
+    await finalizeBookingPayment(activeHoldId, `pay_demo_${Date.now()}`);
   }
 }
 
@@ -2391,7 +2582,7 @@ function renderConfirmedVoucher(req, offers, booking) {
           </div>
           <div>
             <span class="meta-lbl">Payment Reference:</span>
-            <strong class="meta-val" style="font-family:monospace;">${esc(paymentRefStr)}</strong>
+            <strong class="meta-val" style="font-family:monospace;">${esc(paymentRefStr)} ${paymentRefStr.includes('demo') ? '<span style="font-size:10px; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:4px;">Demo Sandbox</span>' : ''}</strong>
           </div>
         </div>
       </div>
