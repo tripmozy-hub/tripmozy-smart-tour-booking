@@ -1560,7 +1560,7 @@ function startPolling() {
   }, 1000);
 
   pollTimer = setInterval(async () => {
-    if (requestData && (requestData.request?.status === 'booked' || requestData.request?.status === 'cancelled')) {
+    if (requestData && (requestData.request?.status === 'booked' || requestData.request?.status === 'cancelled' || requestData.request?.status === 'expired' || (requestData.offers && requestData.offers.length > 0))) {
       if (pollTimer) clearInterval(pollTimer);
       if (tickerTimer) clearInterval(tickerTimer);
       return;
@@ -1861,6 +1861,9 @@ function renderPortal(data) {
     if (tickerTimer) clearInterval(tickerTimer);
   }
 
+  const firstOffer = (offers && offers.length > 0) ? offers[0] : null;
+  const operatorName = firstOffer ? (firstOffer.property_name || 'Verified Tour Partner') : 'Verified Tour Partner';
+
   // Update Stepper
   let step1 = 'completed', step2 = 'active', step3 = '', step4 = '';
   if (hasOffers && !isBooked && !isCancelled && !isExpired) { step2 = 'completed'; step3 = 'active'; }
@@ -1875,8 +1878,8 @@ function renderPortal(data) {
     : isExpired
     ? 'Tour Package Expired'
     : hasOffers
-    ? `${offers.length} Tour Quote${offers.length > 1 ? 's' : ''} Received`
-    : 'Awaiting Tour Operator Quotes';
+    ? 'Tour Operator Assigned · Search Complete'
+    : 'Searching Verified Tour Operators';
 
   const statusClass = isBooked ? 'status-booked' : isCancelled ? 'status-cancelled' : isExpired ? 'status-expired' : hasOffers ? 'status-offers' : 'status-pending';
 
@@ -1893,12 +1896,12 @@ function renderPortal(data) {
         <div class="step-label">Tour Requested</div>
       </div>
       <div class="step-item ${step2}">
-        <div class="step-circle">${isCancelled ? '✕' : isExpired ? '⏱️' : '2'}</div>
-        <div class="step-label">${isCancelled ? 'Cancelled' : isExpired ? 'Expired' : 'Operators Quoting'}</div>
+        <div class="step-circle">${isCancelled ? '✕' : isExpired ? '⏱️' : hasOffers ? '✓' : '2'}</div>
+        <div class="step-label">${isCancelled ? 'Cancelled' : isExpired ? 'Expired' : hasOffers ? 'Operator Accepted' : 'Searching Operators'}</div>
       </div>
       <div class="step-item ${step3}">
         <div class="step-circle">3</div>
-        <div class="step-label">Compare &amp; Hold</div>
+        <div class="step-label">Review &amp; Lock Tour</div>
       </div>
       <div class="step-item ${step4}">
         <div class="step-circle">4</div>
@@ -1941,9 +1944,9 @@ function renderPortal(data) {
           <div style="font-size:11px; color:var(--text-muted);">Max total budget incl. GST</div>
         </div>
         <div>
-          <div class="sum-label">Operators Contacted</div>
-          <div class="sum-val">${recips.length} Verified Partners</div>
-          <div style="font-size:11px; color:#059669; font-weight:600;">Alerted via WhatsApp</div>
+          <div class="sum-label">${hasOffers ? 'Assigned Operator' : 'Operators Contacted'}</div>
+          <div class="sum-val" style="${hasOffers ? 'color:#059669; font-weight:800;' : ''}">${hasOffers ? esc(operatorName) : `${recips.length} Verified Partners`}</div>
+          <div style="font-size:11px; color:#059669; font-weight:600;">${hasOffers ? '✓ Exclusivity Locked' : 'Alerted via WhatsApp'}</div>
         </div>
       </div>
     </div>
@@ -2002,31 +2005,50 @@ function renderPortal(data) {
     return;
   }
 
-  // Live status ticker banner (if waiting / not yet booked and NOT expired)
+  // Live status banner (if not yet booked and NOT expired)
   if (!isExpired) {
-    html += `
-      <div class="live-banner">
-        <div class="live-banner-left">
-          <div class="live-spinner"></div>
-          <div>
-            <div class="live-title">${hasOffers ? `${offers.length} Verified Tour Operator(s) have sent packages!` : 'Tour operators are preparing custom packages now...'}</div>
-            <div class="live-sub">TripMozy WhatsApp Bot is coordinating with tour operators in ${esc(req.destination)}.</div>
+    if (hasOffers) {
+      html += `
+        <div class="assigned-banner" style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:14px; padding:18px 22px; margin-top:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 2px 8px rgba(16,185,129,0.06);">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <div style="width:44px; height:44px; border-radius:50%; background:#dcfce7; color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight:700;">✓</div>
+            <div>
+              <div style="font-weight:800; font-size:16px; color:#166534;">Tour Operator Assigned · Search Closed</div>
+              <div style="font-size:13px; color:#15803d; margin-top:2px; line-height:1.4;">
+                <strong>${esc(operatorName)}</strong> has accepted your tour request and locked in your custom tour package. The operator search is now closed and this request is exclusively assigned.
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:12px; font-weight:700; color:#15803d; background:#dcfce7; padding:6px 14px; border-radius:8px; border:1px solid #bbf7d0;">🔒 Exclusive Lock</span>
           </div>
         </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
-          <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
-          <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">✕ Cancel Request</button>
+      `;
+    } else {
+      html += `
+        <div class="live-banner">
+          <div class="live-banner-left">
+            <div class="live-spinner"></div>
+            <div>
+              <div class="live-title">Broadcasting to verified tour operators in ${esc(req.destination)}...</div>
+              <div class="live-sub">TripMozy WhatsApp Bot is coordinating. The first tour operator to accept will secure exclusive package coordination.</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
+            <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
+            <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">✕ Cancel Request</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   }
 
   // Offers Section
   html += `
     <div class="section-head">
-      <h2>${isExpired ? 'Tour Package Quotes (Expired)' : 'Received Tour Package Quotes'}</h2>
-      <span class="offer-count-chip">${isExpired ? 'Expired' : `${offers.length} Available`}</span>
+      <h2>${isExpired ? 'Tour Package Quotes (Expired)' : hasOffers ? 'Your Assigned Tour Package' : 'Waiting for Tour Operator Quote'}</h2>
+      <span class="offer-count-chip" style="${hasOffers ? 'background:#dcfce7; color:#166534; border:1px solid #bbf7d0;' : ''}">${isExpired ? 'Expired' : hasOffers ? 'Exclusively Assigned' : 'Searching...'}</span>
     </div>
   `;
 
@@ -2106,6 +2128,9 @@ function renderOfferCard(o, req) {
 
       <div class="offer-body">
         <div class="offer-details">
+          <div style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px; margin-bottom:8px;">
+            <span>🔒 Exclusive Accepted Partner</span> · <span>Operator Search Closed</span>
+          </div>
           <div class="room-name">${esc(o.room_type_name || 'All-Inclusive Tour Package')}</div>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
             <span class="feature-tag">${esc(o.meal_plan || 'Meals &amp; Sightseeing Included')}</span>
