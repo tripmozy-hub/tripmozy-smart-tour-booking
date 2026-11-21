@@ -1522,13 +1522,18 @@ let activeHoldOffer = null;
 let activeHoldTimer = null;
 let selectedPaymentMethod = 'UPI_VERIFIED';
 
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? decodeURIComponent(v[2]) : null;
+}
+
 // Initialize
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  requestId = params.get('id') || params.get('req') || window.location.pathname.split('/')[2];
+  requestId = params.get('id') || params.get('req') || params.get('requestId') || params.get('ref') || params.get('reference') || window.location.pathname.split('/')[2];
 
   if (!requestId || requestId === 'booking' || requestId === 'booking.html') {
-    requestId = localStorage.getItem('tm_latest_request_id');
+    requestId = localStorage.getItem('tm_latest_request_id') || localStorage.getItem('tm_latest_request_ref') || getCookie('tm_latest_request_id');
   }
 
   if (!requestId) {
@@ -1576,9 +1581,50 @@ async function loadRequest(isBackground = false) {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const isAdmin = urlParams.get('admin') === '1' || urlParams.get('role') === 'admin' || localStorage.getItem('tm_is_admin') === '1' || localStorage.getItem('tm_user_role') === 'admin';
-    const fetchUrl = `/api/requests/${requestId}${isAdmin ? '?admin=1' : ''}`;
-    const res = await fetch(fetchUrl);
+    let token = urlParams.get('token') || localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
+
+    const queryParts = [];
+    if (isAdmin) queryParts.push('admin=1');
+    if (token) queryParts.push('token=' + encodeURIComponent(token));
+    const queryString = queryParts.length ? '?' + queryParts.join('&') : '';
+    const fetchUrl = `/api/requests/${encodeURIComponent(requestId)}${queryString}`;
+
+    const res = await fetch(fetchUrl, {
+      headers: token ? { 'x-request-token': token } : {}
+    });
+
     if (!res.ok) {
+      // Check cached request data in localStorage as graceful fallback
+      const cachedRaw = localStorage.getItem('tm_latest_request_data');
+      if (cachedRaw) {
+        try {
+          const cached = JSON.parse(cachedRaw);
+          if (cached.id === requestId || cached.reference === requestId) {
+            const fallbackData = {
+              request: {
+                id: cached.id,
+                request_reference: cached.reference,
+                destination: cached.destination,
+                check_in_date: cached.checkInDate || '',
+                check_out_date: cached.checkOutDate || '',
+                nights: cached.nights || 1,
+                num_rooms: cached.numRooms || 1,
+                num_adults: cached.numAdults || 2,
+                total_budget_paise: Math.round((cached.totalBudgetINR || 0) * 100),
+                guest_name: cached.guestName || 'Traveler',
+                status: cached.status || 'awaiting_responses',
+                expires_at: cached.expiresAt || ''
+              },
+              offers: [],
+              recipients: [],
+              isExpired: false
+            };
+            requestData = fallbackData;
+            renderPortal(fallbackData);
+            return;
+          }
+        } catch (_) {}
+      }
       if (!isBackground) {
         renderErrorScreen('Stay request not found. Please check your request reference.');
       }
@@ -1586,6 +1632,10 @@ async function loadRequest(isBackground = false) {
     }
     const data = await res.json();
     requestData = data;
+    if (data.request) {
+      localStorage.setItem('tm_latest_request_id', data.request.id);
+      localStorage.setItem('tm_latest_request_ref', data.request.request_reference);
+    }
     renderPortal(data);
 
     // Auto-open checkout modal if customer arrived via direct payment link (?payNow=1 or ?autoPay=1)
@@ -2889,8 +2939,12 @@ async function doLookup() {
   const val = document.getElementById('lookupInput').value.trim();
   if (!val) return alert('Please enter your request reference');
 
-  // If reference, check if it's an ID or lookup
-  window.location.search = `?id=${val}`;
+  let token = localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
+  const storedRef = localStorage.getItem('tm_latest_request_ref');
+  const storedId = localStorage.getItem('tm_latest_request_id');
+
+  const tokenParam = (token && (storedRef === val || storedId === val)) ? `&token=${encodeURIComponent(token)}` : '';
+  window.location.search = `?id=${encodeURIComponent(val)}${tokenParam}`;
 }
 
 function renderErrorScreen(msg) {

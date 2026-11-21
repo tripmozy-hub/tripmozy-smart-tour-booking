@@ -66,6 +66,69 @@ class RequestService {
     return `${pStr}.${sig}`;
   }
 
+  // Generate cryptographically signed stateless request token (resilient across serverless instances)
+  static generateSignedRequestToken(payload) {
+    const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
+    const minPayload = {
+      type: 'request',
+      reqId: payload.requestId || payload.id,
+      ref: payload.requestReference || payload.reference,
+      cid: payload.customerId,
+      gnm: payload.guestName,
+      gem: payload.guestEmail,
+      gph: payload.guestPhone,
+      dst: payload.destination,
+      dstLoc: payload.destinationLocality || null,
+      cin: payload.checkInDate,
+      cout: payload.checkOutDate,
+      nts: payload.nights,
+      rms: payload.numRooms,
+      adt: payload.numAdults,
+      chd: payload.numChildren || 0,
+      bgt: payload.totalBudgetPaise,
+      propPref: payload.propertyTypePreference || null,
+      roomPref: payload.roomPreference || 'any',
+      fac: Array.isArray(payload.requiredFacilities) ? payload.requiredFacilities : [],
+      sta: payload.status || 'awaiting_responses',
+      exp: payload.expiresAt ? new Date(payload.expiresAt).getTime() : (Date.now() + 2 * 3600 * 1000)
+    };
+    const pStr = Buffer.from(JSON.stringify(minPayload)).toString('base64url');
+    const sig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+    return `${pStr}.${sig}`;
+  }
+
+  // Generate cryptographically signed stateless offer token (resilient across serverless instances)
+  static generateSignedOfferToken(payload) {
+    const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
+    const minPayload = {
+      type: 'offer',
+      reqId: payload.requestId,
+      ref: payload.requestReference,
+      dst: payload.destination,
+      cin: payload.checkInDate,
+      cout: payload.checkOutDate,
+      nts: payload.nights,
+      rms: payload.numRooms,
+      adt: payload.numAdults,
+      bgt: payload.totalBudgetPaise,
+      gnm: payload.guestName,
+      gem: payload.guestEmail,
+      gph: payload.guestPhone,
+      offId: payload.offerId,
+      offRef: payload.offerReference,
+      venId: payload.vendorId,
+      venName: payload.vendorBusinessName,
+      propId: payload.propertyId,
+      propName: payload.propertyName,
+      totPaise: payload.totalPayablePaise,
+      sta: 'offers_available',
+      exp: payload.validUntil ? new Date(payload.validUntil).getTime() : (Date.now() + 4 * 3600 * 1000)
+    };
+    const pStr = Buffer.from(JSON.stringify(minPayload)).toString('base64url');
+    const sig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+    return `${pStr}.${sig}`;
+  }
+
   // Validate and submit stay request
   submitStayRequest({
     guestName,
@@ -427,6 +490,29 @@ class RequestService {
         ipAddress
       });
 
+      const signedRequestToken = RequestService.generateSignedRequestToken({
+        requestId,
+        reference,
+        customerId: finalCustomerId,
+        guestName,
+        guestEmail,
+        guestPhone,
+        destination,
+        destinationLocality,
+        checkInDate,
+        checkOutDate,
+        nights,
+        numRooms,
+        numAdults,
+        numChildren,
+        totalBudgetPaise,
+        propertyTypePreference,
+        roomPreference,
+        requiredFacilities,
+        status: 'awaiting_responses',
+        expiresAt
+      });
+
       return {
         id: requestId,
         reference,
@@ -437,9 +523,209 @@ class RequestService {
         totalBudgetINR: budgetNum,
         matchedCount: dispatchedCount,
         expiresAt,
+        requestToken: signedRequestToken,
         message: `Tour request created successfully! Dispatched to ${dispatchedCount} verified TripMozy tour operators.`
       };
     });
+  }
+
+  // Rehydrate request and relationships from cryptographically signed token on cold serverless instances
+  rehydrateRequestFromToken(rawToken, targetId = null) {
+    if (!rawToken || typeof rawToken !== 'string' || !rawToken.includes('.')) return false;
+    const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
+    try {
+      const [pStr, sig] = rawToken.split('.');
+      if (!pStr || !sig) return false;
+      const expectedSig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+      const sigBuf = Buffer.from(sig);
+      const expBuf = Buffer.from(expectedSig);
+      if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+        return false;
+      }
+      const p = JSON.parse(Buffer.from(pStr, 'base64url').toString('utf8'));
+      if (!p) return false;
+
+      // Check if targetId matches (if targetId provided and not a generic wildcard)
+      if (targetId && targetId !== 'latest' && targetId !== 'undefined' && targetId !== 'null') {
+        const idMatches = targetId === p.reqId || targetId === p.ref || targetId === p.id || targetId === p.recId;
+        if (!idMatches) return false;
+      }
+
+      const reqId = p.reqId || p.id;
+      const reqRef = p.ref || `TM-REQ-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${reqId ? reqId.slice(0, 4).toUpperCase() : 'AUTO'}`;
+      const expIso = p.exp ? new Date(p.exp).toISOString() : new Date(Date.now() + 2 * 3600 * 1000).toISOString();
+
+      return this.db.transaction((tx) => {
+        // 1. Ensure core tour operators seeded
+        try { seedCoreTourOperators(tx); } catch (_) {}
+
+        // 2. Ensure customer user profile exists
+        let custId = p.cid;
+        if (p.gem) {
+          const existingCust = tx.queryOne('SELECT id FROM user_profiles WHERE email = ?', [p.gem]);
+          if (existingCust) {
+            custId = existingCust.id;
+          } else {
+            custId = custId || tx.uuid();
+            tx.execute(`
+              INSERT INTO user_profiles (id, email, phone, role, display_name, status, is_phone_verified, is_email_verified)
+              VALUES (?, ?, ?, 'customer', ?, 'active', 0, 0)
+            `, [custId, p.gem, p.gph || '+919876543210', p.gnm || 'Verified Traveler']);
+          }
+        } else if (!custId) {
+          const fallbackCust = tx.queryOne('SELECT id FROM user_profiles LIMIT 1');
+          custId = fallbackCust ? fallbackCust.id : tx.uuid();
+        }
+
+        // 3. Ensure hotel_booking_requests record exists
+        let existingReq = tx.queryOne('SELECT id, status FROM hotel_booking_requests WHERE id = ? OR request_reference = ?', [reqId, reqRef]);
+        const effectiveReqId = existingReq ? existingReq.id : reqId;
+
+        if (!existingReq) {
+          tx.execute(`
+            INSERT INTO hotel_booking_requests (
+              id, request_reference, customer_id, guest_name, guest_email, guest_phone,
+              destination, destination_locality, check_in_date, check_out_date,
+              nights, num_rooms, num_adults, num_children, children_ages,
+              total_budget_paise, property_type_preference, room_preference,
+              required_facilities, communication_consent, terms_accepted,
+              status, max_recipients, expires_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', ?, ?, ?, ?, 1, 1, ?, 10, ?)
+          `, [
+            effectiveReqId, reqRef, custId, p.gnm || 'Verified Traveler',
+            p.gem || 'traveler@tripmozy.com', p.gph || '+919876543210',
+            p.dst || 'Destination', p.dstLoc || null,
+            p.cin || new Date().toISOString().split('T')[0],
+            p.cout || new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0],
+            p.nts || 4, p.rms || 1, p.adt || 2, p.chd || 0,
+            p.bgt || 3500000, p.propPref || null, p.roomPref || 'any',
+            JSON.stringify(p.fac || []), p.sta || 'awaiting_responses', expIso
+          ]);
+        }
+
+        // 4. If this is an offer token (e.g. from vendor acceptance), rehydrate property, room, recipient, and offer!
+        if (p.offId || p.type === 'offer') {
+          let chosenPropId = p.propId;
+          if (p.venId) {
+            let existingProp = chosenPropId ? tx.queryOne('SELECT id FROM properties WHERE id = ?', [chosenPropId]) : null;
+            if (!existingProp) {
+              const vProp = tx.queryOne("SELECT id FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1", [p.venId]);
+              if (vProp) {
+                chosenPropId = vProp.id;
+              } else {
+                chosenPropId = chosenPropId || tx.uuid();
+                tx.execute(`
+                  INSERT OR IGNORE INTO properties (
+                    id, vendor_id, name, slug, property_type, star_rating, description,
+                    address_line, city, state, pincode, country, status, inventory_mode
+                  ) VALUES (?, ?, ?, ?, 'hotel', 4.8, 'Verified Tour Fleet', 'Tour Operations Desk', ?, 'India', '110001', 'India', 'active', 'vendor_confirmed')
+                `, [chosenPropId, p.venId, p.propName || 'Verified Tour Fleet', `fleet-${p.venId.slice(0, 8)}-${Date.now()}`, p.dst || 'India']);
+              }
+            }
+
+            // Ensure room type exists
+            let room = tx.queryOne('SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1', [chosenPropId]);
+            if (!room) {
+              const roomTypeId = tx.uuid();
+              tx.execute(`
+                INSERT INTO room_types (id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_active)
+                VALUES (?, ?, 'Custom Tour Package', 'King', 4, 2, 20, 1, 1)
+              `, [roomTypeId, chosenPropId]);
+              const rateId = tx.uuid();
+              tx.execute(`
+                INSERT INTO room_rates (id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, is_active)
+                VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 1)
+              `, [rateId, roomTypeId]);
+              room = { id: roomTypeId };
+            }
+
+            // Ensure recipient exists and marked accepted
+            const rec = tx.queryOne('SELECT id FROM booking_request_recipients WHERE request_id = ? AND vendor_id = ?', [effectiveReqId, p.venId]);
+            const recId = rec ? rec.id : (p.recId || tx.uuid());
+            if (!rec) {
+              const actHash = crypto.createHash('sha256').update(rawToken || recId).digest('hex');
+              tx.execute(`
+                INSERT OR IGNORE INTO booking_request_recipients (
+                  id, request_id, property_id, vendor_id, delivery_status, response_status,
+                  responded_at, expires_at, action_token_hash
+                ) VALUES (?, ?, ?, ?, 'delivered', 'accepted', CURRENT_TIMESTAMP, ?, ?)
+              `, [recId, effectiveReqId, chosenPropId, p.venId, expIso, actHash]);
+            } else {
+              tx.execute("UPDATE booking_request_recipients SET response_status = 'accepted', responded_at = CURRENT_TIMESTAMP WHERE id = ?", [recId]);
+            }
+
+            // Other recipients marked cancelled
+            tx.execute(`
+              UPDATE booking_request_recipients
+              SET response_status = 'cancelled', rejection_reason = 'accepted_by_other'
+              WHERE request_id = ? AND vendor_id != ?
+            `, [effectiveReqId, p.venId]);
+
+            // Ensure offer exists
+            const existingOffer = tx.queryOne('SELECT o.id FROM hotel_offers o JOIN properties p ON o.property_id = p.id WHERE o.id = ? OR (o.request_id = ? AND p.vendor_id = ?)', [p.offId, effectiveReqId, p.venId]);
+            if (!existingOffer && p.offId) {
+              const totalPaise = p.totPaise || p.bgt || 3500000;
+              const subtotal = Math.round(totalPaise / 1.05);
+              const tax = totalPaise - subtotal;
+              const nts = p.nts || 4;
+              const rms = p.rms || 1;
+              const nightlyBase = Math.round(subtotal / (nts * rms));
+              const tourPricing = PricingEngine.calculateTourPricing(totalPaise);
+              const inclusionsData = {
+                inclusions: ['Verified Driver & Sightseeing Vehicle', 'Tour Itinerary Assistance', 'All Toll, State Tax & Parking'],
+                tourPricing
+              };
+
+              tx.execute(`
+                INSERT INTO hotel_offers (
+                  id, offer_reference, request_id, property_id, recipient_id, room_type_id,
+                  nightly_base_paise, total_nights, total_rooms, subtotal_paise, tax_paise,
+                  total_payable_paise, is_budget_match, meal_plan, cancellation_terms,
+                  special_inclusions, status, valid_until
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'Custom Tour Package', 'Free cancellation up to 48 hours before tour departure', ?, 'valid', ?)
+              `, [
+                p.offId, p.offRef || `TM-OFF-${Date.now()}`, effectiveReqId,
+                chosenPropId, recId, room ? room.id : null,
+                nightlyBase, nts, rms, subtotal, tax,
+                totalPaise, JSON.stringify(inclusionsData), expIso
+              ]);
+            }
+
+            // Update request status to offers_available
+            tx.execute("UPDATE hotel_booking_requests SET status = 'offers_available', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [effectiveReqId]);
+          }
+        } else {
+          // If pure request token, ensure active vendors are in booking_request_recipients
+          const activeVendors = tx.query("SELECT id, business_name FROM vendor_accounts WHERE status = 'active'");
+          for (const v of activeVendors) {
+            const hasRecip = tx.queryOne('SELECT id FROM booking_request_recipients WHERE request_id = ? AND vendor_id = ?', [effectiveReqId, v.id]);
+            if (!hasRecip) {
+              let vProp = tx.queryOne("SELECT id FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1", [v.id]);
+              if (!vProp) {
+                const newPropId = tx.uuid();
+                tx.execute(`
+                  INSERT INTO properties (
+                    id, vendor_id, name, slug, property_type, star_rating, description,
+                    address_line, city, state, pincode, country, status, inventory_mode
+                  ) VALUES (?, ?, ?, ?, 'hotel', 4.8, 'Verified Tour Fleet', 'Tour Operations Desk', ?, 'India', '110001', 'India', 'active', 'vendor_confirmed')
+                `, [newPropId, v.id, `${v.business_name} - Tour Fleet`, `fleet-${v.id.slice(0, 8)}-${Date.now()}`, p.dst || 'India']);
+                vProp = { id: newPropId };
+              }
+              const actHash = crypto.createHash('sha256').update(`${effectiveReqId}:${v.id}`).digest('hex');
+              tx.execute(`
+                INSERT INTO booking_request_recipients (
+                  id, request_id, property_id, vendor_id, delivery_status, response_status, expires_at, action_token_hash
+                ) VALUES (?, ?, ?, ?, 'delivered', 'pending', ?, ?)
+              `, [tx.uuid(), effectiveReqId, vProp.id, v.id, expIso, actHash]);
+            }
+          }
+        }
+        return true;
+      });
+    } catch (err) {
+      console.error('[Request Rehydration Error]', err.message);
+      return false;
+    }
   }
 
   // Get request details by ID or reference (supports admin oversight mode)

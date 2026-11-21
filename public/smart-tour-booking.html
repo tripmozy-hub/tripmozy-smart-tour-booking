@@ -1934,7 +1934,33 @@
           phone: payload.guestPhone
         }));
         localStorage.setItem('tm_user_role', 'customer');
+        if (data.reference) {
+          localStorage.setItem('tm_latest_request_ref', data.reference);
+          document.cookie = `tm_latest_request_ref=${encodeURIComponent(data.reference)}; path=/; max-age=604800; SameSite=Lax`;
+        }
+        if (data.requestToken) {
+          localStorage.setItem('tm_latest_request_token', data.requestToken);
+          document.cookie = `tm_latest_request_token=${encodeURIComponent(data.requestToken)}; path=/; max-age=604800; SameSite=Lax`;
+        }
         localStorage.setItem('tm_latest_request_id', data.id);
+        document.cookie = `tm_latest_request_id=${encodeURIComponent(data.id)}; path=/; max-age=604800; SameSite=Lax`;
+        localStorage.setItem('tm_latest_request_data', JSON.stringify({
+          id: data.id,
+          reference: data.reference,
+          destination: data.destination,
+          checkInDate: payload.checkInDate,
+          checkOutDate: payload.checkOutDate,
+          nights: data.nights || 1,
+          numRooms: data.numRooms || 1,
+          numAdults: payload.numAdults || 2,
+          totalBudgetINR: data.totalBudgetINR,
+          guestName: payload.guestName,
+          guestEmail: payload.guestEmail,
+          guestPhone: payload.guestPhone,
+          status: data.status || 'awaiting_responses',
+          expiresAt: data.expiresAt,
+          matchedCount: data.matchedCount
+        }));
         document.cookie = `tm_user_name=${encodeURIComponent(payload.guestName)}; path=/; max-age=2592000; SameSite=Lax`;
         document.cookie = `tm_user_email=${encodeURIComponent(payload.guestEmail)}; path=/; max-age=2592000; SameSite=Lax`;
         document.cookie = `tm_user_phone=${encodeURIComponent(payload.guestPhone)}; path=/; max-age=2592000; SameSite=Lax`;
@@ -1949,7 +1975,8 @@
         document.getElementById('resultMsg').textContent =
           `Success! Your tour request for ${data.destination} has been sent to ${data.matchedCount} eligible TripMozy verified tour operators. Quotes will arrive in real time.`;
 
-        const viewOffersUrl = `/booking?id=${data.id}`;
+        const tokenParam = data.requestToken ? `&token=${encodeURIComponent(data.requestToken)}` : '';
+        const viewOffersUrl = `/booking?id=${encodeURIComponent(data.id)}${tokenParam}`;
         document.getElementById('viewOffersBtn').href = viewOffersUrl;
 
         latestSubmissionId = data.id;
@@ -1959,9 +1986,6 @@
         autoRedirectTimer = setTimeout(() => {
           window.location.href = viewOffersUrl;
         }, 2000);
-        autoRedirectTimer = setTimeout(() => {
-          window.location.href = viewOffersUrl;
-        }, 3000);
 
       } catch (err) {
         showToast(err.message);

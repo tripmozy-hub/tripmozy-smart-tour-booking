@@ -402,12 +402,41 @@ class VendorService {
         afterState: { offerReference, totalPayablePaise: pricing.totalPayablePaise, isBudgetMatch }
       });
 
-      // 6. Notify Customer via WhatsApp & Email (Vendor Confirmation & Payment Link)
+      // 6. Generate cryptographically signed offer token (resilient across serverless instances)
+      let offerToken = '';
+      try {
+        const { RequestService } = require('../requests/request-service');
+        offerToken = RequestService.generateSignedOfferToken({
+          requestId: recipient.request_id,
+          requestReference: recipient.request_reference,
+          destination: recipient.destination,
+          checkInDate: recipient.check_in_date,
+          checkOutDate: recipient.check_out_date,
+          nights: recipient.nights,
+          numRooms: recipient.num_rooms,
+          numAdults: recipient.num_adults,
+          totalBudgetPaise: recipient.total_budget_paise,
+          guestName: recipient.guest_name,
+          guestEmail: recipient.guest_email,
+          guestPhone: recipient.guest_phone,
+          offerId,
+          offerReference,
+          vendorId: recipient.vendor_id,
+          vendorBusinessName: recipient.vendor_business_name || recipient.prop_name,
+          propertyId: recipient.property_id,
+          propertyName: recipient.prop_name,
+          totalPayablePaise: pricing.totalPayablePaise,
+          validUntil
+        });
+      } catch (_) {}
+
+      // 7. Notify Customer via WhatsApp & Email (Vendor Confirmation & Payment Link)
       if (this.notifService) {
         const totalINR = pricing.totalPayablePaise / 100;
         const baseUrl = process.env.APP_BASE_URL || (process.env.NODE_ENV === 'development' && !process.env.VERCEL ? 'http://localhost:8080' : 'https://tripmozy-smart-tour-booking.vercel.app');
-        const paymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&payNow=1`;
-        const adminPaymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&admin=1`;
+        const tokenSuffix = offerToken ? `&token=${encodeURIComponent(offerToken)}` : '';
+        const paymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&payNow=1${tokenSuffix}`;
+        const adminPaymentUrl = `${baseUrl}/booking?id=${recipient.request_id}&admin=1${tokenSuffix}`;
 
         const notifPayload = {
           guestName: recipient.guest_name,
@@ -510,6 +539,7 @@ class VendorService {
         success: true,
         offerId,
         offerReference,
+        offerToken: typeof offerToken !== 'undefined' ? offerToken : null,
         totalPayableINR: pricing.totalPayablePaise / 100,
         advancePaidINR: tourPricing.payableNowINR,
         remainingBalanceINR: tourPricing.remainingBalanceINR,

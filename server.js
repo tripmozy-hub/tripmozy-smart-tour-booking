@@ -900,6 +900,15 @@ const appHandler = async (req, res) => {
         const result = reqService.submitStayRequest({ ...body, ipAddress: ip });
         // Guarantee all live email alerts to partner and traveler are received by Gmail SMTP before freezing serverless context
         await notifService.waitForPendingDispatches();
+        
+        // Also set persistent cookies so client never loses reference even across sessions/cold starts
+        if (result && result.requestToken) {
+          res.setHeader('Set-Cookie', [
+            `tm_latest_request_token=${encodeURIComponent(result.requestToken)}; Path=/; Max-Age=604800; SameSite=Lax`,
+            `tm_latest_request_id=${encodeURIComponent(result.id)}; Path=/; Max-Age=604800; SameSite=Lax`,
+            `tm_latest_request_ref=${encodeURIComponent(result.reference)}; Path=/; Max-Age=604800; SameSite=Lax`
+          ]);
+        }
         sendJson(201, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
@@ -986,9 +995,34 @@ const appHandler = async (req, res) => {
   }
 
   if (pathname.startsWith('/api/requests/') && method === 'GET') {
-    const id = pathname.replace('/api/requests/', '');
+    let id = pathname.replace('/api/requests/', '');
     const isAdmin = reqUrl.searchParams.get('admin') === '1' || reqUrl.searchParams.get('role') === 'admin' || req.headers['x-admin-role'] === 'admin';
-    const details = reqService.getRequestDetails(id, isAdmin);
+
+    // Check cookies for fallback request ID / token
+    const cookieHeader = req.headers['cookie'] || '';
+    let cookieToken = '';
+    const tokenMatch = cookieHeader.match(/(^|;\s*)tm_latest_request_token=([^;]*)/);
+    if (tokenMatch) cookieToken = decodeURIComponent(tokenMatch[2]);
+
+    if (!id || id === 'undefined' || id === 'null' || id === 'latest') {
+      const idMatch = cookieHeader.match(/(^|;\s*)tm_latest_request_id=([^;]*)/);
+      if (idMatch) id = decodeURIComponent(idMatch[2]);
+    }
+
+    const rawToken = reqUrl.searchParams.get('token') || req.headers['x-request-token'] || cookieToken || '';
+
+    let details = id ? reqService.getRequestDetails(id, isAdmin) : null;
+
+    // Resilient serverless auto-rehydration if cryptographically verified token is used on a cold instance
+    if (!details && rawToken) {
+      try {
+        reqService.rehydrateRequestFromToken(rawToken, id);
+        details = reqService.getRequestDetails(id, isAdmin);
+      } catch (rehErr) {
+        console.error('[GET /api/requests Rehydration Error]', rehErr.message);
+      }
+    }
+
     if (!details) return sendJson(404, { error: 'Request not found' });
     sendJson(200, details);
     return;
