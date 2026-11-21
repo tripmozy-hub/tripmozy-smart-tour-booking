@@ -37,6 +37,35 @@ class RequestService {
     this.rateLimitMap.set(key, timestamps);
   }
 
+  // Generate cryptographically signed stateless action token (resilient across serverless instances)
+  static generateSignedActionToken(payload) {
+    const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
+    const minPayload = {
+      recId: payload.recipientId,
+      reqId: payload.requestId,
+      propId: payload.propertyId,
+      venId: payload.vendorId,
+      ref: payload.requestReference,
+      dst: payload.destination,
+      cin: payload.checkInDate,
+      cout: payload.checkOutDate,
+      nts: payload.nights,
+      rms: payload.numRooms,
+      adt: payload.numAdults,
+      bgt: payload.totalBudgetPaise,
+      pnm: payload.propertyName,
+      vnm: payload.vendorName,
+      cid: payload.customerId,
+      gnm: payload.guestName,
+      gem: payload.guestEmail,
+      gph: payload.guestPhone,
+      exp: payload.expiresAt ? new Date(payload.expiresAt).getTime() : (Date.now() + 2 * 3600 * 1000)
+    };
+    const pStr = Buffer.from(JSON.stringify(minPayload)).toString('base64url');
+    const sig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+    return `${pStr}.${sig}`;
+  }
+
   // Validate and submit stay request
   submitStayRequest({
     guestName,
@@ -229,8 +258,28 @@ class RequestService {
         }
 
         const recipientId = tx.uuid();
-        const rawToken = crypto.randomBytes(16).toString('hex');
-        const actionTokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const signedActionToken = RequestService.generateSignedActionToken({
+          recipientId,
+          requestId,
+          propertyId: chosenProp.id,
+          vendorId: vendor.id,
+          requestReference: reference,
+          destination,
+          checkInDate,
+          checkOutDate,
+          nights,
+          numRooms,
+          numAdults,
+          totalBudgetPaise,
+          propertyName: chosenProp.name,
+          vendorName: vendor.business_name,
+          customerId: finalCustomerId,
+          guestName,
+          guestEmail,
+          guestPhone,
+          expiresAt
+        });
+        const actionTokenHash = crypto.createHash('sha256').update(signedActionToken).digest('hex');
 
         tx.execute(`
           INSERT INTO booking_request_recipients (
@@ -247,6 +296,8 @@ class RequestService {
         if (this.notifService && !notifiedVendors.has(vendor.id)) {
           notifiedVendors.add(vendor.id);
           
+          const baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL ? 'https://tripmozy-smart-tour-booking.vercel.app' : `http://localhost:${process.env.PORT || 8080}`);
+
           // 1. WhatsApp alert to vendor.contact_phone
           const vendorPhone = vendor.contact_phone;
           if (vendorPhone) {
@@ -268,14 +319,13 @@ class RequestService {
                 numRooms,
                 numAdults,
                 totalBudgetINR: budgetNum,
-                rawToken,
-                actionUrl: `/action?token=${rawToken}`
+                rawToken: signedActionToken,
+                actionUrl: `${baseUrl}/action?token=${signedActionToken}`
               }
             });
           }
 
           // 2. Email alert to vendor: to verified vendor contact email
-          const baseUrl = process.env.APP_BASE_URL || (process.env.NODE_ENV === 'development' && !process.env.VERCEL ? 'http://localhost:8080' : 'https://tripmozy-smart-tour-booking.vercel.app');
           const targetEmails = new Set();
           if (vendor.contact_email && vendor.contact_email.trim().toLowerCase() !== 'tripmozy@gmail.com') {
             targetEmails.add(vendor.contact_email.trim());
@@ -308,9 +358,9 @@ class RequestService {
                   numRooms,
                   numAdults,
                   totalBudgetINR: budgetNum,
-                  rawToken,
-                  actionUrl: `${baseUrl}/action?token=${rawToken}&action=accept`,
-                  rejectUrl: `${baseUrl}/action?token=${rawToken}&action=reject`,
+                  rawToken: signedActionToken,
+                  actionUrl: `${baseUrl}/action?token=${signedActionToken}&action=accept`,
+                  rejectUrl: `${baseUrl}/action?token=${signedActionToken}&action=reject`,
                   dashboardUrl: `${baseUrl}/partner/dashboard?vendorId=${vendor.id}`
                 }
               });

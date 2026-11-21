@@ -59,10 +59,12 @@ class VendorService {
 
     // 2. Dynamic backfill: Ensure all active unassigned requests are delivered to this vendor's dashboard
     if (vendorProp) {
+      const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
       const pendingReqs = this.db.query(`
-        SELECT req.id, req.expires_at
+        SELECT req.id, req.expires_at, req.destination, req.request_reference, req.check_in_date, req.check_out_date,
+               req.nights, req.num_rooms, req.num_adults, req.total_budget_paise, req.guest_name, req.guest_email, req.guest_phone, req.customer_id
         FROM hotel_booking_requests req
-        WHERE req.status IN ('awaiting_responses', 'matching', 'dispatching')
+        WHERE req.status IN ('awaiting_responses', 'matching', 'dispatching', 'pending')
           AND NOT EXISTS (
             SELECT 1 FROM booking_request_recipients r WHERE r.request_id = req.id AND r.vendor_id = ?
           )
@@ -78,8 +80,31 @@ class VendorService {
 
       for (const pr of pendingReqs) {
         const recipientId = this.db.uuid();
-        const rawToken = crypto.randomBytes(16).toString('hex');
-        const actionTokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const minPayload = {
+          recId: recipientId,
+          reqId: pr.id,
+          propId: vendorProp.id,
+          venId: vendorId,
+          ref: pr.request_reference,
+          dst: pr.destination,
+          cin: pr.check_in_date,
+          cout: pr.check_out_date,
+          nts: pr.nights,
+          rms: pr.num_rooms,
+          adt: pr.num_adults,
+          bgt: pr.total_budget_paise,
+          pnm: vendorProp.name,
+          cid: pr.customer_id,
+          gnm: pr.guest_name,
+          gem: pr.guest_email,
+          gph: pr.guest_phone,
+          exp: pr.expires_at ? new Date(pr.expires_at).getTime() : (Date.now() + 2 * 3600 * 1000)
+        };
+        const pStr = Buffer.from(JSON.stringify(minPayload)).toString('base64url');
+        const sig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+        const signedToken = `${pStr}.${sig}`;
+        const actionTokenHash = crypto.createHash('sha256').update(signedToken).digest('hex');
+
         this.db.execute(`
           INSERT INTO booking_request_recipients (
             id, request_id, property_id, vendor_id, delivery_status, response_status,
