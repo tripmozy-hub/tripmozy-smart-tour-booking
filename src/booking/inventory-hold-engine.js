@@ -18,7 +18,8 @@ class InventoryHoldEngine {
     return this.db.transaction((tx) => {
       // 1. Fetch and lock offer details
       const offer = tx.queryOne(`
-        SELECT o.*, req.check_in_date, req.check_out_date, req.num_rooms, req.customer_id as req_customer_id,
+        SELECT o.*, req.status as req_status, req.expires_at as req_expires_at,
+               req.check_in_date, req.check_out_date, req.num_rooms, req.customer_id as req_customer_id,
                p.status as property_status, p.name as property_name
         FROM hotel_offers o
         JOIN hotel_booking_requests req ON o.request_id = req.id
@@ -28,6 +29,17 @@ class InventoryHoldEngine {
 
       if (!offer) {
         return { success: false, reason: 'offer_not_found', message: 'Offer record does not exist' };
+      }
+
+      // Check if tour package request or departure date has expired
+      if (
+        offer.req_status === 'expired' ||
+        (offer.req_expires_at && new Date(offer.req_expires_at) < new Date()) ||
+        (offer.check_in_date && new Date(offer.check_in_date + 'T23:59:59') < new Date())
+      ) {
+        tx.execute("UPDATE hotel_offers SET status = 'expired' WHERE id = ?", [offerId]);
+        tx.execute("UPDATE hotel_booking_requests SET status = 'expired' WHERE id = ? AND status NOT IN ('booked', 'cancelled')", [offer.request_id]);
+        return { success: false, reason: 'tour_package_expired', message: 'This tour package request has expired' };
       }
 
       if (offer.status !== 'valid') {

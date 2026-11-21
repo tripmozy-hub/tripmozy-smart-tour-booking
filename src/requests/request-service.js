@@ -394,11 +394,31 @@ class RequestService {
 
   // Get request details by ID or reference (supports admin oversight mode)
   getRequestDetails(requestId, isAdmin = false) {
-    const req = this.db.queryOne('SELECT * FROM hotel_booking_requests WHERE id = ? OR request_reference = ?', [requestId, requestId]);
+    let req = this.db.queryOne('SELECT * FROM hotel_booking_requests WHERE id = ? OR request_reference = ?', [requestId, requestId]);
+    if (!req) {
+      const b = this.db.queryOne('SELECT request_id FROM bookings WHERE id = ? OR booking_reference = ?', [requestId, requestId]);
+      if (b) {
+        req = this.db.queryOne('SELECT * FROM hotel_booking_requests WHERE id = ?', [b.request_id]);
+      }
+    }
     if (!req) return null;
 
     const actualId = req.id;
     const isBooked = req.status === 'booked';
+    const isCancelled = req.status === 'cancelled';
+
+    // Auto-detect expiration: expired status, past deadline, or past check-in departure
+    const now = new Date();
+    const isPastDeadline = req.expires_at ? (new Date(req.expires_at) < now) : false;
+    const isPastDeparture = req.check_in_date ? (new Date(req.check_in_date + 'T23:59:59') < now) : false;
+    const isReqExpired = req.status === 'expired' || (!isBooked && !isCancelled && (isPastDeadline || isPastDeparture));
+
+    if (isReqExpired && req.status !== 'expired' && !isBooked && !isCancelled) {
+      this.db.execute("UPDATE hotel_booking_requests SET status = 'expired', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [actualId]);
+      req.status = 'expired';
+    }
+    req.isExpired = isReqExpired;
+
     const revealVendorContact = isAdmin || isBooked;
 
     const recipients = this.db.query(`
@@ -434,9 +454,16 @@ class RequestService {
     `, [actualId]);
 
     const enrichedOffers = offers.map(o => {
+      const isOfferPastValidity = o.valid_until ? (new Date(o.valid_until) < now) : false;
+      const isOfferExpired = isReqExpired || o.status === 'expired' || isOfferPastValidity;
+      if (isOfferExpired && o.status === 'valid') {
+        this.db.execute("UPDATE hotel_offers SET status = 'expired' WHERE id = ?", [o.id]);
+        o.status = 'expired';
+      }
       const tourPricing = PricingEngine.calculateTourPricing(o.total_payable_paise);
       return {
         ...o,
+        isExpired: isOfferExpired,
         tourPricing,
         vendor: {
           businessName: o.vendor_business_name || o.property_name,
@@ -493,7 +520,8 @@ class RequestService {
       recipients: sanitizedRecipients,
       offers: enrichedOffers,
       booking,
-      isAdmin: !!isAdmin
+      isAdmin: !!isAdmin,
+      isExpired: isReqExpired
     };
   }
 

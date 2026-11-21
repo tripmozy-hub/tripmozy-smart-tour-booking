@@ -3,3 +3,4 @@ node_modules/
 .system_generated/
 .vercel/
 .env
+*.zip

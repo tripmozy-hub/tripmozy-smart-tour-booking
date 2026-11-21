@@ -182,9 +182,44 @@
     .status-offers  { background: #d1fae5; color: #065f46; }
     .status-booked  { background: #eff6ff; color: #1e40af; }
     .status-cancelled { background: #fee2e2; color: #991b1b; }
+    .status-expired { background: #fee2e2; color: #b91c1c; border: 1.5px solid #fca5a5; font-weight: 800; }
 
     .step-item.cancelled .step-circle { background: #ef4444; color: #fff; }
     .step-item.cancelled .step-label { color: #dc2626; }
+    .step-item.expired .step-circle { background: #ef4444; color: #fff; border-color: #dc2626; }
+    .step-item.expired .step-label { color: #dc2626; font-weight: 700; }
+
+    .offer-card.expired-card {
+      opacity: 0.85;
+      border: 1.5px dashed #cbd5e1;
+      background: #fbfbfb;
+    }
+    .offer-card.expired-card:hover {
+      transform: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .expired-tag {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .book-btn.expired-btn {
+      background: #94a3b8 !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      opacity: 0.88;
+    }
+    .book-btn.expired-btn:hover {
+      transform: none !important;
+      background: #94a3b8 !important;
+    }
 
     .btn-cancel-req {
       background: #fff;
@@ -1569,6 +1604,7 @@ async function loadRequest(isBackground = false) {
 
 // ── Admin Master Oversight Portal Card Renderer ─────────────────────────────
 function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers) {
+  const isReqExpired = req.status === 'expired' || !!req.isExpired || (req.expires_at && new Date(req.expires_at) < new Date()) || (req.check_in_date && new Date(req.check_in_date + 'T23:59:59') < new Date());
   const b = booking || (requestData && requestData.booking) || null;
   const terms = b && b.terms_snapshot ? b.terms_snapshot : {};
   const firstOffer = (offers && offers.length > 0) ? offers[0] : null;
@@ -1760,6 +1796,8 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
             <span class="prop-v">
               ${isBooked
                 ? `<span style="color:#34d399; font-weight:800;">✅ PAID (Ref: ${esc(paymentRefStr)})</span>`
+                : isReqExpired
+                ? '<span style="color:#ef4444; font-weight:800;">⏱️ TOUR PACKAGE EXPIRED</span>'
                 : '<span style="color:#f59e0b; font-weight:800;">⚠️ AWAITING ADVANCE DEPOSIT</span>'
               }
             </span>
@@ -1774,12 +1812,16 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
           <span style="color:#475569;">·</span>
           <span>tripmozy@gmail.com</span>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          ${!isBooked && firstOffer ? `
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          ${!isBooked && !isReqExpired && firstOffer && !firstOffer.isExpired ? `
             <button type="button" class="btn-admin-pay" onclick="initiateRazorpayPayment('${firstOffer.id}')">
               💳 Pay Advance (₹${adminTp.payableNowINR.toLocaleString('en-IN')} ${isGatewayPaused ? '· Demo Simulator' : '· Razorpay Live'})
             </button>
-          ` : ''}
+          ` : (isReqExpired ? `
+            <div style="font-size:12px; color:#fca5a5; font-weight:700; padding:8px 14px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:8px;">
+              ⏱️ Tour Request Expired · Booking Disabled
+            </div>
+          ` : '')}
           ${isBooked ? `
             <button type="button" class="btn-admin-print" onclick="window.print()">
               📄 Print / Download Official Tax Bill &amp; Receipt (PDF)
@@ -1801,6 +1843,7 @@ function renderPortal(data) {
   const recips = data.recipients || [];
   const isBooked = req.status === 'booked';
   const isCancelled = req.status === 'cancelled';
+  const isExpired = req.status === 'expired' || !!req.isExpired || !!data.isExpired || (!isBooked && !isCancelled && ((req.expires_at && new Date(req.expires_at) < new Date()) || (req.check_in_date && new Date(req.check_in_date + 'T23:59:59') < new Date())));
   const hasOffers = offers.length > 0;
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -1813,26 +1856,29 @@ function renderPortal(data) {
     }
   }
 
-  if (isCancelled) {
+  if (isCancelled || isExpired) {
     if (pollTimer) clearInterval(pollTimer);
     if (tickerTimer) clearInterval(tickerTimer);
   }
 
   // Update Stepper
   let step1 = 'completed', step2 = 'active', step3 = '', step4 = '';
-  if (hasOffers && !isBooked && !isCancelled) { step2 = 'completed'; step3 = 'active'; }
+  if (hasOffers && !isBooked && !isCancelled && !isExpired) { step2 = 'completed'; step3 = 'active'; }
   if (isBooked) { step2 = 'completed'; step3 = 'completed'; step4 = 'completed'; }
   if (isCancelled) { step1 = 'completed'; step2 = 'cancelled'; step3 = ''; step4 = ''; }
+  if (isExpired) { step1 = 'completed'; step2 = 'expired'; step3 = ''; step4 = ''; }
 
   const statusLabel = isBooked
     ? 'Tour Confirmed'
     : isCancelled
     ? 'Request Cancelled'
+    : isExpired
+    ? 'Tour Package Expired'
     : hasOffers
     ? `${offers.length} Tour Quote${offers.length > 1 ? 's' : ''} Received`
     : 'Awaiting Tour Operator Quotes';
 
-  const statusClass = isBooked ? 'status-booked' : isCancelled ? 'status-cancelled' : hasOffers ? 'status-offers' : 'status-pending';
+  const statusClass = isBooked ? 'status-booked' : isCancelled ? 'status-cancelled' : isExpired ? 'status-expired' : hasOffers ? 'status-offers' : 'status-pending';
 
   let html = '';
   if (isAdmin) {
@@ -1847,8 +1893,8 @@ function renderPortal(data) {
         <div class="step-label">Tour Requested</div>
       </div>
       <div class="step-item ${step2}">
-        <div class="step-circle">${isCancelled ? '✕' : '2'}</div>
-        <div class="step-label">${isCancelled ? 'Cancelled' : 'Operators Quoting'}</div>
+        <div class="step-circle">${isCancelled ? '✕' : isExpired ? '⏱️' : '2'}</div>
+        <div class="step-label">${isCancelled ? 'Cancelled' : isExpired ? 'Expired' : 'Operators Quoting'}</div>
       </div>
       <div class="step-item ${step3}">
         <div class="step-circle">3</div>
@@ -1871,7 +1917,7 @@ function renderPortal(data) {
         </div>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <div class="status-pill ${statusClass}">${statusLabel}</div>
-          ${!isBooked && !isCancelled ? `
+          ${!isBooked && !isCancelled && !isExpired ? `
             <button type="button" class="btn-cancel-req" onclick="openCancelModal()" title="Cancel this tour request">
               ✕ Cancel Request
             </button>
@@ -1901,6 +1947,26 @@ function renderPortal(data) {
         </div>
       </div>
     </div>
+
+    ${isExpired ? `
+      <!-- Prominent Tour Package Expired Alert Banner -->
+      <div class="expired-alert-banner" style="background:#fef2f2; border:1.5px solid #fca5a5; border-radius:14px; padding:18px 22px; margin-top:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 2px 8px rgba(239,68,68,0.06);">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:44px; height:44px; border-radius:50%; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight:700;">⏱️</div>
+          <div>
+            <div style="font-weight:800; font-size:16px; color:#991b1b;">Tour Package Booking Window Expired</div>
+            <div style="font-size:13px; color:#7f1d1d; margin-top:2px; line-height:1.4;">
+              This tour package quote or travel date has passed its booking validity window and can no longer be held or confirmed.
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="/smart-tour-booking" style="background:#dc2626; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-weight:700; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(220,38,38,0.25);">
+            <span>+ Submit Fresh Tour Request</span>
+          </a>
+        </div>
+      </div>
+    ` : ''}
   `;
 
   // If cancelled by customer, show cancellation confirmation card
@@ -1936,48 +2002,70 @@ function renderPortal(data) {
     return;
   }
 
-  // Live status ticker banner (if waiting / not yet booked)
-  html += `
-    <div class="live-banner">
-      <div class="live-banner-left">
-        <div class="live-spinner"></div>
-        <div>
-          <div class="live-title">${hasOffers ? `${offers.length} Verified Tour Operator(s) have sent packages!` : 'Tour operators are preparing custom packages now...'}</div>
-          <div class="live-sub">TripMozy WhatsApp Bot is coordinating with tour operators in ${esc(req.destination)}.</div>
+  // Live status ticker banner (if waiting / not yet booked and NOT expired)
+  if (!isExpired) {
+    html += `
+      <div class="live-banner">
+        <div class="live-banner-left">
+          <div class="live-spinner"></div>
+          <div>
+            <div class="live-title">${hasOffers ? `${offers.length} Verified Tour Operator(s) have sent packages!` : 'Tour operators are preparing custom packages now...'}</div>
+            <div class="live-sub">TripMozy WhatsApp Bot is coordinating with tour operators in ${esc(req.destination)}.</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
+          <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
+          <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">✕ Cancel Request</button>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
-        <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
-        <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">✕ Cancel Request</button>
-      </div>
-    </div>
-  `;
+    `;
+  }
 
   // Offers Section
   html += `
     <div class="section-head">
-      <h2>Received Tour Package Quotes</h2>
-      <span class="offer-count-chip">${offers.length} Available</span>
+      <h2>${isExpired ? 'Tour Package Quotes (Expired)' : 'Received Tour Package Quotes'}</h2>
+      <span class="offer-count-chip">${isExpired ? 'Expired' : `${offers.length} Available`}</span>
     </div>
   `;
 
   if (offers.length === 0) {
-    html += `
-      <div class="empty-box">
-        <div class="empty-title">Waiting for Tour Operator Quotes</div>
-        <div class="empty-desc">
-          We've dispatched your tour request to <strong>${recips.length} verified local tour operators</strong> in ${esc(req.destination)}.
-          As soon as operators respond with tailored package pricing and inclusions, their official quotes will appear here automatically.
+    if (isExpired) {
+      html += `
+        <div class="empty-box" style="border: 2px dashed #fca5a5; background: #fffaf0;">
+          <div style="width:64px; height:64px; background:#fee2e2; color:#dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px;">⏱️</div>
+          <div class="empty-title" style="color:#991b1b;">Tour Package Request Expired</div>
+          <div class="empty-desc" style="color:#64748b; max-width:540px; margin:0 auto 20px;">
+            The booking window for this tour request in <strong>${esc(req.destination)}</strong> has expired. Tour operators are no longer submitting quotes for this travel date.
+          </div>
+          <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+            <a href="/smart-tour-booking" class="btn-primary-link" style="background:var(--primary); color:#fff; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px;">
+              <span>+ Submit Fresh Tour Request</span>
+            </a>
+            <a href="/" class="btn-secondary" style="background:#f1f5f9; color:#334155; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center;">
+              Return to Home
+            </a>
+          </div>
         </div>
-        <div style="margin-top:22px; padding-top:18px; border-top:1px dashed #e2e8f0; display:flex; flex-direction:column; align-items:center; gap:8px;">
-          <div style="font-size:13px; color:#64748b;">Need to change your travel dates, budget, or destination?</div>
-          <button type="button" class="btn-cancel-waiting" onclick="openCancelModal()">
-            ✕ Cancel This Tour Request
-          </button>
+      `;
+    } else {
+      html += `
+        <div class="empty-box">
+          <div class="empty-title">Waiting for Tour Operator Quotes</div>
+          <div class="empty-desc">
+            We've dispatched your tour request to <strong>${recips.length} verified local tour operators</strong> in ${esc(req.destination)}.
+            As soon as operators respond with tailored package pricing and inclusions, their official quotes will appear here automatically.
+          </div>
+          <div style="margin-top:22px; padding-top:18px; border-top:1px dashed #e2e8f0; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div style="font-size:13px; color:#64748b;">Need to change your travel dates, budget, or destination?</div>
+            <button type="button" class="btn-cancel-waiting" onclick="openCancelModal()">
+              ✕ Cancel This Tour Request
+            </button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   } else {
     html += `<div class="offers-list">${offers.map(o => renderOfferCard(o, req)).join('')}</div>`;
   }
@@ -1987,6 +2075,9 @@ function renderPortal(data) {
 
 // Single Offer Card
 function renderOfferCard(o, req) {
+  const isReqExpired = req.status === 'expired' || !!req.isExpired || (req.expires_at && new Date(req.expires_at) < new Date()) || (req.check_in_date && new Date(req.check_in_date + 'T23:59:59') < new Date());
+  const isOfferExpired = isReqExpired || o.status === 'expired' || !!o.isExpired || (o.valid_until && new Date(o.valid_until) < new Date());
+
   const totalINR = o.total_payable_paise / 100;
   const budgetINR = req.total_budget_paise / 100;
   const savings = Math.max(0, budgetINR - totalINR);
@@ -2001,13 +2092,16 @@ function renderOfferCard(o, req) {
   };
 
   return `
-    <div class="offer-card ${savings > 0 ? 'highlight' : ''}">
+    <div class="offer-card ${savings > 0 && !isOfferExpired ? 'highlight' : ''} ${isOfferExpired ? 'expired-card' : ''}">
       <div class="offer-header">
         <div>
           <div class="hotel-name">${esc(o.property_name)}</div>
           <div class="hotel-meta">&#8203; ${esc(o.property_city)} · <span class="stars">${stars}</span> (${o.star_rating || 4}.0 Star Tour Operator)</div>
         </div>
-        ${savings > 0 ? `<div class="savings-badge">✓ &#8377;${savings.toLocaleString('en-IN')} Below Your Budget</div>` : ''}
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          ${isOfferExpired ? `<div class="expired-tag">⏱️ Tour Package Expired</div>` : ''}
+          ${savings > 0 && !isOfferExpired ? `<div class="savings-badge">✓ &#8377;${savings.toLocaleString('en-IN')} Below Your Budget</div>` : ''}
+        </div>
       </div>
 
       <div class="offer-body">
@@ -2038,15 +2132,15 @@ function renderOfferCard(o, req) {
           </div>
           `}
           <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">
-            Guaranteed quote valid for 4 hours from dispatch
+            ${isOfferExpired ? '<span style="color:#dc2626; font-weight:700;">⏱️ This tour package quote has expired</span>' : 'Guaranteed quote valid for 4 hours from dispatch'}
           </div>
         </div>
 
         <div class="offer-pricing-box">
           <div>
-            <div class="price-total">&#8377;${totalINR.toLocaleString('en-IN')}</div>
+            <div class="price-total" style="${isOfferExpired ? 'color:#94a3b8; text-decoration:line-through;' : ''}">&#8377;${totalINR.toLocaleString('en-IN')}</div>
             <div class="price-sub">Total tour price for ${o.total_nights + 1} Days / ${o.total_nights} Nights (${o.total_rooms} vehicle/setup)</div>
-            <div style="font-size:14px; font-weight:800; color:#059669; margin-top:6px;">
+            <div style="font-size:14px; font-weight:800; color:${isOfferExpired ? '#94a3b8' : '#059669'}; margin-top:6px;">
               Payable Now: &#8377;${tp.payableNowINR.toLocaleString('en-IN')}
             </div>
             <div style="font-size:11px; color:#64748b; margin-top:2px;">
@@ -2056,9 +2150,16 @@ function renderOfferCard(o, req) {
               Remaining &#8377;${tp.remainingBalanceINR.toLocaleString('en-IN')} due at hotel or online
             </div>
           </div>
-          <button class="book-btn" onclick="openCheckoutModal('${o.id}')">
-            <span>Book Tour (Pay &#8377;${tp.payableNowINR.toLocaleString('en-IN')})</span>
-          </button>
+          ${isOfferExpired ? `
+            <button class="book-btn expired-btn" disabled title="This tour package has expired and cannot be booked">
+              <span>⏱️ Tour Package Expired</span>
+            </button>
+            <div style="font-size:11px; color:#dc2626; font-weight:700; margin-top:6px; text-align:center;">Booking validity closed</div>
+          ` : `
+            <button class="book-btn" onclick="openCheckoutModal('${o.id}')">
+              <span>Book Tour (Pay &#8377;${tp.payableNowINR.toLocaleString('en-IN')})</span>
+            </button>
+          `}
         </div>
       </div>
     </div>
@@ -2069,6 +2170,15 @@ function renderOfferCard(o, req) {
 async function openCheckoutModal(offerId) {
   const offer = requestData.offers.find(x => x.id === offerId);
   if (!offer) return;
+
+  const req = requestData.request;
+  const isReqExpired = req.status === 'expired' || !!req.isExpired || (req.expires_at && new Date(req.expires_at) < new Date()) || (req.check_in_date && new Date(req.check_in_date + 'T23:59:59') < new Date());
+  const isOfferExpired = isReqExpired || offer.status === 'expired' || !!offer.isExpired || (offer.valid_until && new Date(offer.valid_until) < new Date());
+
+  if (isOfferExpired) {
+    alert('This tour package offer has expired and can no longer be held or booked. Please submit a new tour request.');
+    return;
+  }
 
   // 1. Call API to lock inventory hold
   const btn = (typeof event !== 'undefined' && event) ? event.currentTarget : null;
@@ -2171,6 +2281,17 @@ function startHoldTimer(expiresAt) {
 
     if (diff <= 0) {
       clearInterval(activeHoldTimer);
+      if (el) {
+        el.textContent = 'EXPIRED';
+        el.style.color = '#dc2626';
+      }
+      const payBtn = document.getElementById('confirmPayBtn');
+      if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.style.background = '#94a3b8';
+        payBtn.style.cursor = 'not-allowed';
+        payBtn.innerHTML = '<span>⏱️ Inventory Hold Expired</span>';
+      }
       alert('Your 15-minute hold has expired. Please select the offer again.');
       closeCheckoutModal();
       loadRequest();
@@ -2321,6 +2442,15 @@ async function initiateRazorpayPayment(offerId) {
   const offer = (requestData && requestData.offers) ? requestData.offers.find(x => x.id === offerId) : null;
   if (!offer) {
     alert('Offer details not found. Please refresh.');
+    return;
+  }
+
+  const req = requestData.request;
+  const isReqExpired = req.status === 'expired' || !!req.isExpired || (req.expires_at && new Date(req.expires_at) < new Date()) || (req.check_in_date && new Date(req.check_in_date + 'T23:59:59') < new Date());
+  const isOfferExpired = isReqExpired || offer.status === 'expired' || !!offer.isExpired || (offer.valid_until && new Date(offer.valid_until) < new Date());
+
+  if (isOfferExpired) {
+    alert('This tour package has expired and cannot be booked. Please submit a new tour request.');
     return;
   }
 
