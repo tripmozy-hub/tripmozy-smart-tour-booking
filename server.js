@@ -1032,7 +1032,29 @@ const appHandler = async (req, res) => {
     const offerId = pathname.split('/')[3];
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
-      const result = holdEngine.createHold({ offerId, customerId: body.customerId });
+
+      // Check cookies for fallback request token
+      const cookieHeader = req.headers['cookie'] || '';
+      let cookieToken = '';
+      const tokenMatch = cookieHeader.match(/(^|;\s*)tm_latest_request_token=([^;]*)/);
+      if (tokenMatch) cookieToken = decodeURIComponent(tokenMatch[2]);
+
+      const rawToken = (body && body.token) || reqUrl.searchParams.get('token') || req.headers['x-request-token'] || cookieToken || '';
+
+      if (rawToken) {
+        try {
+          reqService.rehydrateRequestFromToken(rawToken);
+        } catch (_) {}
+      }
+
+      const result = holdEngine.createHold({
+        offerId,
+        customerId: body ? body.customerId : null,
+        holdMinutes: (body && body.holdMinutes) || 15,
+        offerSnapshot: body && body.offer,
+        requestSnapshot: body && body.request,
+        reqToken: rawToken
+      });
       sendJson(result.success ? 200 : 409, result);
     });
     return;
@@ -1041,8 +1063,25 @@ const appHandler = async (req, res) => {
   if (pathname === '/api/bookings/confirm' && method === 'POST') {
     readBody((err, body) => {
       if (err) return sendJson(400, { error: 'Invalid JSON' });
+
+      // Check cookies for fallback request token
+      const cookieHeader = req.headers['cookie'] || '';
+      let cookieToken = '';
+      const tokenMatch = cookieHeader.match(/(^|;\s*)tm_latest_request_token=([^;]*)/);
+      if (tokenMatch) cookieToken = decodeURIComponent(tokenMatch[2]);
+      const rawToken = (body && body.token) || req.headers['x-request-token'] || cookieToken || '';
+
+      if (rawToken) {
+        try {
+          reqService.rehydrateRequestFromToken(rawToken);
+        } catch (_) {}
+      }
+
       try {
-        const result = bookingService.confirmBooking(body);
+        const result = bookingService.confirmBooking({
+          ...body,
+          holdSnapshot: body && body.holdSnapshot
+        });
 
         // Automated WhatsApp & Email Notification: Official Bill & Booking Confirmation
         if (notifService && result.guest) {

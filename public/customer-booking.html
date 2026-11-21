@@ -1520,6 +1520,7 @@ let activeHoldId = null;
 let activeHoldOfferId = null;
 let activeHoldOffer = null;
 let activeHoldTimer = null;
+let activeHoldSnapshot = null;
 let selectedPaymentMethod = 'UPI_VERIFIED';
 
 function getCookie(name) {
@@ -2259,11 +2260,50 @@ async function openCheckoutModal(offerId) {
   const btn = (typeof event !== 'undefined' && event) ? event.currentTarget : null;
   if (btn) { btn.disabled = true; btn.innerHTML = 'Holding Tour Package...'; }
 
+  const curToken = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
+  const offerPayload = {
+    id: offer.id,
+    offerReference: offer.offer_reference,
+    requestId: offer.request_id || req.id,
+    propertyId: offer.property_id,
+    propertyName: offer.property_name,
+    roomTypeId: offer.room_type_id,
+    vendorId: (offer.vendor && offer.vendor.id) || offer.vendor_id,
+    vendorName: (offer.vendor && (offer.vendor.businessName || offer.vendor.business_name)) || offer.vendor_business_name,
+    totalPayablePaise: offer.total_payable_paise,
+    mealPlan: offer.meal_plan,
+    cancellationTerms: offer.cancellation_terms,
+    validUntil: offer.valid_until
+  };
+  const requestPayload = {
+    id: req.id,
+    reference: req.request_reference,
+    destination: req.destination,
+    checkInDate: req.check_in_date,
+    checkOutDate: req.check_out_date,
+    nights: req.nights,
+    numRooms: req.num_rooms,
+    numAdults: req.num_adults,
+    totalBudgetPaise: req.total_budget_paise,
+    guestName: req.guest_name,
+    guestEmail: req.guest_email,
+    guestPhone: req.guest_phone,
+    status: req.status
+  };
+
   try {
     const res = await fetch(`/api/offers/${offerId}/hold`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customerId: requestData.request.customer_id })
+      headers: {
+        'Content-Type': 'application/json',
+        ...(curToken ? { 'x-request-token': curToken } : {})
+      },
+      body: JSON.stringify({
+        customerId: requestData.request.customer_id,
+        token: curToken,
+        offer: offerPayload,
+        request: requestPayload
+      })
     });
     const holdRes = await res.json();
 
@@ -2276,6 +2316,10 @@ async function openCheckoutModal(offerId) {
     activeHoldId = holdRes.holdId;
     activeHoldOfferId = offerId;
     activeHoldOffer = offer;
+    activeHoldSnapshot = holdRes.holdSnapshot;
+    if (holdRes.holdSnapshot) {
+      try { localStorage.setItem('tm_latest_hold_snapshot', JSON.stringify(holdRes.holdSnapshot)); } catch (_) {}
+    }
 
     const totalINR = offer.total_payable_paise / 100;
     const tp = offer.tourPricing || {
@@ -2532,11 +2576,50 @@ async function initiateRazorpayPayment(offerId) {
   // 1. Create or verify 15-minute hold
   let holdId = activeHoldId;
   if (!holdId) {
+    const curToken = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
+    const offerPayload = {
+      id: offer.id,
+      offerReference: offer.offer_reference,
+      requestId: offer.request_id || requestData.request.id,
+      propertyId: offer.property_id,
+      propertyName: offer.property_name,
+      roomTypeId: offer.room_type_id,
+      vendorId: (offer.vendor && offer.vendor.id) || offer.vendor_id,
+      vendorName: (offer.vendor && (offer.vendor.businessName || offer.vendor.business_name)) || offer.vendor_business_name,
+      totalPayablePaise: offer.total_payable_paise,
+      mealPlan: offer.meal_plan,
+      cancellationTerms: offer.cancellation_terms,
+      validUntil: offer.valid_until
+    };
+    const requestPayload = {
+      id: requestData.request.id,
+      reference: requestData.request.request_reference,
+      destination: requestData.request.destination,
+      checkInDate: requestData.request.check_in_date,
+      checkOutDate: requestData.request.check_out_date,
+      nights: requestData.request.nights,
+      numRooms: requestData.request.num_rooms,
+      numAdults: requestData.request.num_adults,
+      totalBudgetPaise: requestData.request.total_budget_paise,
+      guestName: requestData.request.guest_name,
+      guestEmail: requestData.request.guest_email,
+      guestPhone: requestData.request.guest_phone,
+      status: requestData.request.status
+    };
+
     try {
       const hRes = await fetch(`/api/offers/${offerId}/hold`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: requestData.request.customer_id })
+        headers: {
+          'Content-Type': 'application/json',
+          ...(curToken ? { 'x-request-token': curToken } : {})
+        },
+        body: JSON.stringify({
+          customerId: requestData.request.customer_id,
+          token: curToken,
+          offer: offerPayload,
+          request: requestPayload
+        })
       });
       const hData = await hRes.json();
       if (!hRes.ok || !hData.success) {
@@ -2547,6 +2630,10 @@ async function initiateRazorpayPayment(offerId) {
       activeHoldId = holdId;
       activeHoldOfferId = offerId;
       activeHoldOffer = offer;
+      activeHoldSnapshot = hData.holdSnapshot;
+      if (hData.holdSnapshot) {
+        try { localStorage.setItem('tm_latest_hold_snapshot', JSON.stringify(hData.holdSnapshot)); } catch (_) {}
+      }
     } catch (err) {
       alert('Network error initiating tour booking: ' + err.message);
       return;
@@ -2613,15 +2700,26 @@ async function initiateRazorpayPayment(offerId) {
 
 // Finalize booking via API with payment reference
 async function finalizeBookingPayment(holdId, paymentRef) {
+  const curToken = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
+  let storedSnapshot = activeHoldSnapshot;
+  if (!storedSnapshot) {
+    try { storedSnapshot = JSON.parse(localStorage.getItem('tm_latest_hold_snapshot') || 'null'); } catch (_) {}
+  }
+
   try {
     const res = await fetch('/api/bookings/confirm', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(curToken ? { 'x-request-token': curToken } : {})
+      },
       body: JSON.stringify({
         holdId,
-        customerId: requestData.request.customer_id,
+        customerId: (requestData && requestData.request && requestData.request.customer_id) || localStorage.getItem('tm_customer_id'),
         paymentReference: paymentRef,
-        remainingPaymentOption: selectedRemainingOption
+        remainingPaymentOption: selectedRemainingOption,
+        holdSnapshot: storedSnapshot,
+        token: curToken
       })
     });
     const result = await res.json();
