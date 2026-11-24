@@ -135,6 +135,9 @@ class VendorService {
         req.room_preference,
         req.required_facilities,
         req.status as request_status,
+        req.guest_name,
+        req.guest_phone,
+        req.guest_email,
         p.id as property_id,
         p.name as property_name,
         p.city as property_city
@@ -181,12 +184,43 @@ class VendorService {
     const deduplicatedRows = Array.from(requestMap.values());
 
     return deduplicatedRows.map(row => {
-      // Customer PII is strictly anonymized until booking is confirmed
-      const maskedGuest = actorContext ? actorContext.sanitizeCustomerForVendor({}, false) : { name: 'Verified Traveler' };
+      // Customer PII is revealed to the operator who accepted the request once booking is confirmed (30% advance paid)
+      const revealPII = row.request_status === 'booked' || (actorContext && actorContext.role === 'admin');
+      
+      const guestInfo = revealPII
+        ? {
+            name: row.guest_name || 'Verified Traveler',
+            phone: row.guest_phone || null,
+            email: row.guest_email || null
+          }
+        : (actorContext ? actorContext.sanitizeCustomerForVendor({}, false) : { name: 'Verified Traveler' });
+
+      // Also fetch booking details if booked
+      let bookingInfo = null;
+      if (row.request_status === 'booked') {
+        const b = this.db.queryOne('SELECT * FROM bookings WHERE request_id = ? ORDER BY created_at DESC LIMIT 1', [row.request_id]);
+        if (b) {
+          let terms = {};
+          try { terms = JSON.parse(b.terms_snapshot || '{}'); } catch (_) {}
+          bookingInfo = {
+            id: b.id,
+            bookingReference: b.booking_reference,
+            totalAmountINR: b.total_amount_paise / 100,
+            advancePaidINR: terms.advancePaidINR || Math.round((b.total_amount_paise / 100) * 0.315),
+            remainingBalanceINR: terms.remainingBalanceINR || ((b.total_amount_paise / 100) - Math.round((b.total_amount_paise / 100) * 0.30)),
+            remainingPaymentOption: terms.remainingPaymentOption || 'hotel_arrival',
+            confirmedAt: b.confirmed_at
+          };
+        }
+      }
 
       return {
         ...row,
-        guest: maskedGuest,
+        guest: guestInfo,
+        guest_name: revealPII ? row.guest_name : 'Verified Traveler',
+        guest_phone: revealPII ? row.guest_phone : null,
+        guest_email: revealPII ? row.guest_email : null,
+        booking: bookingInfo,
         required_facilities: JSON.parse(row.required_facilities || '[]'),
         total_budget_inr: row.total_budget_paise / 100,
         is_expired: new Date(row.recipient_expires_at) < new Date()

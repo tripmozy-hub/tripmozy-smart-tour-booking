@@ -998,15 +998,19 @@ const appHandler = async (req, res) => {
     let id = pathname.replace('/api/requests/', '');
     const isAdmin = reqUrl.searchParams.get('admin') === '1' || reqUrl.searchParams.get('role') === 'admin' || req.headers['x-admin-role'] === 'admin';
 
-    // Check cookies for fallback request ID / token
+    // Check cookies for fallback request ID / token / booking token
     const cookieHeader = req.headers['cookie'] || '';
     let cookieToken = '';
+    const bkgTokenMatch = cookieHeader.match(/(^|;\s*)tm_latest_booking_token=([^;]*)/);
     const tokenMatch = cookieHeader.match(/(^|;\s*)tm_latest_request_token=([^;]*)/);
-    if (tokenMatch) cookieToken = decodeURIComponent(tokenMatch[2]);
+    if (bkgTokenMatch) cookieToken = decodeURIComponent(bkgTokenMatch[2]);
+    else if (tokenMatch) cookieToken = decodeURIComponent(tokenMatch[2]);
 
     if (!id || id === 'undefined' || id === 'null' || id === 'latest') {
+      const bkgIdMatch = cookieHeader.match(/(^|;\s*)tm_latest_booking_ref=([^;]*)/);
       const idMatch = cookieHeader.match(/(^|;\s*)tm_latest_request_id=([^;]*)/);
-      if (idMatch) id = decodeURIComponent(idMatch[2]);
+      if (bkgIdMatch) id = decodeURIComponent(bkgIdMatch[2]);
+      else if (idMatch) id = decodeURIComponent(idMatch[2]);
     }
 
     const rawToken = reqUrl.searchParams.get('token') || req.headers['x-request-token'] || cookieToken || '';
@@ -1088,7 +1092,7 @@ const appHandler = async (req, res) => {
           const vendorDisplayName = result.vendor ? (result.vendor.businessName || result.propertyName) : result.propertyName;
           const vendorPhoneNum = result.vendor ? (result.vendor.contactPhone || '') : '';
           const vendorEmailAddr = result.vendor ? (result.vendor.contactEmail || '') : '';
-          const bookingUrl = `${baseUrl}/booking?id=${result.bookingReference}`;
+          const bookingUrl = `${baseUrl}/booking?id=${result.bookingReference}&token=${result.bookingToken || ''}`;
 
           // 1. WhatsApp Bill & Confirmation to Customer
           if (result.guest.phone) {
@@ -1246,6 +1250,12 @@ const appHandler = async (req, res) => {
           } catch (_) {}
         }
 
+        if (result.bookingToken) {
+          res.setHeader('Set-Cookie', [
+            `tm_latest_booking_token=${encodeURIComponent(result.bookingToken)}; Path=/; SameSite=Lax; Max-Age=2592000`,
+            `tm_latest_booking_ref=${encodeURIComponent(result.bookingReference)}; Path=/; SameSite=Lax; Max-Age=2592000`
+          ]);
+        }
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;

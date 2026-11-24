@@ -545,6 +545,13 @@ class RequestService {
       const p = JSON.parse(Buffer.from(pStr, 'base64url').toString('utf8'));
       if (!p) return false;
 
+      // If this is a confirmed booking token, delegate directly to BookingService
+      if (p.type === 'booking' || p.bkgRef || p.bkgId) {
+        const { BookingService } = require('../booking/booking-service');
+        const bkgService = new BookingService(this.db);
+        return bkgService.rehydrateBookingFromToken(rawToken, targetId);
+      }
+
       // Check if targetId matches (if targetId provided and not a generic wildcard)
       if (targetId && targetId !== 'latest' && targetId !== 'undefined' && targetId !== 'null') {
         const idMatches = targetId === p.reqId || targetId === p.ref || targetId === p.id || targetId === p.recId;

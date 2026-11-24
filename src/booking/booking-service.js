@@ -19,6 +19,311 @@ class BookingService {
     return `TM-BKG-${today}-${rand}`;
   }
 
+  // Generate cryptographically signed stateless booking token (resilient across serverless instances)
+  static generateSignedBookingToken(payload) {
+    const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
+    const minPayload = {
+      type: 'booking',
+      bkgId: payload.bookingId,
+      bkgRef: payload.bookingReference,
+      reqId: payload.requestId,
+      reqRef: payload.requestReference,
+      offId: payload.offerId,
+      holdId: payload.holdId,
+      cid: payload.customerId,
+      propId: payload.propertyId,
+      pnm: payload.propertyName,
+      venId: payload.vendorId,
+      vnm: payload.vendorBusinessName || payload.vendorName,
+      vcp: payload.vendorContactPerson || 'Tour Manager',
+      vph: payload.vendorContactPhone || '',
+      vem: payload.vendorContactEmail || '',
+      dst: payload.destination,
+      cin: payload.checkInDate,
+      cout: payload.checkOutDate,
+      nts: payload.nights || 4,
+      rms: payload.numRooms || 1,
+      adt: payload.numAdults || 2,
+      totPaise: payload.totalPayablePaise || (payload.totalAmountINR ? Math.round(payload.totalAmountINR * 100) : 3500000),
+      advPaidINR: payload.advancePaidINR,
+      advPaidPaise: payload.advPaidPaise,
+      advBaseINR: payload.advanceBaseINR,
+      advGstINR: payload.advanceGstINR,
+      remBalINR: payload.remainingBalanceINR,
+      remBalPaise: payload.remBalPaise,
+      remOpt: payload.remainingPaymentOption || 'hotel_arrival',
+      payRef: payload.paymentReference || 'DIRECT_VERIFIED',
+      gnm: payload.guestName,
+      gph: payload.guestPhone,
+      gem: payload.guestEmail,
+      confAt: payload.confirmedAt || new Date().toISOString(),
+      exp: Date.now() + 30 * 86400 * 1000 // 30 days validity for confirmed booking voucher
+    };
+    const pStr = Buffer.from(JSON.stringify(minPayload)).toString('base64url');
+    const sig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+    return `${pStr}.${sig}`;
+  }
+
+  // Rehydrate confirmed booking, request, property, vendor and payment on cold serverless instances
+  rehydrateBookingFromToken(rawToken, targetId = null) {
+    if (!rawToken || typeof rawToken !== 'string' || !rawToken.includes('.')) return false;
+    const ACTION_SECRET = process.env.ACTION_SECRET || 'tripmozy_action_secure_key_2026';
+    try {
+      const [pStr, sig] = rawToken.split('.');
+      if (!pStr || !sig) return false;
+      const expectedSig = crypto.createHmac('sha256', ACTION_SECRET).update(pStr).digest('hex');
+      const sigBuf = Buffer.from(sig);
+      const expBuf = Buffer.from(expectedSig);
+      if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+        return false;
+      }
+      const p = JSON.parse(Buffer.from(pStr, 'base64url').toString('utf8'));
+      if (!p || (p.type !== 'booking' && !p.bkgId && !p.bkgRef)) return false;
+
+      // If targetId is provided, ensure it matches either booking reference, booking id, request reference, or request id
+      if (targetId && targetId !== 'latest' && targetId !== 'undefined' && targetId !== 'null') {
+        const idMatches = targetId === p.bkgRef || targetId === p.bkgId || targetId === p.reqRef || targetId === p.reqId;
+        if (!idMatches) return false;
+      }
+
+      return this.db.transaction((tx) => {
+        const { seedCoreTourOperators } = require('../onboarding/catalog-loader');
+        try { seedCoreTourOperators(tx); } catch (_) {}
+
+        const bkgId = p.bkgId || tx.uuid();
+        const bkgRef = p.bkgRef || `TM-BKG-${Date.now()}`;
+        const reqId = p.reqId || tx.uuid();
+        const reqRef = p.reqRef || `TM-REQ-${Date.now()}`;
+        const offerId = p.offId || tx.uuid();
+        const holdId = p.holdId || tx.uuid();
+        let vendorId = p.venId || tx.uuid();
+        let propId = p.propId || tx.uuid();
+        let roomTypeId = tx.uuid();
+        const totalPaise = p.totPaise || 3500000;
+        const checkInDate = p.cin || new Date().toISOString().split('T')[0];
+        const checkOutDate = p.cout || new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0];
+        const nights = p.nts || 4;
+        const numRooms = p.rms || 1;
+        const guestName = p.gnm || 'Verified Traveler';
+        const guestPhone = p.gph || '+919876543210';
+        const guestEmail = p.gem || 'traveler@tripmozy.com';
+
+        // 1. Ensure user profile
+        let custId = p.cid;
+        if (guestEmail) {
+          const exUser = tx.queryOne('SELECT id FROM user_profiles WHERE email = ?', [guestEmail]);
+          if (exUser) {
+            custId = exUser.id;
+          } else {
+            custId = custId || tx.uuid();
+            tx.execute(`
+              INSERT INTO user_profiles (id, email, phone, role, display_name, status, is_phone_verified, is_email_verified)
+              VALUES (?, ?, ?, 'customer', ?, 'active', 0, 0)
+            `, [custId, guestEmail, guestPhone, guestName]);
+          }
+        } else if (!custId) {
+          const exUser = tx.queryOne('SELECT id FROM user_profiles LIMIT 1');
+          custId = exUser ? exUser.id : tx.uuid();
+        }
+
+        // 2. Ensure request with status 'booked'
+        let exReq = tx.queryOne('SELECT id FROM hotel_booking_requests WHERE id = ? OR request_reference = ?', [reqId, reqRef]);
+        const effectiveReqId = exReq ? exReq.id : reqId;
+        if (!exReq) {
+          tx.execute(`
+            INSERT INTO hotel_booking_requests (
+              id, request_reference, customer_id, guest_name, guest_email, guest_phone,
+              destination, check_in_date, check_out_date, nights, num_rooms, num_adults,
+              total_budget_paise, status, expires_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'booked', ?)
+          `, [
+            effectiveReqId, reqRef, custId, guestName, guestEmail, guestPhone,
+            p.dst || 'Tour Destination', checkInDate, checkOutDate, nights, numRooms, p.adt || 2, totalPaise,
+            new Date(Date.now() + 24 * 3600 * 1000).toISOString()
+          ]);
+        } else {
+          tx.execute("UPDATE hotel_booking_requests SET status = 'booked', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [effectiveReqId]);
+        }
+
+        // 3. Ensure vendor
+        let exVendor = tx.queryOne('SELECT id FROM vendor_accounts WHERE id = ?', [vendorId]);
+        if (!exVendor) {
+          const anyVendor = tx.queryOne("SELECT id FROM vendor_accounts WHERE status = 'active' LIMIT 1");
+          if (anyVendor) {
+            vendorId = anyVendor.id;
+          } else {
+            tx.execute(`
+              INSERT INTO vendor_accounts (id, business_name, contact_person, contact_phone, contact_email, status)
+              VALUES (?, ?, ?, ?, ?, 'active')
+            `, [vendorId, p.vnm || 'TripMozy Verified Tour Operator', p.vcp || 'Tour Operations Manager', p.vph || '+919876543210', p.vem || 'vendor@tripmozy.com']);
+          }
+        }
+
+        // 4. Ensure property
+        let exProp = propId ? tx.queryOne('SELECT id FROM properties WHERE id = ?', [propId]) : null;
+        if (!exProp) {
+          const vProp = tx.queryOne("SELECT id FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1", [vendorId]);
+          if (vProp) {
+            propId = vProp.id;
+          } else {
+            propId = propId || tx.uuid();
+            tx.execute(`
+              INSERT OR IGNORE INTO properties (
+                id, vendor_id, name, slug, property_type, star_rating, description,
+                address_line, city, state, pincode, country, status, inventory_mode
+              ) VALUES (?, ?, ?, ?, 'hotel', 4.8, 'Verified Tour Fleet', 'Tour Operations Desk', ?, 'India', '110001', 'India', 'active', 'vendor_confirmed')
+            `, [propId, vendorId, p.pnm || 'TripMozy Verified Tour Fleet', `fleet-${vendorId.slice(0, 8)}-${Date.now()}`, p.dst || 'India']);
+          }
+        }
+
+        // 5. Ensure room type & rate
+        let exRoom = tx.queryOne('SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1', [propId]);
+        if (exRoom) {
+          roomTypeId = exRoom.id;
+        } else {
+          tx.execute(`
+            INSERT INTO room_types (id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_active)
+            VALUES (?, ?, 'Custom Tour Package', 'King', 4, 2, 20, 1, 1)
+          `, [roomTypeId, propId]);
+          tx.execute(`
+            INSERT INTO room_rates (id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, is_active)
+            VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 1)
+          `, [tx.uuid(), roomTypeId]);
+        }
+
+        // 6. Ensure recipient
+        let exRecip = tx.queryOne('SELECT id FROM booking_request_recipients WHERE request_id = ? AND vendor_id = ?', [effectiveReqId, vendorId]);
+        const recipId = exRecip ? exRecip.id : tx.uuid();
+        if (!exRecip) {
+          const actHash = crypto.createHash('sha256').update(`${effectiveReqId}:${vendorId}`).digest('hex');
+          tx.execute(`
+            INSERT OR IGNORE INTO booking_request_recipients (
+              id, request_id, property_id, vendor_id, delivery_status, response_status, responded_at, expires_at, action_token_hash
+            ) VALUES (?, ?, ?, ?, 'delivered', 'accepted', CURRENT_TIMESTAMP, ?, ?)
+          `, [recipId, effectiveReqId, propId, vendorId, new Date(Date.now() + 4 * 3600 * 1000).toISOString(), actHash]);
+        } else {
+          tx.execute("UPDATE booking_request_recipients SET response_status = 'accepted', responded_at = CURRENT_TIMESTAMP WHERE id = ?", [recipId]);
+        }
+
+        // 7. Ensure offer
+        let exOffer = tx.queryOne('SELECT id FROM hotel_offers WHERE id = ?', [offerId]);
+        if (!exOffer) {
+          const subtotal = Math.round(totalPaise / 1.05);
+          const tax = totalPaise - subtotal;
+          const nightlyBase = Math.round(subtotal / (nights * numRooms));
+          const tourPricing = PricingEngine.calculateTourPricing(totalPaise);
+          const inclusionsData = {
+            inclusions: ['Verified Driver & Sightseeing Vehicle', 'Tour Itinerary Assistance', 'All Toll, State Tax & Parking'],
+            tourPricing
+          };
+
+          tx.execute(`
+            INSERT INTO hotel_offers (
+              id, offer_reference, request_id, property_id, recipient_id, room_type_id,
+              nightly_base_paise, total_nights, total_rooms, subtotal_paise, tax_paise,
+              total_payable_paise, is_budget_match, meal_plan, cancellation_terms,
+              special_inclusions, status, valid_until
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'Custom Tour Package', 'Free cancellation up to 48 hours before departure', ?, 'selected', ?)
+          `, [
+            offerId, `TM-OFF-${Date.now()}`, effectiveReqId, propId, recipId, roomTypeId,
+            nightlyBase, nights, numRooms, subtotal, tax, totalPaise,
+            JSON.stringify(inclusionsData), new Date(Date.now() + 4 * 3600 * 1000).toISOString()
+          ]);
+        }
+
+        // 8. Ensure inventory hold
+        let exHold = tx.queryOne('SELECT id FROM inventory_holds WHERE id = ?', [holdId]);
+        if (!exHold) {
+          tx.execute(`
+            INSERT INTO inventory_holds (
+              id, offer_id, room_type_id, customer_id, check_in_date, check_out_date,
+              quantity, status, expires_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'consumed', ?)
+          `, [
+            holdId, offerId, roomTypeId, custId, checkInDate, checkOutDate, numRooms,
+            new Date(Date.now() + 15 * 60 * 1000).toISOString()
+          ]);
+        } else {
+          tx.execute("UPDATE inventory_holds SET status = 'consumed' WHERE id = ?", [holdId]);
+        }
+
+        // 9. Ensure booking record
+        let exBkg = tx.queryOne('SELECT id FROM bookings WHERE id = ? OR booking_reference = ? OR request_id = ?', [bkgId, bkgRef, effectiveReqId]);
+        if (!exBkg) {
+          const tourPricing = PricingEngine.calculateTourPricing(totalPaise);
+          const advancePaidINR = p.advPaidINR || tourPricing.payableNowINR;
+          const advanceBaseINR = p.advBaseINR || Math.round(advancePaidINR / 1.05);
+          const advanceGstINR = p.advGstINR || (advancePaidINR - advanceBaseINR);
+          const remainingBalanceINR = p.remBalINR || tourPricing.remainingBalanceINR;
+          const subtotalPaise = Math.round(totalPaise / 1.05);
+          const taxPaise = totalPaise - subtotalPaise;
+
+          const termsSnapshot = {
+            mealPlan: 'Custom Tour Package',
+            cancellationTerms: 'Free cancellation up to 48 hours before departure',
+            propertySnapshot: { name: p.pnm || 'Verified Tour Fleet', city: p.dst || 'India' },
+            guestSnapshot: { name: guestName, phone: guestPhone, email: guestEmail },
+            vendorSnapshot: {
+              vendorId,
+              businessName: p.vnm || 'Verified Tour Operator',
+              contactPerson: p.vcp || 'Tour Manager',
+              contactPhone: p.vph || '',
+              contactEmail: p.vem || ''
+            },
+            tourPricing,
+            totalTourINR: totalPaise / 100,
+            advancePaidINR,
+            advancePaidPaise: advancePaidINR * 100,
+            advanceBaseINR,
+            advanceGstINR,
+            remainingBalanceINR,
+            remainingBalancePaise: remainingBalanceINR * 100,
+            remainingPaymentOption: p.remOpt || 'hotel_arrival',
+            paymentReference: p.payRef || 'DIRECT_VERIFIED',
+            paymentStatus: 'SUCCESS_RECEIVED_BY_TRIPMOZY',
+            paymentGateway: 'tripmozy.com',
+            confirmedAt: p.confAt || new Date().toISOString()
+          };
+
+          tx.execute(`
+            INSERT INTO bookings (
+              id, booking_reference, request_id, offer_id, hold_id, customer_id,
+              property_id, room_type_id, check_in_date, check_out_date, num_rooms,
+              num_adults, num_children, total_nights, base_amount_paise, tax_amount_paise,
+              total_amount_paise, currency, cancellation_policy_snapshot, terms_snapshot,
+              status, confirmed_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, 'INR', ?, ?, 'confirmed', ?)
+          `, [
+            bkgId, bkgRef, effectiveReqId, offerId, holdId,
+            custId, propId, roomTypeId, checkInDate, checkOutDate,
+            numRooms, p.adt || 2, nights, subtotalPaise, taxPaise,
+            totalPaise, 'Free cancellation up to 48 hours before departure',
+            JSON.stringify(termsSnapshot), p.confAt || new Date().toISOString()
+          ]);
+
+          // Ensure payment
+          const payId = tx.uuid();
+          const isPaused = process.env.PAYMENT_GATEWAY_PAUSED !== 'false';
+          const providerName = (p.payRef && p.payRef.includes('demo')) || isPaused ? 'demo' : 'razorpay';
+          tx.execute(`
+            INSERT OR IGNORE INTO payments (
+              id, booking_id, amount_paise, currency, provider, provider_order_id,
+              provider_payment_id, status, idempotency_key
+            ) VALUES (?, ?, ?, 'INR', ?, ?, ?, 'paid', ?)
+          `, [
+            payId, bkgId, advancePaidINR * 100, providerName,
+            `order_${bkgRef}`, p.payRef || `pay_verified_${bkgRef}`, `idem_${bkgId}`
+          ]);
+        }
+
+        return true;
+      });
+    } catch (err) {
+      console.error('[Booking Rehydration Error]', err.stack || err.message);
+      return false;
+    }
+  }
+
   // Rehydrate hold, offer, request and property records on cold serverless instances
   rehydrateHoldRecord(tx, holdId, hs, customerId = null) {
     if (!hs) return false;
@@ -191,7 +496,7 @@ class BookingService {
       let hold = tx.queryOne(`
         SELECT h.*, o.property_id, o.room_type_id, o.subtotal_paise, o.tax_paise,
                o.total_payable_paise, o.meal_plan, o.cancellation_terms, o.request_id,
-               req.guest_name, req.guest_phone, req.guest_email, req.nights,
+               req.request_reference, req.guest_name, req.guest_phone, req.guest_email, req.nights,
                req.num_adults, req.num_children, req.customer_id as req_customer_id,
                req.destination,
                p.vendor_id, p.name as property_name, p.city as property_city,
@@ -211,7 +516,7 @@ class BookingService {
         hold = tx.queryOne(`
           SELECT h.*, o.property_id, o.room_type_id, o.subtotal_paise, o.tax_paise,
                  o.total_payable_paise, o.meal_plan, o.cancellation_terms, o.request_id,
-                 req.guest_name, req.guest_phone, req.guest_email, req.nights,
+                 req.request_reference, req.guest_name, req.guest_phone, req.guest_email, req.nights,
                  req.num_adults, req.num_children, req.customer_id as req_customer_id,
                  req.destination,
                  p.vendor_id, p.name as property_name, p.city as property_city,
@@ -382,10 +687,48 @@ class BookingService {
         afterState: { bookingReference, totalPayablePaise: hold.total_payable_paise, paymentReference }
       });
 
+      const bookingToken = BookingService.generateSignedBookingToken({
+        bookingId,
+        bookingReference,
+        requestId: hold.request_id,
+        requestReference: hold.request_reference || (holdSnapshot && holdSnapshot.requestReference),
+        offerId: hold.offer_id,
+        holdId,
+        customerId: effectiveCustomerId,
+        propertyId: hold.property_id,
+        propertyName: hold.property_name,
+        vendorId: hold.vendor_id,
+        vendorBusinessName: hold.vendor_business_name || hold.property_name,
+        vendorContactPerson: hold.vendor_contact_person || 'Tour Manager',
+        vendorContactPhone: hold.vendor_contact_phone || '',
+        vendorContactEmail: hold.vendor_contact_email || '',
+        destination: hold.destination || hold.property_city,
+        checkInDate: hold.check_in_date,
+        checkOutDate: hold.check_out_date,
+        nights: hold.nights,
+        numRooms: hold.quantity,
+        numAdults: hold.num_adults,
+        totalPayablePaise: hold.total_payable_paise,
+        totalAmountINR: hold.total_payable_paise / 100,
+        advancePaidINR: tourPricing.payableNowINR,
+        advPaidPaise: tourPricing.payableNowPaise,
+        advanceBaseINR,
+        advanceGstINR,
+        remainingBalanceINR: tourPricing.remainingBalanceINR,
+        remBalPaise: tourPricing.remainingBalancePaise,
+        remainingPaymentOption: remainingPaymentOption || 'hotel_arrival',
+        paymentReference,
+        guestName: hold.guest_name,
+        guestPhone: hold.guest_phone,
+        guestEmail: hold.guest_email,
+        confirmedAt: termsSnapshot.confirmedAt
+      });
+
       return {
         success: true,
         bookingId,
         bookingReference,
+        bookingToken,
         status: 'confirmed',
         propertyName: hold.property_name,
         destination: hold.destination || hold.property_city,

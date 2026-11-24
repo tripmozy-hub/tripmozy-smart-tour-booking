@@ -1582,7 +1582,7 @@ async function loadRequest(isBackground = false) {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const isAdmin = urlParams.get('admin') === '1' || urlParams.get('role') === 'admin' || localStorage.getItem('tm_is_admin') === '1' || localStorage.getItem('tm_user_role') === 'admin';
-    let token = urlParams.get('token') || localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
+    let token = urlParams.get('token') || localStorage.getItem('tm_latest_booking_token') || getCookie('tm_latest_booking_token') || localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
 
     const queryParts = [];
     if (isAdmin) queryParts.push('admin=1');
@@ -2727,6 +2727,16 @@ async function finalizeBookingPayment(holdId, paymentRef) {
       alert('Booking confirmation failed: ' + (result.error || 'Please try again'));
       return;
     }
+    if (result.bookingToken) {
+      localStorage.setItem('tm_latest_booking_token', result.bookingToken);
+      document.cookie = `tm_latest_booking_token=${encodeURIComponent(result.bookingToken)}; Path=/; SameSite=Lax; Max-Age=2592000`;
+    }
+    if (result.bookingReference) {
+      localStorage.setItem('tm_latest_booking_ref', result.bookingReference);
+      document.cookie = `tm_latest_booking_ref=${encodeURIComponent(result.bookingReference)}; Path=/; SameSite=Lax; Max-Age=2592000`;
+      requestId = result.bookingReference;
+      window.history.replaceState({}, '', `?id=${encodeURIComponent(result.bookingReference)}&token=${encodeURIComponent(result.bookingToken || curToken)}`);
+    }
     closeCheckoutModal();
     await loadRequest();
   } catch (err) {
@@ -3020,11 +3030,11 @@ function renderLookupScreen() {
       <div style="width:56px; height:56px; background:#eff6ff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </div>
-      <h2 style="font-size:22px; font-weight:800; color:var(--navy); margin-bottom:6px;">Track Your Tour Quotes</h2>
-      <p style="font-size:14px; color:var(--text-muted);">Enter your TripMozy Tour Reference (e.g. TM-REQ-20261028-XXXX) to view live quotes from verified tour operators.</p>
-      <input type="text" id="lookupInput" class="lookup-input" placeholder="TM-REQ-20261028-XXXX">
+      <h2 style="font-size:22px; font-weight:800; color:var(--navy); margin-bottom:6px;">Track Your Tour &amp; Booking</h2>
+      <p style="font-size:14px; color:var(--text-muted);">Enter your Tour Request Reference or Booking ID (e.g. TM-REQ-... or TM-BKG-...) to view live quotes or your confirmed booking bill.</p>
+      <input type="text" id="lookupInput" class="lookup-input" placeholder="TM-REQ-2026... or TM-BKG-2026...">
       <button class="book-btn" onclick="doLookup()">
-        <span>View My Tour Offers</span>
+        <span>Track Tour / View Booking</span>
       </button>
       <div style="margin-top:20px; font-size:13px;">
         Don't have a tour request yet? <a href="/smart-tour-booking" style="color:var(--primary); font-weight:700;">Submit a tour request</a>
@@ -3035,13 +3045,24 @@ function renderLookupScreen() {
 
 async function doLookup() {
   const val = document.getElementById('lookupInput').value.trim();
-  if (!val) return alert('Please enter your request reference');
+  if (!val) return alert('Please enter your tour reference or booking ID');
 
-  let token = localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token') || '';
-  const storedRef = localStorage.getItem('tm_latest_request_ref');
-  const storedId = localStorage.getItem('tm_latest_request_id');
+  const storedBkgRef = localStorage.getItem('tm_latest_booking_ref');
+  const storedBkgToken = localStorage.getItem('tm_latest_booking_token') || getCookie('tm_latest_booking_token');
+  const storedReqRef = localStorage.getItem('tm_latest_request_ref');
+  const storedReqId = localStorage.getItem('tm_latest_request_id');
+  const storedReqToken = localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token');
 
-  const tokenParam = (token && (storedRef === val || storedId === val)) ? `&token=${encodeURIComponent(token)}` : '';
+  let token = '';
+  if (val.startsWith('TM-BKG') || val === storedBkgRef) {
+    token = storedBkgToken || storedReqToken || '';
+  } else if (val === storedReqRef || val === storedReqId || val.startsWith('TM-REQ')) {
+    token = storedReqToken || storedBkgToken || '';
+  } else {
+    token = storedBkgToken || storedReqToken || '';
+  }
+
+  const tokenParam = token ? `&token=${encodeURIComponent(token)}` : '';
   window.location.search = `?id=${encodeURIComponent(val)}${tokenParam}`;
 }
 
