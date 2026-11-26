@@ -57,7 +57,7 @@ function applySecurityHeaders(req, res) {
     "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
     "img-src 'self' data: blob: https:; " +
     "connect-src 'self' https: wss:; " +
-    "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com;"
+    "frame-src 'self' blob: data: https://api.razorpay.com https://checkout.razorpay.com;"
   );
 
   // Dynamic CORS: check origin against trusted patterns
@@ -75,7 +75,7 @@ function applySecurityHeaders(req, res) {
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Admin-Role');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Admin-Role, X-Request-Token');
 }
 
 module.exports = {

@@ -3,1411 +3,1775 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Tour Offers &amp; Booking | TripMozy - Memories Begin With a Tour</title>
+  <title>Traveler Dossier &amp; Escrow Portal | TripMozy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Razorpay Official Checkout Gateway -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --navy: #0f172a;
-      --navy-light: #1e293b;
-      --accent: #f59e0b;
-      --bg: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --success: #059669;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --radius: 16px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow: 0 4px 20px rgba(15,23,42,0.08), 0 1px 4px rgba(15,23,42,0.04);
-      --shadow-lg: 0 25px 60px -15px rgba(15,23,42,0.15);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      padding-bottom: 80px;
+      --paper: #F7F5F0;
+      --paper-pure: #FFFFFF;
+      --sand: #EFECE4;
+      --sand-dark: #E5E0D5;
+      --ink: #14171C;
+      --ink-secondary: #484E57;
+      --ink-muted: #767B84;
+      --ochre: #9E6B30;
+      --ochre-dark: #7D5220;
+      --ochre-soft: #F6EFE6;
+      --sage: #1B5E44;
+      --sage-soft: #EBF3EF;
+      --crimson: #9B2C2C;
+      --crimson-soft: #FBF0F0;
+      --hairline: #E2DDD3;
+      --hairline-strong: #C9C2B4;
+      --obsidian: #111317;
+      --obsidian-elevated: #181B22;
+      --brass: #C9A467;
+
+      /* Preserved variable aliases for JS compatibility */
+      --primary: #9E6B30;
+      --primary-dark: #7D5220;
+      --navy: #14171C;
+      --navy-light: #20252D;
+      --accent: #C9A467;
+      --bg: #F7F5F0;
+      --card-bg: #FFFFFF;
+      --text: #14171C;
+      --text-muted: #767B84;
+      --border: #E2DDD3;
+      --success: #1B5E44;
+      --danger: #9B2C2C;
+      --warning: #9E6B30;
+
+      --radius: 3px;
+      --radius-sm: 2px;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      --shadow-sm: 0 2px 6px rgba(20, 23, 28, 0.04);
+      --shadow: 0 10px 30px rgba(20, 23, 28, 0.06);
+      --shadow-lg: 0 24px 60px rgba(17, 19, 23, 0.22);
+      --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* Header */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: "kern" 1, "liga" 1;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
     header {
-      background: var(--navy);
-      color: #fff;
-      padding: 16px 24px;
+      background: rgba(247, 245, 240, 0.94);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--hairline);
       position: sticky;
       top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 120;
     }
+
     .header-inner {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 0 28px;
+      height: 68px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
-    .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-    .brand-logo span { color: var(--accent); }
-    .header-right { display: flex; align-items: center; gap: 14px; }
-    .nav-btn {
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      transition: all 0.2s;
-    }
-    .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
-    /* Live pulse badge */
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--ink);
+      min-width: 0;
+    }
+
+    .brand-logo {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .brand-logo span {
+      color: var(--ochre);
+    }
+
+    .brand-subtag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--ink-muted);
+      border-left: 1px solid var(--hairline-strong);
+      padding-left: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
     .live-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.28);
-      color: #34d399;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
+      gap: 7px;
+      padding: 6px 11px;
+      border: 1px solid var(--hairline);
+      background: var(--paper-pure);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--sage);
     }
+
     .live-dot {
-      width: 7px;
-      height: 7px;
-      background: #10b981;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      animation: pulse 1.8s infinite;
+      background: var(--sage);
+      animation: livePulse 2s ease-in-out infinite;
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    /* Container */
-    .container { max-width: 1060px; margin: 0 auto; padding: 28px 20px; }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.8); }
+    }
 
-    /* Stepper */
-    .stepper {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 28px;
-      position: relative;
-    }
-    .stepper::before {
-      content: '';
-      position: absolute;
-      top: 18px;
-      left: 40px;
-      right: 40px;
-      height: 2px;
-      background: var(--border);
-      z-index: 1;
-    }
-    .step-item {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
+    .nav-btn {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #f0f4ff;
-      padding: 0 10px;
+      padding: 8px 14px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      transition: all 0.2s var(--ease-editorial);
+      white-space: nowrap;
     }
+
+    .nav-btn:hover {
+      border-color: var(--ink);
+      background: var(--sand);
+    }
+
+    .nav-btn-primary {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    .nav-btn-primary:hover {
+      background: var(--ochre-dark);
+      border-color: var(--ochre-dark);
+      color: #fff;
+    }
+
+    /* ── Main Container ─────────────────────────────────────────────── */
+    .container {
+      flex: 1 0 auto;
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 36px 24px 72px;
+    }
+
+    /* ── Concierge Timeline Stepper ─────────────────────────────────── */
+    .stepper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .step-item {
+      padding: 16px 18px;
+      border-right: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      transition: background 0.25s ease;
+    }
+
+    .step-item:last-child {
+      border-right: none;
+    }
+
     .step-circle {
-      width: 36px;
-      height: 36px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #e2e8f0;
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 800;
+      border: 1px solid var(--hairline-strong);
+      background: var(--paper);
+      color: var(--ink-muted);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
     }
-    .step-item.active .step-circle { background: var(--primary); color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.2); }
-    .step-item.completed .step-circle { background: var(--success); color: #fff; }
-    .step-label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
-    .step-item.active .step-label { color: var(--primary); }
-    .step-item.completed .step-label { color: var(--success); }
 
-    /* Summary Card */
-    .summary-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
+    .step-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: 0.01em;
+      line-height: 1.3;
     }
-    .summary-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 12px;
+
+    .step-item.active {
+      background: var(--ochre-soft);
     }
-    .ref-badge {
-      font-family: monospace;
-      font-size: 13px;
+
+    .step-item.active .step-circle {
+      background: var(--ochre);
+      border-color: var(--ochre);
+      color: #fff;
+    }
+
+    .step-item.active .step-label {
+      color: var(--ink);
       font-weight: 700;
-      background: #eff6ff;
-      color: var(--primary);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid #bfdbfe;
     }
+
+    .step-item.completed .step-circle {
+      background: var(--sage);
+      border-color: var(--sage);
+      color: #fff;
+    }
+
+    .step-item.completed .step-label {
+      color: var(--sage);
+      font-weight: 600;
+    }
+
+    .step-item.cancelled, .step-item.expired {
+      background: var(--crimson-soft);
+    }
+
+    .step-item.cancelled .step-circle, .step-item.expired .step-circle {
+      background: var(--crimson);
+      border-color: var(--crimson);
+      color: #fff;
+    }
+
+    .step-item.cancelled .step-label, .step-item.expired .step-label {
+      color: var(--crimson);
+      font-weight: 700;
+    }
+
+    /* ── Request Overview Dossier ───────────────────────────────────── */
+    .summary-card {
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .summary-top {
+      padding: 26px 28px 22px;
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .ref-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--ochre-dark);
+      background: var(--ochre-soft);
+      border: 1px solid rgba(158, 107, 48, 0.25);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .summary-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 3vw, 2.35rem);
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin-top: 10px;
+    }
+
     .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 5px 12px;
-      border-radius: 20px;
-    }
-    .status-pending { background: #fef3c7; color: #92400e; }
-    .status-offers  { background: #d1fae5; color: #065f46; }
-    .status-booked  { background: #eff6ff; color: #1e40af; }
-    .status-cancelled { background: #fee2e2; color: #991b1b; }
-    .status-expired { background: #fee2e2; color: #b91c1c; border: 1.5px solid #fca5a5; font-weight: 800; }
-
-    .step-item.cancelled .step-circle { background: #ef4444; color: #fff; }
-    .step-item.cancelled .step-label { color: #dc2626; }
-    .step-item.expired .step-circle { background: #ef4444; color: #fff; border-color: #dc2626; }
-    .step-item.expired .step-label { color: #dc2626; font-weight: 700; }
-
-    .offer-card.expired-card {
-      opacity: 0.85;
-      border: 1.5px dashed #cbd5e1;
-      background: #fbfbfb;
-    }
-    .offer-card.expired-card:hover {
-      transform: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .expired-tag {
-      background: #fee2e2;
-      border: 1px solid #fca5a5;
-      color: #991b1b;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: var(--radius-sm);
       font-size: 11px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .book-btn.expired-btn {
-      background: #94a3b8 !important;
-      cursor: not-allowed !important;
-      box-shadow: none !important;
-      opacity: 0.88;
-    }
-    .book-btn.expired-btn:hover {
-      transform: none !important;
-      background: #94a3b8 !important;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid transparent;
     }
 
-    .btn-cancel-req {
-      background: #fff;
-      border: 1.5px solid #fecaca;
-      color: #dc2626;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
+    .status-pill.status-pending {
+      background: var(--ochre-soft);
+      color: var(--ochre-dark);
+      border-color: rgba(158, 107, 48, 0.28);
+    }
+
+    .status-pill.status-offers, .status-pill.status-booked {
+      background: var(--sage-soft);
+      color: var(--sage);
+      border-color: rgba(27, 94, 68, 0.25);
+    }
+
+    .status-pill.status-cancelled, .status-pill.status-expired {
+      background: var(--crimson-soft);
+      color: var(--crimson);
+      border-color: rgba(155, 44, 44, 0.25);
+    }
+
+    .btn-cancel-req, .btn-cancel-req-small, .btn-cancel-waiting {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s ease;
-    }
-    .btn-cancel-req:hover {
-      background: #fef2f2;
-      border-color: #ef4444;
-      color: #b91c1c;
-      transform: translateY(-1px);
-    }
-
-    .btn-cancel-req-small {
-      background: #fff;
-      border: 1px solid #fca5a5;
-      color: #dc2626;
+      padding: 7px 13px;
+      border: 1px solid rgba(155, 44, 44, 0.35);
+      background: transparent;
+      color: var(--crimson);
+      border-radius: var(--radius-sm);
       font-size: 12px;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-cancel-req-small:hover {
-      background: #fee2e2;
-    }
-
-    .btn-cancel-waiting {
-      background: #fff;
-      border: 1.5px solid #fca5a5;
-      color: #dc2626;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 9px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
       transition: all 0.2s ease;
     }
-    .btn-cancel-waiting:hover {
-      background: #fef2f2;
-      border-color: #dc2626;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.15);
+
+    .btn-cancel-req:hover, .btn-cancel-req-small:hover, .btn-cancel-waiting:hover {
+      background: var(--crimson-soft);
+      border-color: var(--crimson);
     }
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 16px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--paper);
     }
-    .sum-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
-    .sum-val { font-size: 15px; font-weight: 700; margin-top: 2px; }
-    .sum-val.budget { color: var(--primary); font-size: 18px; }
 
-    /* Live Banner */
-    .live-banner {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+    .summary-cell {
+      padding: 18px 24px;
+      border-right: 1px solid var(--hairline);
+    }
+
+    .summary-cell:last-child {
+      border-right: none;
+    }
+
+    .sum-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-muted);
+      margin-bottom: 6px;
+    }
+
+    .sum-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .sum-val.budget {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+    }
+
+    .sum-sub {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 3px;
+    }
+
+    /* ── Live Search & Assigned Banners ─────────────────────────────── */
+    .live-banner, .assigned-banner, .expired-alert-banner {
+      margin-top: 20px;
+      padding: 18px 22px;
       border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 24px;
+      border: 1px solid var(--hairline);
+      background: var(--paper-pure);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       flex-wrap: wrap;
-      gap: 12px;
     }
-    .live-banner-left { display: flex; align-items: center; gap: 12px; }
+
+    .assigned-banner {
+      border-left: 3px solid var(--sage);
+      background: var(--sage-soft);
+      border-color: rgba(27, 94, 68, 0.28);
+    }
+
+    .expired-alert-banner {
+      border-left: 3px solid var(--crimson);
+      background: var(--crimson-soft);
+      border-color: rgba(155, 44, 44, 0.28);
+    }
+
+    .live-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .live-spinner {
       width: 22px;
       height: 22px;
-      border: 3px solid #bfdbfe;
-      border-top-color: var(--primary);
+      border: 2px solid var(--hairline);
+      border-top-color: var(--ochre);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .live-title { font-size: 14px; font-weight: 700; color: #1e3a8a; }
-    .live-sub { font-size: 12px; color: #3b82f6; }
-    .refresh-now-btn {
-      background: #fff;
-      border: 1px solid #bfdbfe;
-      color: var(--primary);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .refresh-now-btn:hover { background: #dbeafe; }
-
-    /* Section Title */
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .section-head h2 { font-size: 20px; font-weight: 800; color: var(--navy); }
-    .offer-count-chip {
-      background: var(--navy);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 3px 10px;
-      border-radius: 12px;
-    }
-
-    /* Offers Grid */
-    .offers-list { display: flex; flex-direction: column; gap: 20px; }
-
-    .offer-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 2px solid var(--border);
-      overflow: hidden;
-      transition: all 0.2s;
-    }
-    .offer-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-    .offer-card.highlight { border-color: var(--success); }
-
-    .offer-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 10px;
-      background: #fafafa;
-    }
-    .hotel-name { font-size: 18px; font-weight: 800; color: var(--navy); }
-    .hotel-meta { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
-    .stars { color: var(--accent); letter-spacing: 1px; }
-
-    .savings-badge {
-      background: #d1fae5;
-      color: #065f46;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .offer-body {
-      padding: 22px 24px;
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 20px;
-    }
-    @media (max-width: 768px) { .offer-body { grid-template-columns: 1fr; } }
-
-    .offer-details { display: flex; flex-direction: column; gap: 10px; }
-    .room-name { font-size: 15px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 6px; }
-    .feature-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #f1f5f9;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #334155;
-    }
-    .policy-tag { font-size: 12px; color: #059669; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-
-    .offer-pricing-box {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    @media (max-width: 768px) { .offer-pricing-box { text-align: left; } }
-
-    .price-total { font-size: 26px; font-weight: 800; color: var(--navy); }
-    .price-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .price-gst { font-size: 12px; color: #64748b; margin-bottom: 12px; }
-
-    .book-btn {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 13px 20px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-      font-family: inherit;
-      width: 100%;
-    }
-    .book-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
-
-    /* Empty state */
-    .empty-box {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 52px 24px;
-      text-align: center;
-      border: 1px solid var(--border);
-    }
-    .empty-icon { font-size: 54px; margin-bottom: 12px; }
-    .empty-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
-    .empty-desc { font-size: 14px; color: var(--text-muted); max-width: 440px; margin: 0 auto; }
-
-    /* Lookup form (if visited without ID) */
-    .lookup-card {
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 40px 32px;
-      max-width: 480px;
-      margin: 40px auto;
-      box-shadow: var(--shadow-lg);
-      text-align: center;
-      border: 1px solid var(--border);
-    }
-    .lookup-input {
-      width: 100%;
-      padding: 13px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 15px;
-      font-family: inherit;
-      margin: 14px 0;
-    }
-    .lookup-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-
-    /* Checkout Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.65);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(4px);
-    }
-    .modal-overlay.hidden { display: none; }
-    .checkout-modal {
-      background: #fff;
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 520px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
-    }
-    .hold-banner {
-      background: #fef3c7;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #92400e;
-    }
-    .hold-timer { font-size: 16px; font-weight: 800; color: #b45309; }
-
-    .bill-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; }
-    .bill-row.total { font-size: 18px; font-weight: 800; color: var(--navy); border-top: 1.5px solid var(--border); margin-top: 8px; padding-top: 12px; }
-
-    .payment-option {
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 13px 16px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      transition: all 0.2s;
-    }
-    .payment-option:hover { border-color: var(--primary); background: #f8fafc; }
-    .payment-option.selected { border-color: var(--primary); background: #eff6ff; }
-
-    .payment-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--navy);
+      animation: spin 0.9s linear infinite;
       flex-shrink: 0;
     }
 
-    .split-option {
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s;
-      background: #fff;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
-    .split-option:hover { border-color: var(--primary); background: #f8fafc; }
-    .split-option.selected { border-color: var(--primary); background: #eff6ff; }
 
-    .confirm-btn {
-      background: var(--success);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 15px;
-      font-size: 16px;
-      font-weight: 800;
-      width: 100%;
+    .live-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .live-sub {
+      font-size: 13px;
+      color: var(--ink-secondary);
+      margin-top: 2px;
+    }
+
+    .refresh-now-btn {
+      padding: 7px 14px;
+      border: 1px solid var(--hairline-strong);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 16px;
-      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .refresh-now-btn:hover {
+      border-color: var(--ink);
+      background: var(--sand);
+    }
+
+    /* ── Section Header & Empty States ──────────────────────────────── */
+    .section-head {
       display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 34px 0 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .section-head h2 {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .offer-count-chip {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--sand);
+      color: var(--ink-secondary);
+      border: 1px solid var(--hairline);
+    }
+
+    .empty-box, .cancelled-card, .lookup-card {
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      padding: 44px 28px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lookup-card {
+      max-width: 540px;
+      margin: 32px auto 0;
+    }
+
+    .empty-title {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .empty-desc {
+      font-size: 14px;
+      color: var(--ink-secondary);
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .lookup-input {
+      width: 100%;
+      padding: 13px 16px;
+      margin: 18px 0 14px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius-sm);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      text-align: center;
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .lookup-input:focus {
+      border-color: var(--ink);
+      background: var(--paper-pure);
+    }
+
+    .btn-primary-link, .btn-secondary {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.2s;
-    }
-    .confirm-btn:hover { background: #047857; }
-
-    /* Confirmed Voucher & Official Bill Card */
-    .bill-card {
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid #cbd5e1;
-      overflow: hidden;
-      margin-top: 20px;
-    }
-    .bill-header {
-      background: #0f172a;
-      color: #ffffff;
-      padding: 28px 28px 22px;
-    }
-    .bill-header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .bill-brand {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #ffffff;
-    }
-    .bill-brand-sub {
-      font-size: 12px;
-      color: #94a3b8;
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
+      text-decoration: none;
+      transition: all 0.2s var(--ease-editorial);
     }
-    .bill-status-badge {
+
+    .btn-primary-link {
+      background: var(--ink);
+      color: var(--paper);
+      border: 1px solid var(--ink);
+    }
+
+    .btn-primary-link:hover {
+      background: var(--ochre-dark);
+      border-color: var(--ochre-dark);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--hairline-strong);
+    }
+
+    .btn-secondary:hover {
+      background: var(--sand);
+      border-color: var(--ink);
+    }
+
+    /* ── Offer Cards (Architectural Split Ledger) ───────────────────── */
+    .offers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .offer-card {
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: box-shadow 0.25s ease, transform 0.25s var(--ease-editorial);
+    }
+
+    .offer-card.highlight {
+      border-color: var(--ink);
+    }
+
+    .offer-card.expired-card {
+      opacity: 0.85;
+      border-color: rgba(155, 44, 44, 0.35);
+    }
+
+    .offer-header {
+      padding: 20px 26px;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--paper);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hotel-name {
+      font-family: var(--font-serif);
+      font-size: 25px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.15;
+    }
+
+    .hotel-meta {
+      font-size: 13px;
+      color: var(--ink-secondary);
+      margin-top: 4px;
+    }
+
+    .stars {
+      color: var(--ochre);
+      letter-spacing: 1px;
+    }
+
+    .savings-badge {
+      padding: 6px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--sage-soft);
+      border: 1px solid rgba(27, 94, 68, 0.25);
+      color: var(--sage);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .expired-tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(16, 185, 129, 0.18);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 8px 16px;
-      border-radius: 9999px;
-    }
-    .bill-meta-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-      padding-top: 16px;
-    }
-    .meta-lbl {
-      display: block;
+      padding: 6px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--crimson-soft);
+      border: 1px solid rgba(155, 44, 44, 0.28);
+      color: var(--crimson);
       font-size: 11px;
-      color: #94a3b8;
-      text-transform: uppercase;
       font-weight: 700;
-      letter-spacing: 0.4px;
-      margin-bottom: 2px;
-    }
-    .meta-val {
-      font-size: 14px;
-      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    /* Parties Grid (Customer vs Operator) */
-    .bill-parties-grid {
+    .offer-body {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 310px;
+    }
+
+    .offer-details {
+      padding: 24px 26px;
+    }
+
+    .room-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .feature-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      background: var(--paper);
+      border: 1px solid var(--hairline);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .policy-tag {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--sage);
+      font-weight: 600;
+    }
+
+    .offer-pricing-box {
+      padding: 24px;
+      background: var(--sand);
+      border-left: 1px solid var(--hairline);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       gap: 18px;
-      margin-bottom: 24px;
     }
-    .party-box {
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      background: #f8fafc;
+
+    .price-total {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
     }
-    .party-box.vendor-box {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-    }
-    .party-type {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-    .party-type.vendor-type {
-      color: #1e40af;
-    }
-    .party-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--navy);
-      margin-bottom: 8px;
-    }
-    .party-detail {
-      font-size: 13px;
-      color: #475569;
+
+    .price-sub {
+      font-size: 12px;
+      color: var(--ink-secondary);
       margin-top: 4px;
     }
-    .party-detail span {
-      color: var(--text-muted);
+
+    .book-btn {
+      width: 100%;
+      padding: 13px 18px;
+      background: var(--ink);
+      color: var(--paper);
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s var(--ease-editorial);
     }
-    .vendor-phone-highlight {
-      background: #ffffff;
-      border: 1.5px solid #93c5fd;
-      border-radius: 10px;
-      padding: 10px 14px;
-      margin-top: 8px;
+
+    .book-btn:hover:not(:disabled) {
+      background: var(--ochre-dark);
+      border-color: var(--ochre-dark);
     }
-    .phone-label {
-      font-size: 11px;
+
+    .book-btn.expired-btn, .book-btn:disabled {
+      background: var(--sand-dark);
+      color: var(--ink-muted);
+      border-color: var(--hairline-strong);
+      cursor: not-allowed;
+    }
+
+    /* ── Official Receipt & Confirmation Folio ──────────────────────── */
+    .voucher-card.bill-card {
+      margin-top: 24px;
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .bill-header {
+      background: var(--obsidian);
+      color: var(--paper);
+      padding: 28px 32px;
+      border-bottom: 2px solid var(--ochre);
+    }
+
+    .bill-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .bill-brand {
+      font-family: var(--font-serif);
+      font-size: 28px;
       font-weight: 700;
-      color: #1e40af;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 3px;
+      color: #fff;
+      line-height: 1.1;
     }
+
+    .bill-brand-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #A4A9B4;
+      margin-top: 4px;
+    }
+
+    .bill-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      background: rgba(27, 94, 68, 0.25);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: #86EFAC;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+    }
+
+    .bill-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding-top: 18px;
+    }
+
+    .meta-lbl {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #8F95A0;
+      margin-bottom: 4px;
+    }
+
+    .meta-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: #F7F5F0;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .voucher-body {
+      padding: 30px 32px;
+    }
+
+    .bill-parties-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .party-box {
+      padding: 20px 22px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      background: var(--paper);
+    }
+
+    .party-box.vendor-box {
+      background: var(--paper-pure);
+      border-color: var(--ink);
+    }
+
+    .party-type {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-muted);
+      margin-bottom: 6px;
+    }
+
+    .party-type.vendor-type {
+      color: var(--ochre-dark);
+    }
+
+    .party-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .party-detail {
+      font-size: 13px;
+      color: var(--ink-secondary);
+      margin-top: 4px;
+    }
+
+    .party-detail span {
+      color: var(--ink-muted);
+      margin-right: 4px;
+    }
+
+    .vendor-phone-highlight {
+      margin: 12px 0;
+      padding: 12px 14px;
+      background: var(--ochre-soft);
+      border: 1px solid rgba(158, 107, 48, 0.28);
+      border-radius: var(--radius-sm);
+    }
+
+    .phone-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ochre-dark);
+      margin-bottom: 6px;
+    }
+
     .phone-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      flex-wrap: wrap;
     }
+
     .phone-number {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--primary);
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
       text-decoration: none;
-      font-family: monospace;
     }
-    .phone-number:hover {
-      text-decoration: underline;
-    }
+
     .phone-wa-btn {
-      background: #25d366;
-      color: #ffffff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-    .phone-wa-btn:hover {
-      background: #1eb753;
-    }
-    .verified-partner-tag {
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--sage);
+      color: #fff;
       font-size: 11px;
-      color: #15803d;
-      font-weight: 700;
-      margin-top: 8px;
+      font-weight: 600;
+      text-decoration: none;
     }
 
-    /* Schedule Strip */
+    .verified-partner-tag {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sage);
+    }
+
     .bill-schedule-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 14px;
-      background: #f1f5f9;
-      border-radius: 12px;
-      padding: 14px 18px;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      background: var(--sand);
       margin-bottom: 24px;
     }
-    .strip-lbl {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .strip-val {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--navy);
-      margin-top: 2px;
+
+    .bill-schedule-strip > div {
+      padding: 14px 18px;
+      border-right: 1px solid var(--hairline);
     }
 
-    /* Bill Table */
+    .bill-schedule-strip > div:last-child {
+      border-right: none;
+    }
+
+    .strip-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+
+    .strip-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
     .bill-table-wrap {
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
+      overflow-x: auto;
       margin-bottom: 22px;
     }
+
     .bill-table {
       width: 100%;
       border-collapse: collapse;
+      border: 1px solid var(--hairline);
     }
+
     .bill-table th {
-      background: #f8fafc;
-      padding: 12px 18px;
-      font-size: 12px;
+      background: var(--paper);
+      padding: 12px 16px;
+      font-size: 11px;
       font-weight: 700;
-      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.4px;
-      border-bottom: 1.5px solid var(--border);
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      border-bottom: 1px solid var(--hairline);
     }
+
     .bill-table td {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--hairline);
+      font-variant-numeric: tabular-nums;
     }
+
     .bill-table tr.sub-row td {
-      padding: 8px 18px;
       font-size: 13px;
-      background: #fafafa;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      background: var(--paper);
     }
+
     .bill-table tr.received-row td {
-      background: #ecfdf5;
-      border-top: 1.5px solid #a7f3d0;
-      border-bottom: 1.5px solid #a7f3d0;
+      background: var(--sage-soft);
+      border-top: 1px solid rgba(27, 94, 68, 0.25);
+      border-bottom: 1px solid rgba(27, 94, 68, 0.25);
     }
+
     .bill-table tr.remaining-row td {
-      background: #ffffff;
-      border-bottom: none;
+      background: var(--paper-pure);
     }
 
-    /* Escrow Trust Box */
     .bill-trust-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 12px;
-      padding: 16px 18px;
-      font-size: 13px;
-      color: #1e40af;
-      line-height: 1.55;
-      margin-bottom: 24px;
+      padding: 16px 20px;
+      background: var(--paper);
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--ochre);
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      color: var(--ink-secondary);
+      line-height: 1.65;
     }
 
-    /* Action buttons */
     .bill-actions {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
       gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--hairline);
     }
+
     .btn-print-bill {
-      background: #0f172a;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 22px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    .btn-print-bill:hover {
-      background: #1e293b;
-      transform: translateY(-1px);
-    }
-    .btn-call-operator {
-      background: #2563eb;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
       padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    .btn-call-operator:hover {
-      background: #1d4ed8;
-      transform: translateY(-1px);
-    }
-    .btn-plan-new {
-      color: var(--text-muted);
+      background: var(--ink);
+      color: var(--paper);
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-    .btn-plan-new:hover {
-      color: var(--navy);
-      background: #f1f5f9;
-    }
-
-    /* Print rules */
-    @media print {
-      header, .stepper, .live-banner, .bill-actions, .nav-btn, .refresh-now-btn, #custAuthHeader {
-        display: none !important;
-      }
-      body {
-        background: #ffffff !important;
-        color: #000000 !important;
-        padding: 0 !important;
-      }
-      .container {
-        max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      .bill-card {
-        box-shadow: none !important;
-        border: 1px solid #cbd5e1 !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-      }
-      .bill-header {
-        background: #0f172a !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-    }
-
-    /* Confirmed Voucher Card */
-    .voucher-card {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: var(--shadow-lg);
-      border: 2px solid #a7f3d0;
-      overflow: hidden;
-      margin-top: 20px;
-    }
-    .voucher-header {
-      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
-      color: #fff;
-      padding: 32px 24px;
-      text-align: center;
-    }
-    .voucher-body { padding: 28px 24px; }
-    .voucher-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 24px;
-      background: #f8fafc;
-      padding: 18px;
-      border-radius: 12px;
-    }
-    .v-lbl { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-    .v-val { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 2px; }
-
-    /* ── Mobile Phone Browser Responsiveness ── */
-    @media (max-width: 768px) {
-      body { min-height: 100vh; min-height: 100dvh; }
-      header { padding: 10px 14px; }
-      .header-inner { flex-wrap: wrap; gap: 8px; }
-      .brand-logo { font-size: 20px; }
-      .header-right { gap: 6px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
-      .live-badge { display: none; }
-      .nav-btn { padding: 6px 10px; font-size: 11px; }
-
-      .container { padding: 14px 10px 70px; margin: 10px auto; }
-
-      /* Mobile Stepper */
-      .stepper {
-        margin-bottom: 20px;
-        gap: 4px;
-      }
-      .stepper::before {
-        left: 20px;
-        right: 20px;
-        top: 14px;
-      }
-      .step-circle {
-        width: 28px;
-        height: 28px;
-        font-size: 11px;
-      }
-      .step-label {
-        font-size: 9.5px;
-        text-align: center;
-        max-width: 65px;
-        line-height: 1.2;
-      }
-      .step-item {
-        padding: 0 4px;
-      }
-
-      .request-summary-card { padding: 16px 14px; }
-      .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .offer-card { padding: 16px 14px; }
-      .offer-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .offer-body { grid-template-columns: 1fr; gap: 14px; }
-      .offer-pricing-box { text-align: left; }
-      .price-total { font-size: 24px; }
-      .offer-actions { flex-direction: column; gap: 8px; width: 100%; }
-      .offer-actions .btn { width: 100%; }
-
-      .modal-overlay { padding: 10px; }
-      .checkout-modal {
-        padding: 18px 14px;
-        border-radius: 16px;
-        max-width: 100%;
-        max-height: 92vh;
-      }
-      .bill-row { font-size: 13px; }
-      .bill-row.total { font-size: 16px; }
-      .payment-option, .split-option {
-        padding: 10px 12px;
-        font-size: 12px;
-        gap: 8px;
-      }
-      .confirm-btn {
-        padding: 13px;
-        font-size: 15px;
-      }
-
-      /* Official Bill & Voucher Mobile Layout */
-      .bill-card { margin-top: 14px; border-radius: 14px; }
-      .bill-header { padding: 18px 14px; }
-      .bill-header-top { flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 14px; }
-      .bill-brand { font-size: 22px; }
-      .bill-meta-grid { grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; }
-      .bill-body { padding: 16px 12px; }
-      .bill-parties-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
-      .party-box { padding: 14px 12px; }
-      .party-title { font-size: 16px; }
-      .phone-number { font-size: 15px; }
-      .bill-schedule-strip { grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; margin-bottom: 18px; }
-      .bill-table th, .bill-table td { padding: 10px 10px; font-size: 12px; }
-      .bill-actions { flex-direction: column; gap: 8px; width: 100%; }
-      .bill-actions button, .bill-actions a { width: 100%; justify-content: center; }
-      .bill-trust-box { padding: 12px; }
-
-      .voucher-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 12px;
-      }
-      .voucher-body { padding: 18px 14px; }
-      input, select, textarea { font-size: 16px !important; }
-    }
-
-    /* ── TripMozy Main Admin Master Oversight Portal Card ── */
-    .admin-master-card {
-      background: linear-gradient(135deg, #0b1329 0%, #0f172a 50%, #1e293b 100%);
-      border: 1.5px solid rgba(245, 158, 11, 0.45);
-      border-radius: 18px;
-      padding: 24px;
-      margin-bottom: 28px;
-      color: #f8fafc;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 24px rgba(245, 158, 11, 0.12);
-    }
-    .admin-master-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      margin-bottom: 18px;
-    }
-    .admin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.5);
-      color: #fbbf24;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-    }
-    .admin-badge-dot {
-      width: 8px;
-      height: 8px;
-      background: #f59e0b;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #f59e0b;
-      animation: pulse 1.6s infinite;
-    }
-    .admin-tag {
-      font-size: 12px;
-      color: #cbd5e1;
       font-weight: 600;
-    }
-    .admin-account-info {
-      font-size: 12px;
-      color: #94a3b8;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .admin-status-pill {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 12px;
-    }
-    .admin-headline-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .admin-live-tag {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: #e2e8f0;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 8px;
-    }
-    .admin-panels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .admin-panel {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 18px;
-      backdrop-filter: blur(10px);
-    }
-    .admin-panel-title {
-      font-size: 13px;
-      font-weight: 800;
-      color: #fbbf24;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .panel-icon {
-      font-size: 15px;
-    }
-    .admin-prop-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-      font-size: 12.5px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .admin-prop-row .prop-k {
-      color: #94a3b8;
-      font-weight: 500;
-    }
-    .admin-prop-row .prop-v {
-      font-weight: 700;
-      color: #f1f5f9;
-      text-align: right;
-    }
-    .admin-prop-row .prop-v.highlight {
-      color: #60a5fa;
-      font-size: 14px;
-    }
-    .admin-link {
-      color: #38bdf8;
-      text-decoration: none;
-      font-weight: 700;
-    }
-    .admin-link:hover {
-      text-decoration: underline;
-    }
-    .admin-wa-btn {
-      background: #059669;
-      color: #fff;
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      margin-left: 6px;
-      display: inline-block;
-    }
-    .admin-wa-btn:hover {
-      background: #10b981;
-    }
-    .admin-note-box {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 11px;
-      color: #fca5a5;
-      margin-top: 12px;
-      line-height: 1.4;
-    }
-    .admin-actions-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .btn-admin-pay {
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      color: #fff;
-      border: 1px solid #60a5fa;
-      font-size: 13px;
-      font-weight: 800;
-      padding: 10px 18px;
-      border-radius: 10px;
       cursor: pointer;
+    }
+
+    .btn-print-bill:hover {
+      background: var(--ochre-dark);
+      border-color: var(--ochre-dark);
+    }
+
+    .btn-view-receipt {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      gap: 8px;
+      padding: 12px 18px;
+      background: var(--ochre-soft);
+      color: var(--ochre-dark);
+      border: 1px solid rgba(158, 107, 48, 0.42);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
       transition: all 0.2s ease;
     }
-    .btn-admin-pay:hover {
-      background: #1e40af;
-      transform: translateY(-1px);
-    }
-    .btn-admin-print {
-      background: #059669;
+
+    .btn-view-receipt:hover {
+      background: var(--ochre);
       color: #fff;
-      border: none;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 10px 18px;
-      border-radius: 10px;
-      cursor: pointer;
+      border-color: var(--ochre);
     }
-    .btn-admin-view-toggle {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 10px 16px;
-      border-radius: 10px;
+
+    .receipt-quick-bar {
+      background: var(--sand);
+      border-bottom: 1px solid var(--hairline);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .receipt-preview-dialog {
+      width: 100%;
+      max-width: 820px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      color: var(--ink);
+    }
+
+    .receipt-preview-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--obsidian);
+      color: var(--paper);
+      padding: 14px 22px;
+      border-bottom: 2px solid var(--ochre);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .receipt-preview-body {
+      padding: 26px 28px;
+      background: var(--paper);
+    }
+
+    .receipt-paper-sheet {
+      background: #fff;
+      border: 1px solid var(--hairline-strong);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-call-operator {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }
-    .btn-admin-view-toggle:hover {
-      background: rgba(255, 255, 255, 0.15);
+      gap: 8px;
+      padding: 12px 18px;
+      background: var(--sage);
       color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
     }
+
+    .btn-plan-new {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 18px;
+      border: 1px solid var(--hairline-strong);
+      color: var(--ink);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* ── Checkout, Demo Simulator & Cancel Modals ───────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 19, 23, 0.62);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 9000;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.hidden {
+      display: none !important;
+    }
+
+    .checkout-modal {
+      width: 100%;
+      max-width: 540px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      box-shadow: var(--shadow-lg);
+      color: var(--ink);
+    }
+
+    .hold-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--ochre-soft);
+      border: 1px solid rgba(158, 107, 48, 0.3);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ochre-dark);
+      margin-bottom: 16px;
+    }
+
+    .hold-timer {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .split-option, .payment-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      background: var(--paper);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .payment-option {
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .split-option:hover, .payment-option:hover {
+      border-color: var(--ink-muted);
+    }
+
+    .split-option.selected, .payment-option.selected {
+      background: var(--paper-pure);
+      border-color: var(--ink);
+      box-shadow: inset 3px 0 0 var(--ochre);
+    }
+
+    .payment-icon {
+      width: 44px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: var(--sand);
+      color: var(--ink);
+      border: 1px solid var(--hairline);
+    }
+
     .rzp-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
+      background: var(--ochre-soft);
+      border: 1px solid rgba(158, 107, 48, 0.3);
+      color: var(--ochre-dark);
       font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: var(--radius-sm);
+    }
+
+    .confirm-btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px 20px;
+      background: var(--ink);
+      color: var(--paper);
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .confirm-btn:hover:not(:disabled) {
+      background: var(--ochre-dark);
+      border-color: var(--ochre-dark);
+    }
+
+    /* ── Admin Master Oversight Card (Obsidian Studio) ──────────────── */
+    .admin-master-card {
+      background: var(--obsidian);
+      color: #E5E7EB;
+      border: 1px solid #2A2F3A;
+      border-top: 3px solid var(--brass);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-master-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #262A34;
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--brass);
+      background: rgba(201, 164, 103, 0.12);
+      border: 1px solid rgba(201, 164, 103, 0.32);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .admin-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brass);
+    }
+
+    .admin-tag, .admin-account-info {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    .admin-status-pill {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.08);
+      color: #F3F4F6;
+    }
+
+    .admin-headline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 18px 0;
+    }
+
+    .admin-live-tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid #2A2F3A;
+      color: #E5E7EB;
+    }
+
+    .admin-panels-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .admin-panel {
+      background: var(--obsidian-elevated);
+      border: 1px solid #262A34;
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .admin-panel-title {
+      font-size: 12px;
       font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--brass);
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #262A34;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-prop-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 5px 0;
+      font-size: 12px;
+    }
+
+    .prop-k { color: #8F95A0; }
+    .prop-v { color: #F3F4F6; font-weight: 600; text-align: right; }
+    .prop-v.highlight { color: #fff; }
+    .admin-link { color: var(--brass); text-decoration: none; font-weight: 600; }
+
+    .admin-wa-btn {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      background: var(--sage);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .admin-note-box {
+      margin-top: 12px;
+      padding: 10px 12px;
+      font-size: 11px;
+      line-height: 1.45;
+      border-radius: var(--radius-sm);
+      background: rgba(201, 164, 103, 0.08);
+      border: 1px solid rgba(201, 164, 103, 0.25);
+      color: #E2C692;
+    }
+
+    .admin-actions-bar {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #262A34;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-admin-pay, .btn-admin-print, .btn-admin-view-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 15px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+
+    .btn-admin-pay {
+      background: var(--brass);
+      color: #111317;
+    }
+
+    .btn-admin-print {
+      background: var(--sage);
+      color: #fff;
+    }
+
+    .btn-admin-view-toggle {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #2A2F3A;
+      color: #E5E7EB;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .site-footer {
+      background: var(--obsidian);
+      color: #A1A7B3;
+      padding: 40px 28px;
+      border-top: 1px solid #262A34;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--paper);
+      font-weight: 600;
+    }
+
+    .footer-brand span { color: var(--brass); }
+
+    .footer-links {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #A1A7B3;
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .footer-links a:hover { color: var(--paper); }
+
+    .footer-note {
+      font-size: 12px;
+      color: #6B7280;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 920px) {
+      .admin-panels-grid { grid-template-columns: 1fr; }
+      .offer-body { grid-template-columns: 1fr; }
+      .offer-pricing-box { border-left: none; border-top: 1px solid var(--hairline); }
+      .summary-grid, .bill-meta-grid, .bill-schedule-strip { grid-template-columns: repeat(2, 1fr); }
+      .summary-cell:nth-child(2n), .bill-schedule-strip > div:nth-child(2n) { border-right: none; }
+      .summary-cell, .bill-schedule-strip > div { border-bottom: 1px solid var(--hairline); }
+      .bill-parties-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .header-inner { padding: 8px 14px; min-height: 56px; height: auto; gap: 8px; flex-wrap: wrap; }
+      .brand { flex-shrink: 0; }
+      .brand-logo { font-size: 22px; }
+      .brand-subtag, .live-badge { display: none; }
+      .header-right { gap: 6px; flex-wrap: wrap; }
+      .nav-btn { padding: 6px 10px; font-size: 11px; }
+      .container { padding: 20px 14px 48px; }
+      .stepper { grid-template-columns: repeat(2, 1fr); }
+      .step-item { border-bottom: 1px solid var(--hairline); padding: 12px; }
+      .summary-top { padding: 20px 18px; }
+      .summary-cell { padding: 14px 16px; }
+      .offer-header, .offer-details, .offer-pricing-box, .voucher-body, .bill-header { padding: 18px; }
+      .receipt-quick-bar, .receipt-preview-body, .receipt-paper-sheet { padding: 14px 16px; }
+      .checkout-modal { padding: 20px 18px; }
+      .bill-meta-grid { grid-template-columns: 1fr; gap: 12px; }
+      .bill-schedule-strip { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── Print Styles ───────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff !important; }
+      header, .stepper, .summary-card, .live-banner, .assigned-banner, .expired-alert-banner, .print-hide, .modal-overlay, .admin-master-card, .site-footer {
+        display: none !important;
+      }
+      .container { max-width: 100%; padding: 0; margin: 0; }
+      .voucher-card.bill-card { box-shadow: none; border: 1px solid #ccc; margin: 0; }
+      .bill-header { background: #14171C !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <div class="header-inner">
     <a href="/" class="brand">
       <div class="brand-logo">Trip<span>Mozy</span></div>
-      <span style="font-size:12px; color:#94a3b8; border-left:1px solid #334155; padding-left:10px; margin-left:10px; font-weight:600;">Tour Offers</span>
+      <span class="brand-subtag">Traveler Dossier</span>
     </a>
     <div class="header-right">
       <div class="live-badge">
         <div class="live-dot"></div>
-        <span>Live Tour Marketplace</span>
+        <span>Live Escrow Desk</span>
       </div>
-      <a href="/smart-tour-booking" class="nav-btn">+ New Tour Request</a>
+      <a href="/smart-tour-booking" class="nav-btn nav-btn-primary">New Tour Request</a>
       <span id="custAuthHeader">
-        <a href="/login" class="nav-btn" style="border-color:#fbbf24;color:#fbbf24;">Log In</a>
+        <a href="/login" class="nav-btn">Sign In</a>
       </span>
     </div>
   </div>
 </header>
 
 <div class="container" id="app">
-  <!-- Content injected via JavaScript -->
-  <div style="text-align:center; padding: 60px;">
+  <div style="text-align:center; padding: 72px 20px;">
     <div class="live-spinner" style="margin: 0 auto 16px;"></div>
-    <div>Loading your stay request...</div>
+    <div style="font-family: var(--font-serif); font-size: 20px; color: var(--ink);">Retrieving your tour dossier...</div>
   </div>
 </div>
+
+<footer class="site-footer print-hide">
+  <div class="footer-inner">
+    <div class="footer-brand">Trip<span>Mozy</span></div>
+    <nav class="footer-links" aria-label="Portal links">
+      <a href="/">Home</a>
+      <a href="/smart-tour-booking">Commission a Tour</a>
+      <a href="/partner/dashboard">Operator Dispatch</a>
+      <a href="/login">Sign In</a>
+    </nav>
+    <div class="footer-note">Escrow-protected tour commissioning across India.</div>
+  </div>
+</footer>
 
 <!-- Checkout / 15-Minute Hold Modal -->
 <div class="modal-overlay hidden" id="checkoutModal">
   <div class="checkout-modal">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3 style="font-size:18px; font-weight:800; color:var(--navy);" id="modalHotelName">Confirm Tour Booking</h3>
-      <button onclick="closeCheckoutModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--hairline);">
+      <div>
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--ochre-dark); margin-bottom:4px;">Escrow Checkout</div>
+        <h3 style="font-family:var(--font-serif); font-size:24px; font-weight:600; color:var(--ink); line-height:1.15;" id="modalHotelName">Confirm Tour Booking</h3>
+      </div>
+      <button onclick="closeCheckoutModal()" aria-label="Close checkout" style="background:none; border:1px solid var(--hairline); border-radius:2px; width:30px; height:30px; font-size:18px; line-height:1; cursor:pointer; color:var(--ink-secondary);">&times;</button>
     </div>
 
-    <!-- 15-minute countdown banner -->
     <div class="hold-banner">
-      <span>Secured 15-Minute Tour Package Hold</span>
+      <span>15-Minute Exclusive Package Hold</span>
       <span class="hold-timer" id="holdCountdown">15:00</span>
     </div>
 
-    <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px;">
-      <div style="font-size:13px; font-weight:700; color:var(--navy);" id="modalRoomType">Tour Package</div>
-      <div style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="modalStayDates">4 Days / 3 Nights</div>
-      <div style="font-size:12px; color:#059669; font-weight:600; margin-top:4px;" id="modalMealPlan">Meals &amp; Sightseeing Included · Free Cancellation</div>
+    <div style="background:var(--paper); border:1px solid var(--hairline); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px;">
+      <div style="font-size:14px; font-weight:700; color:var(--ink);" id="modalRoomType">Tour Package</div>
+      <div style="font-size:12px; color:var(--ink-secondary); margin-top:3px;" id="modalStayDates">4 Days / 3 Nights</div>
+      <div style="font-size:12px; color:var(--sage); font-weight:600; margin-top:5px;" id="modalMealPlan">Meals &amp; Sightseeing Included · Free Cancellation</div>
     </div>
 
-    <!-- Bill breakdown with 30% Advance + 5% GST & 70% Balance Split -->
-    <div style="background:#f8fafc; border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px;">
-      <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Payment Breakdown &amp; Advance Terms</div>
+    <div style="background:var(--paper); border:1px solid var(--hairline); border-radius:var(--radius-sm); padding:16px; margin-bottom:16px;">
+      <div style="font-size:10px; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:10px;">Advance Escrow Ledger</div>
       <div class="bill-row">
-        <span style="color:var(--text-muted)">Total Tour Package Price:</span>
-        <span style="font-weight:700; font-size:15px; color:var(--navy);" id="billTourTotal">&#8377;0</span>
-      </div>
-      <div class="bill-row">
-        <span style="color:var(--text-muted)">30% Tour Advance Deposit:</span>
-        <span style="font-weight:600;" id="billAdvanceBase">&#8377;0</span>
+        <span style="color:var(--ink-secondary)">Total Tour Package Price</span>
+        <span style="font-family:var(--font-mono); font-weight:600; font-size:14px; color:var(--ink);" id="billTourTotal">&#8377;0</span>
       </div>
       <div class="bill-row">
-        <span style="color:var(--text-muted)">5% GST on Advance (Govt. of India):</span>
-        <span style="font-weight:600;" id="billAdvanceGst">&#8377;0</span>
+        <span style="color:var(--ink-secondary)">30% Tour Advance Deposit</span>
+        <span style="font-family:var(--font-mono); font-weight:500;" id="billAdvanceBase">&#8377;0</span>
       </div>
-      <div class="bill-row total" style="border-top:1.5px dashed #cbd5e1; padding-top:10px; margin-top:6px;">
-        <span style="font-weight:800; color:#065f46;">Payable Now to TripMozy Account:</span>
-        <span style="color:#059669; font-size:18px; font-weight:800;" id="billPayableNow">&#8377;0</span>
+      <div class="bill-row">
+        <span style="color:var(--ink-secondary)">5% GST on Advance (Govt. of India)</span>
+        <span style="font-family:var(--font-mono); font-weight:500;" id="billAdvanceGst">&#8377;0</span>
       </div>
-      <div class="bill-row" style="margin-top:6px; font-size:13px;">
-        <span style="color:#64748b;">Remaining 70% Balance Due:</span>
-        <span style="font-weight:700; color:var(--navy);" id="billRemainingBalance">&#8377;0</span>
+      <div class="bill-row total" style="border-top:1px solid var(--hairline-strong); padding-top:10px; margin-top:8px;">
+        <span style="font-weight:700; color:var(--sage);">Payable Now to TripMozy Escrow</span>
+        <span style="font-family:var(--font-mono); color:var(--sage); font-size:18px; font-weight:700;" id="billPayableNow">&#8377;0</span>
+      </div>
+      <div class="bill-row" style="margin-top:6px; font-size:12px;">
+        <span style="color:var(--ink-muted);">Remaining 70% Balance Due</span>
+        <span style="font-family:var(--font-mono); font-weight:600; color:var(--ink);" id="billRemainingBalance">&#8377;0</span>
       </div>
     </div>
 
-    <!-- Escrow Protection Info Banner -->
-    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; font-size:12px; color:#1e40af; margin-bottom:16px; line-height:1.5;">
-      <strong>TripMozy Safe Escrow Account:</strong> Your 30% advance (+ 5% GST) is securely collected into the <strong>TripMozy Account</strong> and protected until your tour commences.
+    <div style="background:var(--ochre-soft); border:1px solid rgba(158, 107, 48, 0.25); border-radius:var(--radius-sm); padding:11px 14px; font-size:12px; color:var(--ochre-dark); margin-bottom:16px; line-height:1.5;">
+      <strong>TripMozy Escrow Protection:</strong> Your 30% advance (+5% GST) is held in TripMozy Escrow until tour departure, unlocking operator manager contact on issuance.
     </div>
 
-    <!-- Remaining 70% Balance Payment Preference -->
     <div style="margin-bottom:18px;">
-      <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--navy);">
-        How would you like to pay the remaining 70% balance (<span id="balanceAmountLabel" style="color:var(--primary)">&#8377;0</span>)?
+      <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--ink);">
+        Select Settlement Mode for Remaining 70% (<span id="balanceAmountLabel" style="font-family:var(--font-mono); color:var(--ochre-dark)">&#8377;0</span>)
       </div>
       <div class="split-option selected" id="optPayHotel" onclick="selectRemainingOption('hotel_arrival')">
-        <input type="radio" name="remOption" id="radioHotel" checked style="accent-color:var(--primary); margin:0; cursor:pointer;">
+        <input type="radio" name="remOption" id="radioHotel" checked style="accent-color:var(--ochre-dark); margin-top:3px; cursor:pointer;">
         <div>
-          <div style="font-weight:700; font-size:13px; color:var(--navy);">Option 1: Pay on Arrival (Recommended)</div>
-          <div style="font-size:11px; color:var(--text-muted);">Pay by Cash, UPI, or Card directly when you reach destination / tour check-in</div>
+          <div style="font-weight:700; font-size:13px; color:var(--ink);">Pay on Arrival (Recommended)</div>
+          <div style="font-size:11.5px; color:var(--ink-secondary); margin-top:2px;">Settle via Cash, UPI, or Card upon reaching tour check-in</div>
         </div>
       </div>
       <div class="split-option" id="optPayTripmozy" onclick="selectRemainingOption('tripmozy_online')" style="margin-top:8px;">
-        <input type="radio" name="remOption" id="radioTripmozy" style="accent-color:var(--primary); margin:0; cursor:pointer;">
+        <input type="radio" name="remOption" id="radioTripmozy" style="accent-color:var(--ochre-dark); margin-top:3px; cursor:pointer;">
         <div>
-          <div style="font-weight:700; font-size:13px; color:var(--navy);">Option 2: Pay Remaining 70% Online via TripMozy</div>
-          <div style="font-size:11px; color:var(--text-muted);">Pay securely online anytime before departure via your traveler portal</div>
+          <div style="font-weight:700; font-size:13px; color:var(--ink);">Settle Online Before Departure</div>
+          <div style="font-size:11.5px; color:var(--ink-secondary); margin-top:2px;">Pay the remaining 70% balance directly through your dossier portal</div>
         </div>
       </div>
     </div>
 
-    <!-- Payment Gateway: Official Razorpay Live or Demo Sandbox -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-      <div style="font-size:13px; font-weight:700; color:var(--navy);">Payment Gateway (TripMozy Account):</div>
-      <div class="rzp-badge" id="gatewayBadge" style="background:#fef3c7; border:1px solid #fde68a; color:#92400e;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
+      <div style="font-size:12px; font-weight:700; color:var(--ink);">Advance Payment Gateway</div>
+      <div class="rzp-badge" id="gatewayBadge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         <span id="gatewayBadgeText">Demo Sandbox Mode (Live Gateway Paused)</span>
       </div>
     </div>
 
-    <!-- Demo notice banner when Live Gateway is paused -->
-    <div id="demoNoticeBanner" style="background:#fefce8; border:1px solid #fef08a; border-radius:10px; padding:10px 14px; font-size:12px; color:#854d0e; margin-bottom:14px; display:flex; align-items:flex-start; gap:8px;">
-      <span style="font-size:16px; line-height:1;">🧪</span>
+    <div id="demoNoticeBanner" style="background:var(--sand); border:1px solid var(--hairline-strong); border-radius:var(--radius-sm); padding:10px 14px; font-size:12px; color:var(--ink-secondary); margin-bottom:14px; display:flex; align-items:flex-start; gap:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ochre-dark)" stroke-width="1.8" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       <div>
-        <div style="font-weight:700;">Live Gateway Paused · Demo Test Mode Active</div>
-        <div style="color:#713f12; margin-top:2px;">Live card/UPI charges are temporarily paused for testing. You can safely simulate advance deposits, test operator unlock, and verify official payment receipts in this demo sandbox.</div>
+        <div style="font-weight:700; color:var(--ink);">Live Gateway Paused · Demo Test Mode Active</div>
+        <div style="margin-top:2px;">Live charges are paused for sandbox verification. Simulate advance settlement to verify operator contact unlock and tax receipts.</div>
       </div>
     </div>
 
     <div class="payment-option selected" id="optUpi" onclick="selectPayment(this, 'DEMO_UPI')">
-      <div class="payment-icon" style="background:#eff6ff; color:#2563eb;">UPI</div>
+      <div class="payment-icon">UPI</div>
       <div>
-        <div id="lblUpiTitle" style="font-weight:700; color:var(--navy);">UPI (Simulated Demo · Google Pay / PhonePe / Paytm)</div>
-        <div id="lblUpiSub" style="font-size:11px; color:var(--text-muted)">Instant 1-click sandbox authorization to TripMozy Account</div>
+        <div id="lblUpiTitle" style="font-weight:700; font-size:13px; color:var(--ink);">UPI (Simulated Demo · Google Pay / PhonePe / Paytm)</div>
+        <div id="lblUpiSub" style="font-size:11.5px; color:var(--ink-muted)">Instant 1-click sandbox authorization to TripMozy Escrow</div>
       </div>
     </div>
     <div class="payment-option" id="optCard" onclick="selectPayment(this, 'DEMO_CARD')">
-      <div class="payment-icon" style="background:#f0fdf4; color:#16a34a;">Card</div>
+      <div class="payment-icon">CARD</div>
       <div>
-        <div id="lblCardTitle" style="font-weight:700; color:var(--navy);">Credit / Debit Card (Simulated Demo)</div>
-        <div id="lblCardSub" style="font-size:11px; color:var(--text-muted)">Test Visa •••• 4242 or Mastercard sandbox simulation</div>
+        <div id="lblCardTitle" style="font-weight:700; font-size:13px; color:var(--ink);">Credit / Debit Card (Simulated Demo)</div>
+        <div id="lblCardSub" style="font-size:11.5px; color:var(--ink-muted)">Test Visa •••• 4242 or Mastercard sandbox authorization</div>
       </div>
     </div>
     <div class="payment-option" id="optNetbanking" onclick="selectPayment(this, 'DEMO_NETBANKING')">
-      <div class="payment-icon" style="background:#fefce8; color:#ca8a04;">Bank</div>
+      <div class="payment-icon">BANK</div>
       <div>
-        <div id="lblBankTitle" style="font-weight:700; color:var(--navy);">Net Banking (Simulated Demo)</div>
-        <div id="lblBankSub" style="font-size:11px; color:var(--text-muted)">Test All Major Indian Banks sandbox authorization</div>
+        <div id="lblBankTitle" style="font-weight:700; font-size:13px; color:var(--ink);">Net Banking (Simulated Demo)</div>
+        <div id="lblBankSub" style="font-size:11.5px; color:var(--ink-muted)">All Major Indian Banks sandbox authorization</div>
       </div>
     </div>
 
-    <button class="confirm-btn" id="confirmPayBtn" onclick="executeBookingConfirmation()" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+    <button class="confirm-btn" id="confirmPayBtn" onclick="executeBookingConfirmation()">
       <span id="confirmPayBtnText">Pay Advance &amp; Confirm Tour Booking (Demo)</span>
     </button>
   </div>
@@ -1415,56 +1779,55 @@
 
 <!-- Interactive Demo Gateway Simulator Modal -->
 <div class="modal-overlay hidden" id="demoGatewayModal" style="z-index: 10000;">
-  <div class="checkout-modal" style="max-width:440px; border-radius:16px; border:2px solid #3b82f6; box-shadow:0 25px 50px -12px rgba(37,99,235,0.25);">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <div style="background:#2563eb; color:#fff; border-radius:8px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">⚡</div>
+  <div class="checkout-modal" style="max-width:440px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--hairline); padding-bottom:14px; margin-bottom:18px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="background:var(--obsidian); color:var(--brass); border-radius:var(--radius-sm); width:32px; height:32px; display:flex; align-items:center; justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
         <div>
-          <div style="font-size:15px; font-weight:800; color:var(--navy);">TripMozy Demo Gateway</div>
-          <div style="font-size:11px; color:#64748b;">Secure Sandbox Payment Simulator</div>
+          <div style="font-size:15px; font-weight:700; color:var(--ink);">TripMozy Sandbox Gateway</div>
+          <div style="font-size:11px; color:var(--ink-muted);">Test Escrow Authorization</div>
         </div>
       </div>
-      <button onclick="closeDemoGatewayModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted);">&times;</button>
+      <button onclick="closeDemoGatewayModal()" aria-label="Close demo gateway" style="background:none; border:1px solid var(--hairline); border-radius:2px; width:28px; height:28px; font-size:18px; cursor:pointer; color:var(--ink-secondary);">&times;</button>
     </div>
 
-    <!-- Amount Card -->
-    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:center; margin-bottom:16px;">
-      <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Advance Payable to TripMozy</div>
-      <div style="font-size:26px; font-weight:800; color:#059669; margin:4px 0;" id="demoModalAmount">&#8377;0</div>
-      <div style="font-size:11px; color:#64748b;">30% Tour Deposit (+ 5% GST) · Safe Escrow Protected</div>
+    <div style="background:var(--paper); border:1px solid var(--hairline); border-radius:var(--radius-sm); padding:16px; text-align:center; margin-bottom:16px;">
+      <div style="font-size:10px; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.12em;">Advance Payable to TripMozy Escrow</div>
+      <div style="font-family:var(--font-mono); font-size:28px; font-weight:600; color:var(--sage); margin:6px 0;" id="demoModalAmount">&#8377;0</div>
+      <div style="font-size:11.5px; color:var(--ink-secondary);">30% Advance Deposit (+5% GST) · Escrow Protected</div>
     </div>
 
-    <!-- Simulation Details -->
-    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px; margin-bottom:16px; font-size:12px;">
+    <div style="background:var(--sand); border:1px solid var(--hairline); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:16px; font-size:12px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-        <span style="color:#64748b;">Simulated Method:</span>
-        <strong id="demoModalMethod" style="color:#1e40af;">UPI (traveler@upi)</strong>
+        <span style="color:var(--ink-muted);">Payment Rail:</span>
+        <strong id="demoModalMethod" style="font-family:var(--font-mono); color:var(--ink);">UPI (Sandbox)</strong>
       </div>
       <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-        <span style="color:#64748b;">Destination / Tour:</span>
-        <strong id="demoModalDest" style="color:var(--navy);">-</strong>
+        <span style="color:var(--ink-muted);">Circuit / Destination:</span>
+        <strong id="demoModalDest" style="color:var(--ink);">-</strong>
       </div>
       <div style="display:flex; justify-content:space-between;">
-        <span style="color:#64748b;">Traveler:</span>
-        <strong id="demoModalTraveler" style="color:var(--navy);">-</strong>
+        <span style="color:var(--ink-muted);">Traveler:</span>
+        <strong id="demoModalTraveler" style="color:var(--ink);">-</strong>
       </div>
     </div>
 
-    <div id="demoProgressBox" style="display:none; margin-bottom:16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; text-align:center;">
-      <div class="live-spinner" style="margin:0 auto 8px; width:22px; height:22px; border-width:2px;"></div>
-      <div id="demoProgressStatus" style="font-size:13px; font-weight:700; color:#166534;">Authorizing Sandbox Payment...</div>
+    <div id="demoProgressBox" style="display:none; margin-bottom:16px; background:var(--sage-soft); border:1px solid rgba(27,94,68,0.28); border-radius:var(--radius-sm); padding:14px; text-align:center;">
+      <div class="live-spinner" style="margin:0 auto 8px; border-top-color:var(--sage);"></div>
+      <div id="demoProgressStatus" style="font-size:13px; font-weight:600; color:var(--sage);">Authorizing Sandbox Payment...</div>
     </div>
 
-    <!-- Action Buttons -->
-    <div id="demoActionBtns" style="display:flex; flex-direction:column; gap:10px;">
-      <button class="confirm-btn" onclick="authorizeDemoPayment(true)" style="background:linear-gradient(135deg, #059669 0%, #047857 100%); margin:0; width:100%;">
+    <div id="demoActionBtns" style="display:flex; flex-direction:column; gap:8px;">
+      <button class="confirm-btn" onclick="authorizeDemoPayment(true)" style="background:var(--sage); border-color:var(--sage); margin:0; width:100%;">
         <span>Authorize Demo Payment (Success)</span>
       </button>
-      <button onclick="authorizeDemoPayment(false)" style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">
-        Simulate Payment Failure / Decline
+      <button onclick="authorizeDemoPayment(false)" style="background:var(--crimson-soft); border:1px solid rgba(155,44,44,0.3); color:var(--crimson); padding:10px; border-radius:var(--radius-sm); font-size:12px; font-weight:600; cursor:pointer;">
+        Simulate Payment Decline
       </button>
-      <button onclick="closeDemoGatewayModal()" style="background:none; border:none; color:#64748b; font-size:12px; cursor:pointer; padding:4px;">
-        Cancel
+      <button onclick="closeDemoGatewayModal()" style="background:none; border:none; color:var(--ink-muted); font-size:12px; cursor:pointer; padding:6px;">
+        Cancel Transaction
       </button>
     </div>
   </div>
@@ -1474,38 +1837,65 @@
 <div class="modal-overlay hidden" id="cancelModal">
   <div class="checkout-modal" style="max-width:480px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-      <h3 style="font-size:18px; font-weight:800; color:#991b1b;">Cancel Tour Request</h3>
-      <button onclick="closeCancelModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);">&times;</button>
+      <h3 style="font-family:var(--font-serif); font-size:24px; font-weight:600; color:var(--crimson);">Cancel Tour Request</h3>
+      <button onclick="closeCancelModal()" aria-label="Close cancel modal" style="background:none; border:1px solid var(--hairline); border-radius:2px; width:28px; height:28px; font-size:18px; cursor:pointer; color:var(--ink-secondary);">&times;</button>
     </div>
 
-    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px; margin-bottom:16px; font-size:13px; color:#991b1b; line-height:1.5;">
-      Are you sure you want to cancel your tour request for <strong id="cancelModalDest">your trip</strong>?
-      <br>Contacted tour operators will be notified to stop preparing quotes.
+    <div style="background:var(--crimson-soft); border:1px solid rgba(155,44,44,0.28); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px; font-size:13px; color:var(--crimson); line-height:1.5;">
+      Cancel your active tour request for <strong id="cancelModalDest">your trip</strong>?
+      Contacted tour operators will be notified immediately to stand down.
     </div>
 
     <div style="margin-bottom:16px;">
-      <label style="display:block; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:6px;">Reason for cancellation (optional):</label>
-      <select id="cancelReasonSelect" style="width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:#fff; margin-bottom:10px;">
+      <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-secondary); margin-bottom:6px;">Reason for cancellation (optional)</label>
+      <select id="cancelReasonSelect" style="width:100%; padding:10px 12px; border:1px solid var(--hairline-strong); border-radius:var(--radius-sm); font-size:13px; background:var(--paper); color:var(--ink); margin-bottom:10px;">
         <option value="change_of_plans">Change of travel dates or plans</option>
         <option value="different_destination">Looking for a different destination</option>
         <option value="budget_adjusted">Need to adjust budget or group size</option>
         <option value="test_request">Submitted as a test request</option>
         <option value="other">Other reason</option>
       </select>
-      <textarea id="cancelReasonNotes" placeholder="Optional notes for tour operators..." style="width:100%; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; resize:vertical; min-height:60px; font-family:inherit;"></textarea>
+      <textarea id="cancelReasonNotes" placeholder="Optional notes for tour operators..." style="width:100%; padding:10px 12px; border:1px solid var(--hairline-strong); border-radius:var(--radius-sm); background:var(--paper); color:var(--ink); font-size:13px; resize:vertical; min-height:64px;"></textarea>
     </div>
 
     <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button type="button" onclick="closeCancelModal()" style="background:#f1f5f9; color:#475569; border:none; padding:10px 18px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">
+      <button type="button" onclick="closeCancelModal()" style="background:transparent; color:var(--ink); border:1px solid var(--hairline-strong); padding:10px 16px; border-radius:var(--radius-sm); font-weight:600; font-size:13px; cursor:pointer;">
         Keep Request Active
       </button>
-      <button type="button" id="confirmCancelBtn" onclick="executeCancelRequest()" style="background:#dc2626; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+      <button type="button" id="confirmCancelBtn" onclick="executeCancelRequest()" style="background:var(--crimson); color:#fff; border:1px solid var(--crimson); padding:10px 18px; border-radius:var(--radius-sm); font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
         <span>Yes, Cancel Tour Request</span>
       </button>
     </div>
   </div>
 </div>
 
+<!-- Official TripMozy Receipt Viewer Modal -->
+<div class="modal-overlay hidden print-hide" id="receiptViewerModal" style="z-index: 10500;">
+  <div class="receipt-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+    <div class="receipt-preview-toolbar">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span style="font-family:var(--font-serif); font-size:21px; font-weight:700; color:#fff;">Trip<span style="color:var(--brass);">Mozy</span> Receipt</span>
+        <span id="rvInvoiceNum" style="font-family:var(--font-mono); font-size:11px; color:var(--brass); background:rgba(201,164,103,0.14); border:1px solid rgba(201,164,103,0.35); padding:3px 9px; border-radius:2px;">TM-INV</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <a id="rvDownloadPdfBtn" href="#" download="TripMozy-Receipt.pdf" class="tm-pdf-dl-link" style="background:var(--sage); color:#fff; border:1px solid var(--sage); padding:8px 14px; border-radius:2px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download PDF</span>
+        </a>
+        <a id="rvRawPdfLink" href="#" target="_blank" style="background:rgba(255,255,255,0.1); color:#F7F5F0; border:1px solid rgba(255,255,255,0.2); padding:8px 12px; border-radius:2px; font-size:12px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+          Open PDF Tab
+        </a>
+        <button type="button" onclick="window.print()" style="background:transparent; color:#D1D5DB; border:1px solid rgba(255,255,255,0.2); padding:8px 12px; border-radius:2px; font-size:12px; font-weight:600; cursor:pointer;">
+          Print
+        </button>
+        <button type="button" onclick="closeReceiptModal()" aria-label="Close receipt viewer" style="background:transparent; color:#9CA3AF; border:1px solid rgba(255,255,255,0.2); width:32px; height:32px; border-radius:2px; font-size:18px; line-height:1; cursor:pointer;">&times;</button>
+      </div>
+    </div>
+    <div class="receipt-preview-body" id="receiptViewerBody">
+      <!-- Populated dynamically when View Receipt is clicked -->
+    </div>
+  </div>
+</div>
 <script>
 // =============================================================================
 // TripMozy Customer Booking & Live Offers Engine
@@ -1522,6 +1912,7 @@ let activeHoldOffer = null;
 let activeHoldTimer = null;
 let activeHoldSnapshot = null;
 let selectedPaymentMethod = 'UPI_VERIFIED';
+let cameFromQueryParam = false;
 
 function getCookie(name) {
   const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
@@ -1531,7 +1922,9 @@ function getCookie(name) {
 // Initialize
 async function init() {
   const params = new URLSearchParams(window.location.search);
-  requestId = params.get('id') || params.get('req') || params.get('requestId') || params.get('ref') || params.get('reference') || window.location.pathname.split('/')[2];
+  const explicitId = params.get('id') || params.get('req') || params.get('requestId') || params.get('ref') || params.get('reference') || window.location.pathname.split('/')[2];
+  cameFromQueryParam = Boolean(explicitId && explicitId !== 'booking' && explicitId !== 'booking.html');
+  requestId = explicitId;
 
   if (!requestId || requestId === 'booking' || requestId === 'booking.html') {
     requestId = localStorage.getItem('tm_latest_request_id') || localStorage.getItem('tm_latest_request_ref') || getCookie('tm_latest_request_id');
@@ -1627,7 +2020,14 @@ async function loadRequest(isBackground = false) {
         } catch (_) {}
       }
       if (!isBackground) {
-        renderErrorScreen('Stay request not found. Please check your request reference.');
+        if (!cameFromQueryParam) {
+          localStorage.removeItem('tm_latest_request_id');
+          localStorage.removeItem('tm_latest_request_ref');
+          localStorage.removeItem('tm_latest_request_token');
+          renderLookupScreen();
+        } else {
+          renderErrorScreen('Stay request not found. Please check your request reference.');
+        }
       }
       return;
     }
@@ -1716,16 +2116,16 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
 
       <div class="admin-headline-row">
         <div>
-          <h2 style="font-size:20px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+          <h2 style="font-family:var(--font-serif); font-size:24px; font-weight:600; color:#fff; display:flex; align-items:center; gap:8px;">
             <span>Tour Case Review: ${esc(req.request_reference)}</span>
           </h2>
-          <div style="color:#94a3b8; font-size:13px; margin-top:2px;">
-            Destination: <strong>${esc(req.destination)}</strong> · Duration: ${req.nights + 1} Days / ${req.nights} Nights (${fmtDate(req.check_in_date)} to ${fmtDate(req.check_out_date)})
+          <div style="color:#9CA3AF; font-size:13px; margin-top:2px;">
+            Destination: <strong style="color:#F3F4F6;">${esc(req.destination)}</strong> · Duration: ${req.nights + 1} Days / ${req.nights} Nights (${fmtDate(req.check_in_date)} to ${fmtDate(req.check_out_date)})
           </div>
         </div>
         <div>
           <span class="admin-live-tag">
-            ${isBooked ? '✅ 30% Advance Secured in Escrow · Confirmed' : hasOffers ? '⚡ Operator Accepted &amp; Quoted' : '⏳ Awaiting Operator Quotes'}
+            ${isBooked ? '30% Advance Secured in Escrow · Confirmed' : hasOffers ? 'Operator Accepted &amp; Quoted' : 'Awaiting Operator Quotes'}
           </span>
         </div>
       </div>
@@ -1734,7 +2134,8 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
         <!-- Panel 1: Traveler (Customer) Contact & Demand -->
         <div class="admin-panel">
           <div class="admin-panel-title">
-            <span class="panel-icon">👤</span> Traveler Profile &amp; Contact
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Traveler Profile &amp; Contact</span>
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">Traveler Name:</span>
@@ -1760,14 +2161,15 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
             <span class="prop-v">₹${(req.total_budget_paise / 100).toLocaleString('en-IN')}</span>
           </div>
           <div class="admin-note-box">
-            🔒 <strong>Admin Privacy Rule:</strong> Regular traveler cannot view operator contact before 30% advance confirmation. Full contact unmasked here for Admin oversight only.
+            <strong>Admin Privacy Rule:</strong> Regular traveler cannot view operator contact before 30% advance confirmation. Full contact unmasked here for Admin oversight only.
           </div>
         </div>
 
         <!-- Panel 2: Accepting Tour Operator (Vendor Partner) -->
         <div class="admin-panel">
           <div class="admin-panel-title">
-            <span class="panel-icon">🏢</span> Accepting Tour Operator Partner
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            <span>Accepting Tour Operator Partner</span>
           </div>
           ${hasAcceptedVendor ? `
             <div class="admin-prop-row">
@@ -1797,14 +2199,13 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
               <span class="prop-k">Fleet / Base:</span>
               <span class="prop-v">${esc(vendorProperty)}</span>
             </div>
-            <div class="admin-note-box" style="border-color:#10b981; background:rgba(16,185,129,0.08); color:#34d399;">
-              ✓ <strong>Exclusivity Lock:</strong> Request accepted by this partner. Vanished from all other operators' dashboards.
+            <div class="admin-note-box" style="border-color:rgba(27,94,68,0.45); background:rgba(27,94,68,0.16); color:#86EFAC;">
+              <strong>Exclusivity Lock:</strong> Request accepted by this partner. Removed from all other operators' dispatch boards.
             </div>
           ` : `
-            <div style="padding:24px 0; text-align:center; color:#94a3b8;">
-              <div style="font-size:26px; margin-bottom:8px;">⏳</div>
-              <div style="font-weight:700; color:#cbd5e1; font-size:14px;">Awaiting Tour Operator Partner</div>
-              <div style="font-size:12px; margin-top:4px; line-height:1.4;">Broadcasted simultaneously to ${recips.length} verified operators. Details will appear immediately upon operator acceptance.</div>
+            <div style="padding:24px 0; text-align:center; color:#9CA3AF;">
+              <div style="font-weight:700; color:#E5E7EB; font-size:14px;">Awaiting Tour Operator Partner</div>
+              <div style="font-size:12px; margin-top:6px; line-height:1.45;">Broadcasted simultaneously to ${recips.length} verified operators. Details will appear immediately upon operator acceptance.</div>
             </div>
           `}
         </div>
@@ -1812,7 +2213,8 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
         <!-- Panel 3: Financials & Live Gateway -->
         <div class="admin-panel">
           <div class="admin-panel-title">
-            <span class="panel-icon">💳</span> Payment &amp; Escrow Review
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <span>Payment &amp; Escrow Review</span>
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">Total Tour Price:</span>
@@ -1826,9 +2228,9 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
             <span class="prop-k">5% GST on Advance:</span>
             <span class="prop-v">₹${adminTp.advanceGstINR.toLocaleString('en-IN')}</span>
           </div>
-          <div class="admin-prop-row" style="background:rgba(37,99,235,0.18); padding:6px 8px; border-radius:6px; margin:4px 0;">
-            <span class="prop-k" style="color:#60a5fa; font-weight:800;">Advance Payable Now:</span>
-            <span class="prop-v" style="color:#38bdf8; font-size:16px; font-weight:800;">₹${adminTp.payableNowINR.toLocaleString('en-IN')}</span>
+          <div class="admin-prop-row" style="background:rgba(201,164,103,0.12); padding:6px 8px; border-radius:2px; margin:4px 0;">
+            <span class="prop-k" style="color:var(--brass); font-weight:700;">Advance Payable Now:</span>
+            <span class="prop-v" style="color:#fff; font-size:15px; font-weight:700; font-family:var(--font-mono);">₹${adminTp.payableNowINR.toLocaleString('en-IN')}</span>
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">Remaining 70% Balance:</span>
@@ -1836,20 +2238,20 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">Payment Gateway:</span>
-            <span class="prop-v" style="font-family:monospace; color:#f59e0b; font-weight:700;">${isGatewayPaused ? 'Demo Sandbox (Live Paused)' : 'Razorpay Live'}</span>
+            <span class="prop-v" style="font-family:var(--font-mono); color:var(--brass); font-weight:600;">${isGatewayPaused ? 'Demo Sandbox (Live Paused)' : 'Razorpay Live'}</span>
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">${isGatewayPaused ? 'Live Key (Paused):' : 'Live Key ID:'}</span>
-            <span class="prop-v" style="font-family:monospace; font-size:11px; color:#cbd5e1;">rzp_live_RYrXNuT77Ns4gT</span>
+            <span class="prop-v" style="font-family:var(--font-mono); font-size:11px; color:#CBD5E1;">rzp_live_RYrXNuT77Ns4gT</span>
           </div>
           <div class="admin-prop-row">
             <span class="prop-k">Payment Status:</span>
             <span class="prop-v">
               ${isBooked
-                ? `<span style="color:#34d399; font-weight:800;">✅ PAID (Ref: ${esc(paymentRefStr)})</span>`
+                ? `<span style="color:#86EFAC; font-weight:700;">PAID (Ref: ${esc(paymentRefStr)})</span>`
                 : isReqExpired
-                ? '<span style="color:#ef4444; font-weight:800;">⏱️ TOUR PACKAGE EXPIRED</span>'
-                : '<span style="color:#f59e0b; font-weight:800;">⚠️ AWAITING ADVANCE DEPOSIT</span>'
+                ? '<span style="color:#FCA5A5; font-weight:700;">TOUR PACKAGE EXPIRED</span>'
+                : '<span style="color:var(--brass); font-weight:700;">AWAITING ADVANCE DEPOSIT</span>'
               }
             </span>
           </div>
@@ -1858,28 +2260,34 @@ function renderAdminMasterCard(req, offers, recips, booking, isBooked, hasOffers
 
       <!-- Admin Actions Bar -->
       <div class="admin-actions-bar">
-        <div style="font-size:12px; color:#94a3b8; display:flex; align-items:center; gap:8px;">
-          <span>🛡️ TripMozy Main Platform Admin Oversight</span>
-          <span style="color:#475569;">·</span>
+        <div style="font-size:12px; color:#9CA3AF; display:flex; align-items:center; gap:8px;">
+          <span>TripMozy Main Platform Admin Oversight</span>
+          <span style="color:#4B5563;">·</span>
           <span>tripmozy@gmail.com</span>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
           ${!isBooked && !isReqExpired && firstOffer && !firstOffer.isExpired ? `
             <button type="button" class="btn-admin-pay" onclick="initiateRazorpayPayment('${firstOffer.id}')">
-              💳 Pay Advance (₹${adminTp.payableNowINR.toLocaleString('en-IN')} ${isGatewayPaused ? '· Demo Simulator' : '· Razorpay Live'})
+              Pay Advance (₹${adminTp.payableNowINR.toLocaleString('en-IN')} ${isGatewayPaused ? '· Demo Simulator' : '· Razorpay Live'})
             </button>
           ` : (isReqExpired ? `
-            <div style="font-size:12px; color:#fca5a5; font-weight:700; padding:8px 14px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:8px;">
-              ⏱️ Tour Request Expired · Booking Disabled
+            <div style="font-size:12px; color:#FCA5A5; font-weight:600; padding:8px 14px; background:rgba(155,44,44,0.2); border:1px solid rgba(252,165,165,0.3); border-radius:2px;">
+              Tour Request Expired · Booking Disabled
             </div>
           ` : '')}
           ${isBooked ? `
-            <button type="button" class="btn-admin-print" onclick="window.print()">
-              📄 Print / Download Official Tax Bill &amp; Receipt (PDF)
+            <button type="button" class="btn-admin-pay" onclick="openReceiptModal()">
+              View Official Receipt
+            </button>
+            <a href="${getReceiptDownloadUrls(req, b).downloadUrl}" download="${esc(getReceiptDownloadUrls(req, b).filename)}" class="btn-admin-print tm-pdf-dl-link">
+              Download Receipt (PDF)
+            </a>
+            <button type="button" class="btn-admin-view-toggle" onclick="window.print()">
+              Print Tax Bill
             </button>
           ` : ''}
           <a href="/booking?id=${req.id || req.request_reference}" class="btn-admin-view-toggle">
-            👁️ Preview Regular Customer View
+            Preview Regular Customer View
           </a>
         </div>
       </div>
@@ -1903,7 +2311,7 @@ function renderPortal(data) {
   if (isAdmin) {
     const custAuth = document.getElementById('custAuthHeader');
     if (custAuth) {
-      custAuth.innerHTML = `<span style="font-size:12px;color:#fbbf24;font-weight:700;padding:6px 12px;border-radius:8px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);">🛡️ Admin (tripmozy@gmail.com)</span>`;
+      custAuth.innerHTML = `<span style="font-size:11px;color:var(--ochre-dark);font-weight:700;letter-spacing:0.04em;padding:6px 12px;border-radius:2px;background:var(--ochre-soft);border:1px solid rgba(158,107,48,0.35);">Admin (tripmozy@gmail.com)</span>`;
     }
   }
 
@@ -1933,6 +2341,9 @@ function renderPortal(data) {
     : 'Searching Verified Tour Operators';
 
   const statusClass = isBooked ? 'status-booked' : isCancelled ? 'status-cancelled' : isExpired ? 'status-expired' : hasOffers ? 'status-offers' : 'status-pending';
+  const checkIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>';
+  const xIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  const clockIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
   let html = '';
   if (isAdmin) {
@@ -1943,19 +2354,19 @@ function renderPortal(data) {
     <!-- Stepper -->
     <div class="stepper">
       <div class="step-item ${step1}">
-        <div class="step-circle">1</div>
+        <div class="step-circle">01</div>
         <div class="step-label">Tour Requested</div>
       </div>
       <div class="step-item ${step2}">
-        <div class="step-circle">${isCancelled ? '✕' : isExpired ? '⏱️' : hasOffers ? '✓' : '2'}</div>
+        <div class="step-circle">${isCancelled ? xIcon : isExpired ? clockIcon : hasOffers ? checkIcon : '02'}</div>
         <div class="step-label">${isCancelled ? 'Cancelled' : isExpired ? 'Expired' : hasOffers ? 'Operator Accepted' : 'Searching Operators'}</div>
       </div>
       <div class="step-item ${step3}">
-        <div class="step-circle">3</div>
+        <div class="step-circle">03</div>
         <div class="step-label">Review &amp; Lock Tour</div>
       </div>
       <div class="step-item ${step4}">
-        <div class="step-circle">4</div>
+        <div class="step-circle">04</div>
         <div class="step-label">Confirmed</div>
       </div>
     </div>
@@ -1965,7 +2376,7 @@ function renderPortal(data) {
       <div class="summary-top">
         <div>
           <span class="ref-badge">${esc(req.request_reference)}</span>
-          <h1 style="font-size:22px; font-weight:800; margin-top:8px; color:var(--navy);">
+          <h1 class="summary-heading">
             Tour in ${esc(req.destination)}
           </h1>
         </div>
@@ -1973,50 +2384,53 @@ function renderPortal(data) {
           <div class="status-pill ${statusClass}">${statusLabel}</div>
           ${!isBooked && !isCancelled && !isExpired ? `
             <button type="button" class="btn-cancel-req" onclick="openCancelModal()" title="Cancel this tour request">
-              ✕ Cancel Request
+              ${xIcon}
+              <span>Cancel Request</span>
             </button>
           ` : ''}
         </div>
       </div>
 
       <div class="summary-grid">
-        <div>
+        <div class="summary-cell">
           <div class="sum-label">Tour Dates</div>
-          <div class="sum-val">${fmtDate(req.check_in_date)} → ${fmtDate(req.check_out_date)}</div>
-          <div style="font-size:12px; color:var(--text-muted);">${req.nights + 1} Days / ${req.nights} Night${req.nights > 1 ? 's' : ''}</div>
+          <div class="sum-val">${fmtDate(req.check_in_date)} &rarr; ${fmtDate(req.check_out_date)}</div>
+          <div class="sum-sub">${req.nights + 1} Days / ${req.nights} Night${req.nights > 1 ? 's' : ''}</div>
         </div>
-        <div>
+        <div class="summary-cell">
           <div class="sum-label">Travelers &amp; Setup</div>
           <div class="sum-val">${req.num_adults} Adult${req.num_adults > 1 ? 's' : ''}${req.num_children > 0 ? ` · ${req.num_children} Child` : ''} · ${req.num_rooms} Vehicle / Room</div>
         </div>
-        <div>
+        <div class="summary-cell">
           <div class="sum-label">Your Budget Target</div>
           <div class="sum-val budget">&#8377;${(req.total_budget_paise / 100).toLocaleString('en-IN')}</div>
-          <div style="font-size:11px; color:var(--text-muted);">Max total budget incl. GST</div>
+          <div class="sum-sub">Max total budget incl. GST</div>
         </div>
-        <div>
+        <div class="summary-cell">
           <div class="sum-label">${hasOffers ? 'Assigned Operator' : 'Operators Contacted'}</div>
-          <div class="sum-val" style="${hasOffers ? 'color:#059669; font-weight:800;' : ''}">${hasOffers ? esc(operatorName) : `${recips.length} Verified Partners`}</div>
-          <div style="font-size:11px; color:#059669; font-weight:600;">${hasOffers ? '✓ Exclusivity Locked' : 'Alerted via WhatsApp'}</div>
+          <div class="sum-val" style="${hasOffers ? 'color:var(--sage);' : ''}">${hasOffers ? esc(operatorName) : `${recips.length} Verified Partners`}</div>
+          <div class="sum-sub" style="color:${hasOffers ? 'var(--sage)' : 'var(--ink-muted)'}; font-weight:${hasOffers ? '600' : '400'};">${hasOffers ? 'Exclusivity Locked' : 'Dispatched via Email & WhatsApp'}</div>
         </div>
       </div>
     </div>
 
     ${isExpired ? `
       <!-- Prominent Tour Package Expired Alert Banner -->
-      <div class="expired-alert-banner" style="background:#fef2f2; border:1.5px solid #fca5a5; border-radius:14px; padding:18px 22px; margin-top:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 2px 8px rgba(239,68,68,0.06);">
+      <div class="expired-alert-banner">
         <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:44px; height:44px; border-radius:50%; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight:700;">⏱️</div>
+          <div style="width:42px; height:42px; border-radius:2px; background:#fff; border:1px solid rgba(155,44,44,0.3); color:var(--crimson); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
           <div>
-            <div style="font-weight:800; font-size:16px; color:#991b1b;">Tour Package Booking Window Expired</div>
-            <div style="font-size:13px; color:#7f1d1d; margin-top:2px; line-height:1.4;">
+            <div style="font-weight:700; font-size:15px; color:var(--crimson);">Tour Package Booking Window Expired</div>
+            <div style="font-size:13px; color:var(--ink-secondary); margin-top:2px; line-height:1.45;">
               This tour package quote or travel date has passed its booking validity window and can no longer be held or confirmed.
             </div>
           </div>
         </div>
         <div style="display:flex; gap:10px;">
-          <a href="/smart-tour-booking" style="background:#dc2626; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-weight:700; font-size:13px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(220,38,38,0.25);">
-            <span>+ Submit Fresh Tour Request</span>
+          <a href="/smart-tour-booking" class="btn-primary-link" style="background:var(--crimson); border-color:var(--crimson);">
+            <span>Submit Fresh Tour Request</span>
           </a>
         </div>
       </div>
@@ -2026,22 +2440,20 @@ function renderPortal(data) {
   // If cancelled by customer, show cancellation confirmation card
   if (isCancelled) {
     html += `
-      <div class="cancelled-card" style="background:#fff; border-radius:16px; border:2px solid #fecaca; padding:40px 24px; text-align:center; margin-top:24px; box-shadow:0 4px 20px rgba(239,68,68,0.06);">
-        <div style="width:68px; height:68px; background:#fee2e2; color:#dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 18px; font-weight:700;">✕</div>
-        <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:10px;">This Tour Request is Cancelled</h2>
-        <div style="font-family:monospace; font-size:14px; font-weight:700; background:#f1f5f9; color:#475569; display:inline-block; padding:5px 14px; border-radius:6px; margin-bottom:16px;">
-          ${esc(req.request_reference)}
+      <div class="cancelled-card" style="margin-top:24px; border-color:rgba(155,44,44,0.35);">
+        <div style="width:56px; height:56px; background:var(--crimson-soft); border:1px solid rgba(155,44,44,0.3); color:var(--crimson); border-radius:2px; display:flex; align-items:center; justify-content:center; margin:0 auto 18px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </div>
-        <p style="font-size:15px; color:#64748b; line-height:1.6; max-width:540px; margin:0 auto 24px;">
-          Your tour request for <strong>${esc(req.destination)}</strong> has been cancelled. Verified tour operators have been notified to stop preparing quotes, and no quotes or holds will be processed.
+        <h2 style="font-family:var(--font-serif); font-size:28px; font-weight:600; color:var(--ink); margin-bottom:10px;">This Tour Request is Cancelled</h2>
+        <div class="ref-badge" style="margin-bottom:16px;">${esc(req.request_reference)}</div>
+        <p style="font-size:14px; color:var(--ink-secondary); line-height:1.6; max-width:520px; margin:0 auto 24px;">
+          Your tour request for <strong>${esc(req.destination)}</strong> has been cancelled. Verified tour operators have been notified to stand down, and no quotes or holds will be processed.
         </p>
         <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-          <a href="/smart-tour-booking" class="btn-primary-link" style="background:var(--primary); color:#fff; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px;">
+          <a href="/smart-tour-booking" class="btn-primary-link">
             <span>Plan a New Tour</span>
           </a>
-          <a href="/" class="btn-secondary" style="background:#f1f5f9; color:#334155; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center;">
-            Return to Home
-          </a>
+          <a href="/" class="btn-secondary">Return to Home</a>
         </div>
       </div>
     `;
@@ -2060,18 +2472,20 @@ function renderPortal(data) {
   if (!isExpired) {
     if (hasOffers) {
       html += `
-        <div class="assigned-banner" style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:14px; padding:18px 22px; margin-top:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:0 2px 8px rgba(16,185,129,0.06);">
+        <div class="assigned-banner">
           <div style="display:flex; align-items:center; gap:14px;">
-            <div style="width:44px; height:44px; border-radius:50%; background:#dcfce7; color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; font-weight:700;">✓</div>
+            <div style="width:40px; height:40px; border-radius:2px; background:#fff; border:1px solid rgba(27,94,68,0.3); color:var(--sage); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
             <div>
-              <div style="font-weight:800; font-size:16px; color:#166534;">Tour Operator Assigned · Search Closed</div>
-              <div style="font-size:13px; color:#15803d; margin-top:2px; line-height:1.4;">
-                <strong>${esc(operatorName)}</strong> has accepted your tour request and locked in your custom tour package. The operator search is now closed and this request is exclusively assigned.
+              <div style="font-weight:700; font-size:15px; color:var(--sage);">Tour Operator Assigned · Search Closed</div>
+              <div style="font-size:13px; color:var(--ink-secondary); margin-top:2px; line-height:1.45;">
+                <strong>${esc(operatorName)}</strong> has accepted your tour request and locked your custom tour quote. The operator search is closed with exclusive coordination.
               </div>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:12px; font-weight:700; color:#15803d; background:#dcfce7; padding:6px 14px; border-radius:8px; border:1px solid #bbf7d0;">🔒 Exclusive Lock</span>
+            <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sage); background:#fff; padding:6px 12px; border-radius:2px; border:1px solid rgba(27,94,68,0.28);">Exclusive Lock</span>
           </div>
         </div>
       `;
@@ -2082,13 +2496,13 @@ function renderPortal(data) {
             <div class="live-spinner"></div>
             <div>
               <div class="live-title">Broadcasting to verified tour operators in ${esc(req.destination)}...</div>
-              <div class="live-sub">TripMozy WhatsApp Bot is coordinating. The first tour operator to accept will secure exclusive package coordination.</div>
+              <div class="live-sub">TripMozy Concierge is coordinating. The first tour operator to accept secures exclusive package coordination.</div>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span style="font-size:12px; color:var(--text-muted);" id="tickerText">Auto-checking in 6s...</span>
+            <span style="font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted);" id="tickerText">Auto-checking in 6s...</span>
             <button class="refresh-now-btn" onclick="loadRequest()">Check Now</button>
-            <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">✕ Cancel Request</button>
+            <button class="btn-cancel-req-small" onclick="openCancelModal()" title="Cancel this tour request">Cancel Request</button>
           </div>
         </div>
       `;
@@ -2099,26 +2513,26 @@ function renderPortal(data) {
   html += `
     <div class="section-head">
       <h2>${isExpired ? 'Tour Package Quotes (Expired)' : hasOffers ? 'Your Assigned Tour Package' : 'Waiting for Tour Operator Quote'}</h2>
-      <span class="offer-count-chip" style="${hasOffers ? 'background:#dcfce7; color:#166534; border:1px solid #bbf7d0;' : ''}">${isExpired ? 'Expired' : hasOffers ? 'Exclusively Assigned' : 'Searching...'}</span>
+      <span class="offer-count-chip" style="${hasOffers ? 'background:var(--sage-soft); color:var(--sage); border-color:rgba(27,94,68,0.28);' : ''}">${isExpired ? 'Expired' : hasOffers ? 'Exclusively Assigned' : 'Searching'}</span>
     </div>
   `;
 
   if (offers.length === 0) {
     if (isExpired) {
       html += `
-        <div class="empty-box" style="border: 2px dashed #fca5a5; background: #fffaf0;">
-          <div style="width:64px; height:64px; background:#fee2e2; color:#dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px;">⏱️</div>
-          <div class="empty-title" style="color:#991b1b;">Tour Package Request Expired</div>
-          <div class="empty-desc" style="color:#64748b; max-width:540px; margin:0 auto 20px;">
-            The booking window for this tour request in <strong>${esc(req.destination)}</strong> has expired. Tour operators are no longer submitting quotes for this travel date.
+        <div class="empty-box" style="border-style:dashed; border-color:rgba(155,44,44,0.35);">
+          <div style="width:54px; height:54px; background:var(--crimson-soft); border:1px solid rgba(155,44,44,0.28); color:var(--crimson); border-radius:2px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="empty-title" style="color:var(--crimson);">Tour Package Request Expired</div>
+          <div class="empty-desc" style="margin-bottom:22px;">
+            The booking window for this tour request in <strong>${esc(req.destination)}</strong> has expired. Tour operators are no longer submitting quotes for this departure window.
           </div>
           <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-            <a href="/smart-tour-booking" class="btn-primary-link" style="background:var(--primary); color:#fff; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px;">
-              <span>+ Submit Fresh Tour Request</span>
+            <a href="/smart-tour-booking" class="btn-primary-link">
+              <span>Submit Fresh Tour Request</span>
             </a>
-            <a href="/" class="btn-secondary" style="background:#f1f5f9; color:#334155; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:14px; display:inline-flex; align-items:center;">
-              Return to Home
-            </a>
+            <a href="/" class="btn-secondary">Return to Home</a>
           </div>
         </div>
       `;
@@ -2128,12 +2542,13 @@ function renderPortal(data) {
           <div class="empty-title">Waiting for Tour Operator Quotes</div>
           <div class="empty-desc">
             We've dispatched your tour request to <strong>${recips.length} verified local tour operators</strong> in ${esc(req.destination)}.
-            As soon as operators respond with tailored package pricing and inclusions, their official quotes will appear here automatically.
+            As soon as a vetted operator confirms package pricing and inclusions, their official quote will appear here automatically.
           </div>
-          <div style="margin-top:22px; padding-top:18px; border-top:1px dashed #e2e8f0; display:flex; flex-direction:column; align-items:center; gap:8px;">
-            <div style="font-size:13px; color:#64748b;">Need to change your travel dates, budget, or destination?</div>
+          <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--hairline); display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div style="font-size:13px; color:var(--ink-muted);">Need to adjust your travel dates, budget, or destination?</div>
             <button type="button" class="btn-cancel-waiting" onclick="openCancelModal()">
-              ✕ Cancel This Tour Request
+              ${xIcon}
+              <span>Cancel This Tour Request</span>
             </button>
           </div>
         </div>
@@ -2154,7 +2569,10 @@ function renderOfferCard(o, req) {
   const totalINR = o.total_payable_paise / 100;
   const budgetINR = req.total_budget_paise / 100;
   const savings = Math.max(0, budgetINR - totalINR);
-  const stars = '★'.repeat(o.star_rating || 4) + '☆'.repeat(5 - (o.star_rating || 4));
+  const ratingNum = Number(o.star_rating || 4);
+  const ratingStr = Number.isInteger(ratingNum) ? `${ratingNum}.0` : ratingNum.toFixed(1);
+  const filledStars = Math.min(5, Math.max(0, Math.round(ratingNum)));
+  const stars = '★'.repeat(filledStars) + '☆'.repeat(5 - filledStars);
 
   const tp = o.tourPricing || {
     totalTourINR: totalINR,
@@ -2169,18 +2587,19 @@ function renderOfferCard(o, req) {
       <div class="offer-header">
         <div>
           <div class="hotel-name">${esc(o.property_name)}</div>
-          <div class="hotel-meta">&#8203; ${esc(o.property_city)} · <span class="stars">${stars}</span> (${o.star_rating || 4}.0 Star Tour Operator)</div>
+          <div class="hotel-meta">${esc(o.property_city)} · <span class="stars">${stars}</span> (${ratingStr} Star Tour Operator)</div>
         </div>
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          ${isOfferExpired ? `<div class="expired-tag">⏱️ Tour Package Expired</div>` : ''}
-          ${savings > 0 && !isOfferExpired ? `<div class="savings-badge">✓ &#8377;${savings.toLocaleString('en-IN')} Below Your Budget</div>` : ''}
+          ${isOfferExpired ? `<div class="expired-tag">Tour Package Expired</div>` : ''}
+          ${savings > 0 && !isOfferExpired ? `<div class="savings-badge">&#8377;${savings.toLocaleString('en-IN')} Below Budget</div>` : ''}
         </div>
       </div>
 
       <div class="offer-body">
         <div class="offer-details">
-          <div style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px; margin-bottom:8px;">
-            <span>🔒 Exclusive Accepted Partner</span> · <span>Operator Search Closed</span>
+          <div style="display:inline-flex; align-items:center; gap:6px; background:var(--sage-soft); border:1px solid rgba(27,94,68,0.28); color:var(--sage); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:4px 10px; border-radius:2px; margin-bottom:10px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Exclusive Accepted Partner</span> · <span>Search Closed</span>
           </div>
           <div class="room-name">${esc(o.room_type_name || 'All-Inclusive Tour Package')}</div>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
@@ -2191,46 +2610,46 @@ function renderOfferCard(o, req) {
           <div class="policy-tag">
             ${esc(o.cancellation_terms || 'Free cancellation up to 48 hours before tour start')}
           </div>
-          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 12px; margin-top:10px; font-size:12px;">
-            <div style="font-weight:700; color:#166534; margin-bottom:2px;">Easy Payment Terms:</div>
-            <div style="color:#15803d;">Pay <strong>&#8377;${tp.payableNowINR.toLocaleString('en-IN')} (30% Advance + 5% GST)</strong> to TripMozy to lock this tour.</div>
-            <div style="color:#15803d; margin-top:2px;">Remaining <strong>&#8377;${tp.remainingBalanceINR.toLocaleString('en-IN')} (70%)</strong> can be paid on tour arrival or on TripMozy!</div>
+          <div style="background:var(--sage-soft); border:1px solid rgba(27,94,68,0.22); border-radius:2px; padding:11px 14px; margin-top:12px; font-size:12.5px; color:var(--ink-secondary);">
+            <div style="font-weight:700; color:var(--sage); margin-bottom:3px;">Escrow Split Payment Schedule</div>
+            <div>Pay <strong>&#8377;${tp.payableNowINR.toLocaleString('en-IN')} (30% Advance + 5% GST)</strong> into TripMozy Escrow to lock this package.</div>
+            <div style="margin-top:2px;">Remaining <strong>&#8377;${tp.remainingBalanceINR.toLocaleString('en-IN')} (70%)</strong> can be settled upon arrival or online.</div>
           </div>
           ${(o.vendor && o.vendor.contactPhone) ? `
-          <div style="background:#fef3c7; border:1.5px solid #f59e0b; border-radius:8px; padding:10px 12px; margin-top:8px; font-size:12px; color:#92400e;">
-            <div style="font-weight:800; margin-bottom:2px;">🛡️ Operator Contact (Admin Unmasked):</div>
+          <div style="background:var(--ochre-soft); border:1px solid rgba(158,107,48,0.3); border-radius:2px; padding:11px 14px; margin-top:10px; font-size:12px; color:var(--ochre-dark);">
+            <div style="font-weight:700; margin-bottom:3px;">Operator Contact (Admin Unmasked)</div>
             <div>Manager: <strong>${esc(o.vendor.contactPerson)}</strong></div>
-            <div>Phone: <a href="tel:${esc(o.vendor.contactPhone)}" style="color:#b45309; font-weight:700;">${esc(o.vendor.contactPhone)}</a> · Email: <a href="mailto:${esc(o.vendor.contactEmail)}" style="color:#b45309; font-weight:700;">${esc(o.vendor.contactEmail)}</a></div>
+            <div>Phone: <a href="tel:${esc(o.vendor.contactPhone)}" style="color:var(--ink); font-weight:700;">${esc(o.vendor.contactPhone)}</a> · Email: <a href="mailto:${esc(o.vendor.contactEmail)}" style="color:var(--ink); font-weight:700;">${esc(o.vendor.contactEmail)}</a></div>
           </div>
           ` : `
-          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:8px 12px; margin-top:8px; font-size:12px; color:#1e40af;">
-            🔒 <strong>Operator Contact:</strong> Direct operator phone number &amp; manager contact will be released on your official PDF invoice immediately after payment.
+          <div style="background:var(--paper); border:1px solid var(--hairline); border-radius:2px; padding:9px 12px; margin-top:10px; font-size:12px; color:var(--ink-secondary);">
+            <strong>Operator Contact Release:</strong> Direct operator phone number &amp; manager details appear on your official receipt immediately after advance escrow settlement.
           </div>
           `}
-          <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">
-            ${isOfferExpired ? '<span style="color:#dc2626; font-weight:700;">⏱️ This tour package quote has expired</span>' : 'Guaranteed quote valid for 4 hours from dispatch'}
+          <div style="font-size:12px; color:var(--ink-muted); margin-top:10px;">
+            ${isOfferExpired ? '<span style="color:var(--crimson); font-weight:700;">This tour package quote has expired</span>' : 'Guaranteed quote valid for 4 hours from dispatch'}
           </div>
         </div>
 
         <div class="offer-pricing-box">
           <div>
-            <div class="price-total" style="${isOfferExpired ? 'color:#94a3b8; text-decoration:line-through;' : ''}">&#8377;${totalINR.toLocaleString('en-IN')}</div>
+            <div class="price-total" style="${isOfferExpired ? 'color:var(--ink-muted); text-decoration:line-through;' : ''}">&#8377;${totalINR.toLocaleString('en-IN')}</div>
             <div class="price-sub">Total tour price for ${o.total_nights + 1} Days / ${o.total_nights} Nights (${o.total_rooms} vehicle/setup)</div>
-            <div style="font-size:14px; font-weight:800; color:${isOfferExpired ? '#94a3b8' : '#059669'}; margin-top:6px;">
+            <div style="font-family:var(--font-mono); font-size:14px; font-weight:700; color:${isOfferExpired ? 'var(--ink-muted)' : 'var(--sage)'}; margin-top:10px;">
               Payable Now: &#8377;${tp.payableNowINR.toLocaleString('en-IN')}
             </div>
-            <div style="font-size:11px; color:#64748b; margin-top:2px;">
-              (30% Advance &#8377;${tp.advanceBaseINR.toLocaleString('en-IN')} + 5% GST &#8377;${tp.advanceGstINR.toLocaleString('en-IN')} to TripMozy)
+            <div style="font-size:11.5px; color:var(--ink-muted); margin-top:3px;">
+              30% Advance &#8377;${tp.advanceBaseINR.toLocaleString('en-IN')} + 5% GST &#8377;${tp.advanceGstINR.toLocaleString('en-IN')}
             </div>
-            <div style="font-size:11px; color:#64748b; margin-top:2px;">
-              Remaining &#8377;${tp.remainingBalanceINR.toLocaleString('en-IN')} due at hotel or online
+            <div style="font-size:11.5px; color:var(--ink-secondary); margin-top:4px;">
+              Balance &#8377;${tp.remainingBalanceINR.toLocaleString('en-IN')} due at hotel or online
             </div>
           </div>
           ${isOfferExpired ? `
             <button class="book-btn expired-btn" disabled title="This tour package has expired and cannot be booked">
-              <span>⏱️ Tour Package Expired</span>
+              <span>Tour Package Expired</span>
             </button>
-            <div style="font-size:11px; color:#dc2626; font-weight:700; margin-top:6px; text-align:center;">Booking validity closed</div>
+            <div style="font-size:11px; color:var(--crimson); font-weight:600; margin-top:6px; text-align:center;">Booking validity closed</div>
           ` : `
             <button class="book-btn" onclick="openCheckoutModal('${o.id}')">
               <span>Book Tour (Pay &#8377;${tp.payableNowINR.toLocaleString('en-IN')})</span>
@@ -2402,14 +2821,15 @@ function startHoldTimer(expiresAt) {
       clearInterval(activeHoldTimer);
       if (el) {
         el.textContent = 'EXPIRED';
-        el.style.color = '#dc2626';
+        el.style.color = '#9B2C2C';
       }
       const payBtn = document.getElementById('confirmPayBtn');
       if (payBtn) {
         payBtn.disabled = true;
-        payBtn.style.background = '#94a3b8';
+        payBtn.style.background = '#767B84';
+        payBtn.style.borderColor = '#767B84';
         payBtn.style.cursor = 'not-allowed';
-        payBtn.innerHTML = '<span>⏱️ Inventory Hold Expired</span>';
+        payBtn.innerHTML = '<span>Inventory Hold Expired</span>';
       }
       alert('Your 15-minute hold has expired. Please select the offer again.');
       closeCheckoutModal();
@@ -2453,28 +2873,28 @@ function updateGatewayUI(cfg) {
 
   if (isPaused) {
     if (badge) {
-      badge.style.background = '#fef3c7';
-      badge.style.borderColor = '#fde68a';
-      badge.style.color = '#92400e';
+      badge.style.background = '#F6EFE6';
+      badge.style.borderColor = 'rgba(158, 107, 48, 0.35)';
+      badge.style.color = '#7D5220';
     }
     if (badgeText) badgeText.textContent = 'Demo Sandbox Mode (Live Paused)';
     if (demoBanner) demoBanner.style.display = 'flex';
     if (upiTitle) upiTitle.textContent = 'UPI (Simulated Demo · Google Pay / PhonePe / Paytm)';
-    if (upiSub) upiSub.textContent = 'Instant 1-click sandbox authorization to TripMozy Account';
+    if (upiSub) upiSub.textContent = 'Instant 1-click sandbox authorization to TripMozy Escrow';
     if (cardTitle) cardTitle.textContent = 'Credit / Debit Card (Simulated Demo)';
     if (cardSub) cardSub.textContent = 'Test Visa •••• 4242 / Mastercard sandbox authorization';
     if (bankTitle) bankTitle.textContent = 'Net Banking (Simulated Demo)';
     if (bankSub) bankSub.textContent = 'Test All Major Indian Banks sandbox authorization';
   } else {
     if (badge) {
-      badge.style.background = '#eff6ff';
-      badge.style.borderColor = '#bfdbfe';
-      badge.style.color = '#1e40af';
+      badge.style.background = '#EBF3EF';
+      badge.style.borderColor = 'rgba(27, 94, 68, 0.3)';
+      badge.style.color = '#1B5E44';
     }
     if (badgeText) badgeText.textContent = `Razorpay Live (${RAZORPAY_LIVE_KEY})`;
     if (demoBanner) demoBanner.style.display = 'none';
     if (upiTitle) upiTitle.textContent = 'UPI (Google Pay, PhonePe, Paytm, Any UPI)';
-    if (upiSub) upiSub.textContent = 'Instant confirmation directly via Razorpay to TripMozy Account';
+    if (upiSub) upiSub.textContent = 'Instant confirmation directly via Razorpay to TripMozy Escrow';
     if (cardTitle) cardTitle.textContent = 'Credit / Debit Card';
     if (cardSub) cardSub.textContent = 'Visa, Mastercard, RuPay (Zero convenience fees via Razorpay)';
     if (bankTitle) bankTitle.textContent = 'Net Banking';
@@ -2675,7 +3095,7 @@ async function initiateRazorpayPayment(offerId) {
         holdId: holdId
       },
       theme: {
-        color: '#2563eb'
+        color: '#14171C'
       },
       handler: async function (response) {
         const paymentRef = response.razorpay_payment_id || `pay_rzp_live_${Date.now()}`;
@@ -2788,7 +3208,7 @@ async function executeBookingConfirmation() {
         holdId: activeHoldId
       },
       theme: {
-        color: '#2563eb'
+        color: '#14171C'
       },
       handler: async function (response) {
         btn.innerHTML = '<span>Verifying &amp; Confirming Booking...</span>';
@@ -2865,6 +3285,9 @@ function renderConfirmedVoucher(req, offers, booking) {
   const paymentRefStr = terms.paymentReference || 'DIRECT_VERIFIED';
   const receiptNum = `TM-INV-${req.request_reference ? req.request_reference.replace('TM-REQ-', '') : '2026'}`;
 
+  const receiptUrls = getReceiptDownloadUrls(req, b);
+  setTimeout(() => verifyServerPdfOrBindFallback(receiptUrls), 50);
+
   return `
     <div class="voucher-card bill-card">
       <!-- Official Bill Header -->
@@ -2887,7 +3310,7 @@ function renderConfirmedVoucher(req, offers, booking) {
           </div>
           <div>
             <span class="meta-lbl">Booking Reference:</span>
-            <strong class="meta-val" style="color:#60a5fa; font-family:monospace;">${esc(req.request_reference)}</strong>
+            <strong class="meta-val" style="color:var(--brass); font-family:var(--font-mono);">${esc(req.request_reference)}</strong>
           </div>
           <div>
             <span class="meta-lbl">Payment Date:</span>
@@ -2895,8 +3318,26 @@ function renderConfirmedVoucher(req, offers, booking) {
           </div>
           <div>
             <span class="meta-lbl">Payment Reference:</span>
-            <strong class="meta-val" style="font-family:monospace;">${esc(paymentRefStr)} ${paymentRefStr.includes('demo') ? '<span style="font-size:10px; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:4px;">Demo Sandbox</span>' : ''}</strong>
+            <strong class="meta-val" style="font-family:var(--font-mono);">${esc(paymentRefStr)} ${paymentRefStr.includes('demo') ? '<span style="display:inline-block; white-space:nowrap; font-size:10px; background:rgba(201,164,103,0.18); color:var(--brass); border:1px solid rgba(201,164,103,0.4); padding:2px 6px; border-radius:2px; font-weight:600; margin-left:4px;">Demo Sandbox</span>' : ''}</strong>
           </div>
+        </div>
+      </div>
+
+      <!-- Quick Receipt Action Bar (Visible immediately on confirmation) -->
+      <div class="receipt-quick-bar print-hide">
+        <div>
+          <div style="font-size:12px; font-weight:700; color:var(--ink);">Official TripMozy Receipt &amp; Tax Invoice Ready</div>
+          <div style="font-size:11.5px; color:var(--ink-secondary);">Preview formatted tax invoice or download an official vector PDF copy for your travel records.</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" onclick="openReceiptModal()" class="btn-view-receipt">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>View Receipt</span>
+          </button>
+          <a href="${esc(receiptUrls.downloadUrl)}" download="${esc(receiptUrls.filename)}" class="btn-print-bill tm-pdf-dl-link" style="text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download Receipt PDF</span>
+          </a>
         </div>
       </div>
 
@@ -2969,26 +3410,26 @@ function renderConfirmedVoucher(req, offers, booking) {
                 <td style="text-align:right; font-weight:800; font-size:15px; color:var(--navy);">&#8377;${totalTourINR.toLocaleString('en-IN')}</td>
               </tr>
               <tr class="sub-row">
-                <td style="padding-left:24px; color:#475569;">30% Tour Advance Deposit (Base)</td>
-                <td style="text-align:right; color:#475569;">&#8377;${advanceBaseINR.toLocaleString('en-IN')}</td>
+                <td style="padding-left:24px; color:var(--ink-secondary);">30% Tour Advance Deposit (Base)</td>
+                <td style="text-align:right; color:var(--ink-secondary);">&#8377;${advanceBaseINR.toLocaleString('en-IN')}</td>
               </tr>
               <tr class="sub-row">
-                <td style="padding-left:24px; color:#475569;">5% GST on Tour Advance (Govt. of India)</td>
-                <td style="text-align:right; color:#475569;">&#8377;${advanceGstINR.toLocaleString('en-IN')}</td>
+                <td style="padding-left:24px; color:var(--ink-secondary);">5% GST on Tour Advance (Govt. of India)</td>
+                <td style="text-align:right; color:var(--ink-secondary);">&#8377;${advanceGstINR.toLocaleString('en-IN')}</td>
               </tr>
               <tr class="received-row">
                 <td>
-                  <div style="font-weight:800; font-size:15px; color:#065f46;">Total Payment Received by TripMozy.com</div>
-                  <div style="font-size:11px; font-weight:600; color:#059669; margin-top:2px;">Status: SUCCESS · Received &amp; Secured in TripMozy Escrow</div>
+                  <div style="font-weight:700; font-size:14.5px; color:var(--sage);">Total Payment Received by TripMozy.com</div>
+                  <div style="font-size:11px; font-weight:600; color:var(--sage); margin-top:2px;">Status: SUCCESS · Received &amp; Secured in TripMozy Escrow</div>
                 </td>
-                <td style="text-align:right; font-weight:800; font-size:18px; color:#059669;">&#8377;${advancePaidINR.toLocaleString('en-IN')}</td>
+                <td style="text-align:right; font-weight:700; font-size:18px; color:var(--sage);">&#8377;${advancePaidINR.toLocaleString('en-IN')}</td>
               </tr>
               <tr class="remaining-row">
                 <td>
-                  <div style="font-weight:800; font-size:14px; color:var(--navy);">Remaining 70% Balance Due</div>
-                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${isOnlineOption ? 'Scheduled to pay online via TripMozy before departure' : 'Scheduled to pay directly to Tour Operator (' + esc(vendorName) + ') upon arrival'}</div>
+                  <div style="font-weight:700; font-size:14px; color:var(--ink);">Remaining 70% Balance Due</div>
+                  <div style="font-size:11px; color:var(--ink-muted); margin-top:2px;">${isOnlineOption ? 'Scheduled to pay online via TripMozy before departure' : 'Scheduled to pay directly to Tour Operator (' + esc(vendorName) + ') upon arrival'}</div>
                 </td>
-                <td style="text-align:right; font-weight:800; font-size:15px; color:var(--navy);">&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</td>
+                <td style="text-align:right; font-weight:700; font-size:15px; color:var(--ink);">&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</td>
               </tr>
             </tbody>
           </table>
@@ -2996,17 +3437,26 @@ function renderConfirmedVoucher(req, offers, booking) {
 
         <!-- Escrow Protection & Trust Notice -->
         <div class="bill-trust-box">
-          <div style="font-weight:800; color:#1e40af; font-size:13px; margin-bottom:4px;">TripMozy Escrow Protection &amp; Booking Guarantee:</div>
-          <div>• Your advance payment of <strong>&#8377;${advancePaidINR.toLocaleString('en-IN')}</strong> is safely received and held in the official <strong>TripMozy Escrow Account</strong> until your tour commences.</div>
-          <div>• For itinerary coordination, pickup points, or custom requests, call your tour operator directly at <a href="tel:${cleanVendorPhone}" style="color:#2563eb; font-weight:700; text-decoration:none;">${esc(vendorPhone)}</a>.</div>
-          <div>• Please present a government-issued photo ID and this Tour Booking Reference (<strong>${esc(req.request_reference)}</strong>) to your driver upon tour commencement.</div>
+          <div style="font-weight:700; color:var(--ink); font-size:13px; margin-bottom:4px;">TripMozy Escrow Protection &amp; Booking Guarantee:</div>
+          <div>&bull; Your advance payment of <strong>&#8377;${advancePaidINR.toLocaleString('en-IN')}</strong> is safely received and held in the official <strong>TripMozy Escrow Account</strong> until your tour commences.</div>
+          <div>&bull; For itinerary coordination, pickup points, or custom requests, call your tour operator directly at <a href="tel:${cleanVendorPhone}" style="color:var(--ochre-dark); font-weight:700; text-decoration:none;">${esc(vendorPhone)}</a>.</div>
+          <div>&bull; Please present a government-issued photo ID and this Tour Booking Reference (<strong>${esc(req.request_reference)}</strong>) to your driver upon tour commencement.</div>
         </div>
 
         <!-- Bill Footer Actions -->
         <div class="bill-actions print-hide">
-          <button onclick="window.print()" class="btn-print-bill">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-            Print / Download Official Bill (PDF)
+          <button type="button" onclick="openReceiptModal()" class="btn-view-receipt">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>View Receipt</span>
+          </button>
+
+          <a href="${esc(receiptUrls.downloadUrl)}" download="${esc(receiptUrls.filename)}" class="btn-print-bill tm-pdf-dl-link" style="text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download Receipt PDF</span>
+          </a>
+
+          <button type="button" onclick="window.print()" class="btn-plan-new" style="background:transparent; cursor:pointer;">
+            Print Bill
           </button>
 
           <a href="tel:${cleanVendorPhone}" class="btn-call-operator">
@@ -3027,17 +3477,18 @@ function renderConfirmedVoucher(req, offers, booking) {
 function renderLookupScreen() {
   document.getElementById('app').innerHTML = `
     <div class="lookup-card">
-      <div style="width:56px; height:56px; background:#eff6ff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <div style="width:52px; height:52px; background:var(--ochre-soft); border:1px solid rgba(158,107,48,0.28); border-radius:2px; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; color:var(--ochre-dark);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </div>
-      <h2 style="font-size:22px; font-weight:800; color:var(--navy); margin-bottom:6px;">Track Your Tour &amp; Booking</h2>
-      <p style="font-size:14px; color:var(--text-muted);">Enter your Tour Request Reference or Booking ID (e.g. TM-REQ-... or TM-BKG-...) to view live quotes or your confirmed booking bill.</p>
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; color:var(--ochre-dark); margin-bottom:6px;">Traveler Dossier Lookup</div>
+      <h2 style="font-family:var(--font-serif); font-size:30px; font-weight:600; color:var(--ink); margin-bottom:8px;">Track Your Tour &amp; Booking</h2>
+      <p style="font-size:14px; color:var(--ink-secondary); line-height:1.6;">Enter your Tour Request Reference or Booking ID (for example <code style="font-family:var(--font-mono);">TM-REQ-...</code> or <code style="font-family:var(--font-mono);">TM-BKG-...</code>) to inspect live quotes or your confirmed escrow receipt.</p>
       <input type="text" id="lookupInput" class="lookup-input" placeholder="TM-REQ-2026... or TM-BKG-2026...">
       <button class="book-btn" onclick="doLookup()">
         <span>Track Tour / View Booking</span>
       </button>
-      <div style="margin-top:20px; font-size:13px;">
-        Don't have a tour request yet? <a href="/smart-tour-booking" style="color:var(--primary); font-weight:700;">Submit a tour request</a>
+      <div style="margin-top:20px; font-size:13px; color:var(--ink-muted);">
+        Starting a new itinerary? <a href="/smart-tour-booking" style="color:var(--ochre-dark); font-weight:700; text-decoration:none; border-bottom:1px solid var(--ochre);">Commission a tour request</a>
       </div>
     </div>
   `;
@@ -3069,12 +3520,16 @@ async function doLookup() {
 function renderErrorScreen(msg) {
   document.getElementById('app').innerHTML = `
     <div class="lookup-card">
-      <div style="width:56px; height:56px; background:#fef2f2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <div style="width:52px; height:52px; background:var(--crimson-soft); border:1px solid rgba(155,44,44,0.28); border-radius:2px; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; color:var(--crimson);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
       </div>
-      <h2 style="font-size:20px; font-weight:800; color:var(--navy); margin-bottom:6px;">Notice</h2>
-      <p style="font-size:14px; color:var(--text-muted); margin-bottom:18px;">${esc(msg)}</p>
-      <a href="/smart-tour-booking" class="book-btn" style="text-decoration:none;">Create New Tour Request</a>
+      <h2 style="font-family:var(--font-serif); font-size:28px; font-weight:600; color:var(--ink); margin-bottom:8px;">Dossier Lookup Notice</h2>
+      <p style="font-size:14px; color:var(--ink-secondary); margin-bottom:18px;">${esc(msg)}</p>
+      <input type="text" id="lookupInput" class="lookup-input" placeholder="Enter another TM-REQ-... or TM-BKG-... reference">
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="book-btn" onclick="doLookup()">Search Another Reference</button>
+        <a href="/smart-tour-booking" class="btn-secondary" style="width:100%;">Create New Tour Request</a>
+      </div>
     </div>
   `;
 }
@@ -3152,6 +3607,304 @@ async function executeCancelRequest() {
   }
 }
 
+// ── Official TripMozy Receipt Viewer & Direct Synchronous PDF Download ────────
+function getReceiptAccessContext(reqOverride = null, bookingOverride = null) {
+  const b = bookingOverride || (requestData && requestData.booking) || null;
+  const req = reqOverride || (requestData && requestData.request) || {};
+  const targetId = (b && (b.booking_reference || b.id)) || req.request_reference || req.id || requestId || '';
+  const urlParams = new URLSearchParams(window.location.search);
+  const curToken = urlParams.get('token')
+    || localStorage.getItem('tm_latest_booking_token')
+    || getCookie('tm_latest_booking_token')
+    || localStorage.getItem('tm_latest_request_token')
+    || getCookie('tm_latest_request_token')
+    || '';
+  const adminToken = localStorage.getItem('tm_session_token') || getCookie('tm_session_token') || '';
+  return { targetId, curToken, adminToken };
+}
+
+function getReceiptDownloadUrls(reqOverride = null, bookingOverride = null) {
+  const { targetId, curToken, adminToken } = getReceiptAccessContext(reqOverride, bookingOverride);
+  const req = reqOverride || (requestData && requestData.request) || {};
+  const reqRef = req.request_reference || targetId || '2026';
+  const invoiceNum = `TM-INV-${String(reqRef).replace(/^TM-REQ-/, '')}`;
+  const filename = `TripMozy-Receipt-${invoiceNum}.pdf`;
+  const params = new URLSearchParams();
+  if (curToken) params.set('token', curToken);
+  if (adminToken) params.set('auth', adminToken);
+  const qs = params.toString();
+  const basePath = `/api/bookings/${encodeURIComponent(targetId || reqRef)}/receipt.pdf`;
+  return {
+    targetId,
+    invoiceNum,
+    filename,
+    downloadUrl: `${basePath}?download=1${qs ? '&' + qs : ''}`,
+    viewUrl: `${basePath}?view=1${qs ? '&' + qs : ''}`
+  };
+}
+
+// Lightweight client-side pure vector PDF fallback when viewing cached/offline booking
+function generateClientFallbackPdfDataUri() {
+  if (!requestData || !requestData.request) return null;
+  const req = requestData.request;
+  const offers = requestData.offers || [];
+  const b = requestData.booking || null;
+  const terms = (b && b.terms_snapshot) ? b.terms_snapshot : {};
+  const tp = terms.tourPricing || (offers[0] && offers[0].tourPricing) || {};
+  const totalINR = tp.totalTourINR || Math.round(((b && b.total_amount_paise) || req.total_budget_paise || 0) / 100);
+  const advBase = terms.advanceBaseINR || tp.advanceBaseINR || Math.round(totalINR * 0.30);
+  const advGst = terms.advanceGstINR || tp.advanceGstINR || Math.round(advBase * 0.05);
+  const advPaid = tp.payableNowINR || (advBase + advGst);
+  const remBal = tp.remainingBalanceINR || Math.max(0, totalINR - advBase);
+  const reqRef = req.request_reference || req.id || 'TM-REQ';
+  const bkgRef = (b && b.booking_reference) || reqRef;
+  const invNum = `TM-INV-${String(reqRef).replace(/^TM-REQ-/, '')}`;
+  const vendorSnap = terms.vendorSnapshot || {};
+  const firstOffer = offers[0] || null;
+  const vendorName = (b && b.vendor && b.vendor.businessName) || vendorSnap.businessName || (firstOffer && firstOffer.property_name) || 'TripMozy Verified Operator';
+  const vendorPhone = (b && b.vendor && b.vendor.contactPhone) || vendorSnap.contactPhone || (firstOffer && firstOffer.vendor_contact_phone) || '+91 98765 43210';
+
+  const clean = (s) => String(s || '-').replace(/₹/g, 'Rs. ').replace(/[^\x20-\x7E]/g, ' ').replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  const lines = [
+    ['F2', 18, 48, 780, 'TripMozy.com - Official Tour Receipt'],
+    ['F1', 10, 48, 758, `Invoice: ${invNum}   |   Booking: ${bkgRef}`],
+    ['F1', 10, 48, 740, `Payment Ref: ${terms.paymentReference || 'CONFIRMED'}   |   Status: ESCROW PAID`],
+    ['F2', 11, 48, 706, `Traveler: ${req.guest_name || 'Traveler'} (${req.guest_phone || '-'})`],
+    ['F1', 10, 48, 690, `Email: ${req.guest_email || '-'}`],
+    ['F2', 11, 48, 662, `Assigned Operator: ${vendorName}`],
+    ['F1', 10, 48, 646, `Operator Contact: ${vendorPhone}`],
+    ['F1', 10, 48, 616, `Destination: ${req.destination || '-'} (${req.check_in_date || ''} -> ${req.check_out_date || ''})`],
+    ['F1', 11, 48, 582, `Total Tour Package:         Rs. ${totalINR.toLocaleString('en-IN')}`],
+    ['F1', 10, 48, 564, `30% Advance Deposit Base:   Rs. ${advBase.toLocaleString('en-IN')}`],
+    ['F1', 10, 48, 548, `5% GST (Govt. of India):    Rs. ${advGst.toLocaleString('en-IN')}`],
+    ['F2', 12, 48, 524, `Total Paid to TripMozy:     Rs. ${advPaid.toLocaleString('en-IN')}`],
+    ['F2', 11, 48, 502, `Remaining 70% Balance Due:  Rs. ${remBal.toLocaleString('en-IN')}`],
+    ['F1', 9,  48, 464, 'Electronically issued by TripMozy Escrow Desk - Valid Official Booking Dossier.']
+  ];
+  const stream = lines.map(([f, sz, x, y, txt]) => `BT /${f} ${sz} Tf 0.08 0.09 0.11 rg 1 0 0 1 ${x} ${y} Tm (${clean(txt)}) Tj ET`).join('\n');
+  const objs = [
+    '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n',
+    '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n',
+    '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>\nendobj\n',
+    `4 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj\n`,
+    '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n',
+    '6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n'
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offs = [0];
+  for (const o of objs) { offs.push(pdf.length); pdf += o; }
+  const xrefPos = pdf.length;
+  pdf += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i < offs.length; i++) pdf += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+  pdf += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF\n`;
+  return 'data:application/pdf;base64,' + btoa(pdf);
+}
+
+let cachedFallbackPdfUri = null;
+async function verifyServerPdfOrBindFallback(urls) {
+  try {
+    const checkUrl = urls.downloadUrl.replace('/receipt.pdf?', '/receipt?');
+    const res = await fetch(checkUrl, { method: 'GET' });
+    if (res.ok) return;
+  } catch (_) {}
+  // Server missed booking record (e.g. cold serverless DB without token) — bind offline vector PDF
+  try {
+    cachedFallbackPdfUri = generateClientFallbackPdfDataUri();
+    if (cachedFallbackPdfUri) {
+      document.querySelectorAll('.tm-pdf-dl-link').forEach((el) => {
+        el.href = cachedFallbackPdfUri;
+        el.setAttribute('download', urls.filename);
+      });
+    }
+  } catch (_) {}
+}
+
+function openReceiptModal() {
+  if (!requestData || !requestData.request) return;
+  const modal = document.getElementById('receiptViewerModal');
+  const bodyEl = document.getElementById('receiptViewerBody');
+  const invEl = document.getElementById('rvInvoiceNum');
+  const rawPdfLink = document.getElementById('rvRawPdfLink');
+  const dlPdfLink = document.getElementById('rvDownloadPdfBtn');
+  if (!modal || !bodyEl) return;
+
+  const req = requestData.request;
+  const offers = requestData.offers || [];
+  const b = requestData.booking || null;
+  const terms = (b && b.terms_snapshot) ? b.terms_snapshot : {};
+  const tourPricing = terms.tourPricing || (offers[0] && offers[0].tourPricing) || null;
+  const totalTourINR = tourPricing ? tourPricing.totalTourINR : (b ? b.total_amount_paise / 100 : req.total_budget_paise / 100);
+  const advancePaidINR = tourPricing ? tourPricing.payableNowINR : Math.round(totalTourINR * 0.315);
+  const advanceBaseINR = terms.advanceBaseINR || Math.round(advancePaidINR / 1.05);
+  const advanceGstINR = terms.advanceGstINR || (advancePaidINR - advanceBaseINR);
+  const remainingBalanceINR = tourPricing ? tourPricing.remainingBalanceINR : Math.round(totalTourINR * 0.70);
+  const isOnlineOption = terms.remainingPaymentOption === 'tripmozy_online';
+  const vendorSnap = terms.vendorSnapshot || {};
+  const firstOffer = offers[0] || null;
+
+  const vendorName = (b && b.vendor && b.vendor.businessName) || vendorSnap.businessName || (b && b.vendor_business_name) || (firstOffer && (firstOffer.vendor?.businessName || firstOffer.vendor_business_name || firstOffer.property_name)) || (b && b.property_name) || 'TripMozy Verified Tour Operator';
+  const vendorPhone = (b && b.vendor && b.vendor.contactPhone) || vendorSnap.contactPhone || (b && b.vendor_contact_phone) || (firstOffer && (firstOffer.vendor?.contactPhone || firstOffer.vendor_contact_phone)) || '+91 98765 43210';
+  const vendorEmail = (b && b.vendor && b.vendor.contactEmail) || vendorSnap.contactEmail || (b && b.vendor_contact_email) || (firstOffer && (firstOffer.vendor?.contactEmail || firstOffer.vendor_contact_email)) || 'partners@tripmozy.com';
+  const vendorPerson = (b && b.vendor && b.vendor.contactPerson) || vendorSnap.contactPerson || (b && b.vendor_contact_person) || (firstOffer && (firstOffer.vendor?.contactPerson || firstOffer.vendor_contact_person)) || 'Tour Manager';
+  const bookingRef = (b && b.booking_reference) || req.request_reference;
+  const receiptNum = `TM-INV-${req.request_reference ? req.request_reference.replace('TM-REQ-', '') : '2026'}`;
+  const paymentRefStr = terms.paymentReference || (b && b.payment_reference) || 'DIRECT_VERIFIED';
+  const paymentDateStr = terms.confirmedAt ? fmtDate(terms.confirmedAt.split('T')[0]) : fmtDate(new Date().toISOString().split('T')[0]);
+
+  if (invEl) invEl.textContent = receiptNum;
+
+  const urls = getReceiptDownloadUrls(req, b);
+  if (dlPdfLink) {
+    dlPdfLink.href = cachedFallbackPdfUri || urls.downloadUrl;
+    dlPdfLink.setAttribute('download', urls.filename);
+  }
+  if (rawPdfLink) {
+    rawPdfLink.href = cachedFallbackPdfUri || urls.viewUrl;
+  }
+
+  bodyEl.innerHTML = `
+    <div class="receipt-paper-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; padding-bottom:18px; border-bottom:2px solid var(--ink);">
+        <div>
+          <div style="font-family:var(--font-serif); font-size:28px; font-weight:700; color:var(--ink); line-height:1;">Trip<span style="color:var(--ochre);">Mozy</span>.com</div>
+          <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.14em; color:var(--ochre-dark); margin-top:6px;">Official Payment Receipt &amp; Escrow Tax Invoice (SAC 998552)</div>
+        </div>
+        <div style="text-align:right;">
+          <span style="display:inline-block; background:var(--sage-soft); color:var(--sage); border:1px solid rgba(27,94,68,0.35); padding:4px 10px; border-radius:2px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Paid &amp; Escrow Confirmed</span>
+          <div style="font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--ink); margin-top:6px;">${esc(receiptNum)}</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; background:var(--paper); border:1px solid var(--hairline); padding:12px 14px; margin:16px 0;">
+        <div><div style="font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-muted);">Booking Reference</div><div style="font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--ink); margin-top:2px;">${esc(bookingRef)}</div></div>
+        <div><div style="font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-muted);">Request Reference</div><div style="font-family:var(--font-mono); font-size:12px; font-weight:600; color:var(--ink); margin-top:2px;">${esc(req.request_reference)}</div></div>
+        <div><div style="font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-muted);">Payment Date</div><div style="font-size:12px; font-weight:700; color:var(--ink); margin-top:2px;">${paymentDateStr}</div></div>
+        <div><div style="font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-muted);">Payment Reference</div><div style="font-family:var(--font-mono); font-size:11.5px; font-weight:600; color:var(--ink); margin-top:2px; overflow-wrap:anywhere;">${esc(paymentRefStr)}</div></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:14px; margin-bottom:16px;">
+        <div style="background:var(--paper); border:1px solid var(--hairline); padding:14px 16px;">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--ink-muted); margin-bottom:6px;">Billed To (Traveler)</div>
+          <div style="font-family:var(--font-serif); font-size:20px; font-weight:600; color:var(--ink); margin-bottom:6px;">${esc(req.guest_name)}</div>
+          <div style="font-size:12.5px; color:var(--ink-secondary);">Phone: <strong style="font-family:var(--font-mono);">${esc(req.guest_phone)}</strong></div>
+          <div style="font-size:12.5px; color:var(--ink-secondary);">Email: ${esc(req.guest_email)}</div>
+          <div style="font-size:12.5px; color:var(--ink-secondary);">Destination: <strong>${esc(req.destination)}</strong> (${fmtDate(req.check_in_date)} &rarr; ${fmtDate(req.check_out_date)})</div>
+        </div>
+        <div style="background:#fff; border:1px solid var(--ink); padding:14px 16px;">
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--ochre-dark); margin-bottom:6px;">Assigned Tour Operator</div>
+          <div style="font-family:var(--font-serif); font-size:20px; font-weight:600; color:var(--ink); margin-bottom:6px;">${esc(vendorName)}</div>
+          <div style="font-size:12.5px; color:var(--ink-secondary);">Direct Phone: <strong style="font-family:var(--font-mono); color:var(--ink);">${esc(vendorPhone)}</strong></div>
+          <div style="font-size:12.5px; color:var(--ink-secondary);">Manager: ${esc(vendorPerson)}</div>
+          <div style="font-size:12.5px; color:var(--ink-secondary);">Email: ${esc(vendorEmail)}</div>
+        </div>
+      </div>
+
+      <table class="bill-table" style="margin-bottom:16px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;">Particulars &amp; Breakdown</th>
+            <th style="text-align:right;">Amount (INR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tour Package to ${esc(req.destination)}</strong> (${req.nights + 1} Days / ${req.nights} Nights · ${req.num_adults} Adults · ${req.num_rooms} Vehicle)<div style="font-size:11.5px; color:var(--ink-muted); margin-top:2px;">Inclusions: ${esc(terms.mealPlan || 'Sightseeing, Transfers & Accommodation Included')}</div></td>
+            <td style="text-align:right; font-family:var(--font-mono); font-weight:700;">&#8377;${totalTourINR.toLocaleString('en-IN')}</td>
+          </tr>
+          <tr class="sub-row">
+            <td style="padding-left:22px; color:var(--ink-secondary);">30% Tour Advance Deposit (Base Escrow)</td>
+            <td style="text-align:right; font-family:var(--font-mono);">&#8377;${advanceBaseINR.toLocaleString('en-IN')}</td>
+          </tr>
+          <tr class="sub-row">
+            <td style="padding-left:22px; color:var(--ink-secondary);">5% GST on Tour Advance (SAC 998552)</td>
+            <td style="text-align:right; font-family:var(--font-mono);">&#8377;${advanceGstINR.toLocaleString('en-IN')}</td>
+          </tr>
+          <tr class="received-row">
+            <td><strong style="color:var(--sage);">Total Advance Received by TripMozy Escrow</strong><div style="font-size:11px; color:var(--sage);">Status: SUCCESS · Escrow Protected</div></td>
+            <td style="text-align:right; font-family:var(--font-mono); font-size:16px; font-weight:700; color:var(--sage);">&#8377;${advancePaidINR.toLocaleString('en-IN')}</td>
+          </tr>
+          <tr class="remaining-row">
+            <td><strong>Remaining 70% Balance Due</strong><div style="font-size:11px; color:var(--ink-muted);">${isOnlineOption ? 'Online settlement via TripMozy before departure' : 'Pay directly to ' + esc(vendorName) + ' upon tour arrival'}</div></td>
+            <td style="text-align:right; font-family:var(--font-mono); font-weight:700;">&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size:11.5px; color:var(--ink-muted); border-top:1px solid var(--hairline); padding-top:10px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <span>Electronically issued by TripMozy.com Escrow Desk · No signature required.</span>
+        <span style="font-weight:700; color:var(--sage);">Verified Official Dossier</span>
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+}
+
+function closeReceiptModal() {
+  const modal = document.getElementById('receiptViewerModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function downloadBookingReceiptPdf(btn) {
+  const { targetId, curToken, adminToken } = getReceiptAccessContext();
+  if (!targetId) {
+    alert('Booking reference unavailable for PDF download.');
+    return;
+  }
+
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Generating PDF...</span>';
+  }
+
+  try {
+    const tq = curToken ? `&token=${encodeURIComponent(curToken)}` : '';
+    const pdfUrl = `/api/bookings/${encodeURIComponent(targetId)}/receipt.pdf?download=1${tq}`;
+    const headers = {};
+    if (curToken) headers['x-request-token'] = curToken;
+    if (adminToken) headers['Authorization'] = `Bearer ${adminToken}`;
+
+    const res = await fetch(pdfUrl, { headers });
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || `Could not download receipt PDF (HTTP ${res.status})`);
+    }
+
+    const blob = await res.blob();
+    const disp = res.headers.get('Content-Disposition') || '';
+    const fnMatch = disp.match(/filename="?([^"]+)"?/i);
+    const reqRef = (requestData && requestData.request && requestData.request.request_reference) || targetId;
+    const invFallback = `TripMozy-Receipt-TM-INV-${String(reqRef).replace(/^TM-REQ-/, '')}.pdf`;
+    const filename = (fnMatch && fnMatch[1]) || invFallback;
+
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    }, 1000);
+  } catch (err) {
+    alert(err.message || 'Unable to download receipt PDF.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  }
+}
+
+const receiptModalEl = document.getElementById('receiptViewerModal');
+if (receiptModalEl) {
+  receiptModalEl.addEventListener('click', (e) => {
+    if (e.target === receiptModalEl) closeReceiptModal();
+  });
+}
+
 // Boot
 (function checkCustomerSession() {
   try {
@@ -3159,7 +3912,7 @@ async function executeCancelRequest() {
     const isAdmin = params.get('admin') === '1' || params.get('role') === 'admin' || localStorage.getItem('tm_is_admin') === '1' || localStorage.getItem('tm_user_role') === 'admin';
     const item = document.getElementById('custAuthHeader');
     if (isAdmin && item) {
-      item.innerHTML = `<span style="font-size:12px;color:#fbbf24;font-weight:700;padding:6px 12px;border-radius:8px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);">🛡️ Admin (tripmozy@gmail.com)</span>`;
+      item.innerHTML = `<span style="font-size:11px;color:var(--ochre-dark);font-weight:700;padding:6px 12px;border-radius:2px;background:var(--ochre-soft);border:1px solid rgba(158,107,48,0.35);">Admin (tripmozy@gmail.com)</span>`;
       return;
     }
     const raw = localStorage.getItem('tm_user_info');
@@ -3167,7 +3920,7 @@ async function executeCancelRequest() {
     if (raw && role === 'customer') {
       const u = JSON.parse(raw);
       if (item) {
-        item.innerHTML = `<span style="font-size:12px;color:#cbd5e1;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.08);">${u.displayName || 'Traveler'}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:4px;">(Sign Out)</a>`;
+        item.innerHTML = `<span style="font-size:12px;color:var(--ink);font-weight:600;padding:6px 10px;border-radius:2px;background:var(--sand);border:1px solid var(--hairline);">${esc(u.displayName || 'Traveler')}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:var(--crimson);font-weight:600;text-decoration:none;margin-left:4px;">Sign Out</a>`;
       }
     }
   } catch (_) {}
@@ -3184,5 +3937,6 @@ function signOutCustomer() {
 
 init();
 </script>
+<script src="/assets/tripmozy-motion.js" defer></script>
 </body>
 </html>

@@ -3,410 +3,491 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Smart Tour Booking Marketplace | TripMozy - Handcrafted Journeys</title>
+  <title>Commissioning Studio | TripMozy — Tailor Your Tour Brief</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #0b0f19;
-      --primary-dark: #05070d;
-      --navy: #0b0f19;
-      --navy-light: #151d2f;
-      --accent: #b8924b;
-      --accent-hover: #9a7836;
-      --accent-light: #fbf7ee;
-      --accent-border: #d8ba7a;
-      --bg: #faf8f5;
-      --card-bg: #ffffff;
-      --text: #111827;
-      --text-muted: #64748b;
-      --text-secondary: #4b5563;
-      --border: #ece7df;
-      --border-focus: #b8924b;
-      --success: #0f766e;
-      --radius: 18px;
-      --radius-sm: 10px;
-      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
-      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
-      --shadow-lg: 0 20px 50px -10px rgba(11, 15, 25, 0.12);
+      --bg-paper: #F7F5F0;
+      --bg-surface: #FFFFFF;
+      --bg-sand: #EFECE4;
+      --bg-dark: #111317;
+      --ink: #14171C;
+      --ink-secondary: #484E57;
+      --ink-muted: #767B84;
+      --accent: #9E6B30;
+      --accent-dark: #7D5220;
+      --accent-tint: #F6EFE6;
+      --accent-border: #DFCBB0;
+      --sage: #1B5E44;
+      --sage-tint: #EBF3EF;
+      --crimson: #9B2C2C;
+      --hairline: #E2DDD3;
+      --hairline-strong: #C9C2B4;
+      --radius-sharp: 2px;
+      --radius: 4px;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.55;
-      padding-bottom: 70px;
+      font-family: var(--font-sans);
+      background: var(--bg-paper);
+      color: var(--ink);
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    /* Header & Navigation */
+    html.tm-ready [data-reveal] {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    html.tm-ready [data-reveal].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      html.tm-ready [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+    }
+
+    /* Header */
     header {
-      background: var(--navy);
-      color: #ffffff;
-      padding: 16px 28px;
+      background: var(--bg-paper);
+      border-bottom: 1px solid var(--hairline);
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid rgba(184, 146, 75, 0.2);
-      backdrop-filter: blur(10px);
     }
     .header-inner {
-      max-width: 1240px;
+      max-width: 1340px;
       margin: 0 auto;
+      padding: 0 28px;
+      height: 68px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 20px;
     }
     .brand {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: baseline;
+      gap: 14px;
       text-decoration: none;
-      color: #ffffff;
+      color: var(--ink);
+      flex-shrink: 0;
     }
     .brand-logo {
-      font-size: 23px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      line-height: 1;
     }
-    .brand-logo span { color: var(--accent); }
+    .brand-logo span { color: var(--accent); font-style: italic; font-weight: 600; }
     .brand-tagline {
-      font-size: 11.5px;
-      color: #94a3b8;
-      border-left: 1px solid rgba(255, 255, 255, 0.15);
-      padding-left: 12px;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      font-weight: 600;
-      display: none;
-    }
-    @media (min-width: 640px) { .brand-tagline { display: inline-block; } }
-    .header-nav { display: flex; gap: 16px; align-items: center; }
-    .nav-link {
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 13.5px;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-    .nav-link:hover { color: #ffffff; }
-    .partner-btn {
-      background: rgba(184, 146, 75, 0.12);
-      border: 1px solid rgba(184, 146, 75, 0.45);
-      color: #d8ba7a;
-      padding: 8px 18px;
-      border-radius: 9999px;
-      font-size: 12.5px;
-      font-weight: 700;
-      text-decoration: none;
-      letter-spacing: 0.3px;
-      transition: all 0.2s;
-    }
-    .partner-btn:hover {
-      background: var(--accent);
-      color: #0b0f19;
-      border-color: var(--accent);
-    }
-
-    /* Hero Banner */
-    .hero {
-      background: linear-gradient(180deg, #0b0f19 0%, #151d2f 100%);
-      color: #ffffff;
-      padding: 58px 24px 68px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -50px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(184, 146, 75, 0.18) 0%, rgba(11, 15, 25, 0) 70%);
-      pointer-events: none;
-    }
-    .hero-container {
-      max-width: 860px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-    .luxury-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(184, 146, 75, 0.14);
-      border: 1px solid rgba(184, 146, 75, 0.35);
-      color: #d8ba7a;
-      padding: 6px 18px;
-      border-radius: 9999px;
-      font-size: 11.5px;
-      font-weight: 700;
-      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--ink-muted);
+      border-left: 1px solid var(--hairline-strong);
+      padding-left: 14px;
       letter-spacing: 1.2px;
       text-transform: uppercase;
+      display: none;
     }
-    .hero h1 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 38px;
+    @media (min-width: 820px) { .brand-tagline { display: inline-block; } }
+    .header-nav { display: flex; gap: 22px; align-items: center; }
+    .nav-link {
+      color: var(--ink-secondary);
+      text-decoration: none;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: -0.3px;
-      margin-bottom: 16px;
-      line-height: 1.25;
-      color: #faf8f5;
+      white-space: nowrap;
+      transition: color 0.2s ease;
     }
-    @media (min-width: 768px) { .hero h1 { font-size: 48px; } }
-    .hero p {
-      font-size: 15.5px;
-      color: #cbd5e1;
-      line-height: 1.75;
-      max-width: 700px;
-      margin: 0 auto;
-      font-weight: 400;
+    .nav-link:hover { color: var(--ink); }
+    .nav-cta {
+      background: var(--bg-dark);
+      color: #F7F5F0;
+      padding: 8px 16px;
+      border-radius: var(--radius-sharp);
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s ease;
     }
+    .nav-cta:hover { background: var(--accent-dark); color: #fff; }
+    .nav-hide-mobile { display: none; }
+    @media (min-width: 768px) { .nav-hide-mobile { display: inline-block; } }
 
-    /* Curated Suggested Tour Cards Section */
-    .curated-wrap {
-      max-width: 1240px;
-      margin: -28px auto 36px;
-      padding: 0 20px;
-      position: relative;
-      z-index: 10;
+    /* Studio Masthead Strip (Distinct compact composition vs Home Hero) */
+    .studio-header {
+      border-bottom: 1px solid var(--hairline);
+      background: var(--bg-surface);
+      padding: 36px 28px 34px;
     }
-    .curated-box {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-    }
-    .curated-top {
+    .studio-header-inner {
+      max-width: 1340px;
+      margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 20px;
     }
-    .curated-title-group h2 {
-      font-family: 'Playfair Display', Georgia, serif;
+    .studio-kicker {
+      display: inline-block;
+      width: fit-content;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      margin-bottom: 10px;
+    }
+    .studio-header h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .studio-header h1 em { font-style: italic; color: var(--accent-dark); font-weight: 500; }
+    .studio-meta-right {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      font-size: 12.5px;
+      color: var(--ink-secondary);
+    }
+    .studio-meta-item strong {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--ink);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    /* Curated Rail Showcase (Supports any count with zero orphan grid slots!) */
+    .rail-section {
+      background: var(--bg-sand);
+      border-bottom: 1px solid var(--hairline);
+      padding: 34px 28px 42px;
+    }
+    .rail-inner {
+      max-width: 1340px;
+      margin: 0 auto;
+    }
+    .rail-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .rail-title {
+      font-family: var(--font-serif);
       font-size: 24px;
       font-weight: 600;
-      color: var(--navy);
-      letter-spacing: -0.3px;
+      color: var(--ink);
+      line-height: 1.15;
     }
-    .curated-title-group p {
-      font-size: 13.5px;
-      color: var(--text-muted);
-      margin-top: 3px;
+    .rail-sub {
+      font-size: 13px;
+      color: var(--ink-secondary);
+      margin-top: 2px;
     }
-    .curated-tag {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent);
-      background: var(--accent-light);
-      border: 1px solid var(--accent-border);
-      padding: 4px 12px;
-      border-radius: 20px;
-      letter-spacing: 0.3px;
+    .rail-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
+    .rail-arrow {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--hairline-strong);
+      background: var(--bg-surface);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: var(--radius-sharp);
+      transition: all 0.2s ease;
+    }
+    .rail-arrow:hover { background: var(--bg-dark); color: #fff; border-color: var(--bg-dark); }
+
     .curated-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(278px, 310px);
+      gap: 18px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: var(--hairline-strong) transparent;
+      padding-bottom: 10px;
     }
-    @media (max-width: 640px) {
-      .curated-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-    }
+    .curated-grid::-webkit-scrollbar { height: 5px; }
+    .curated-grid::-webkit-scrollbar-thumb { background: var(--hairline-strong); border-radius: 2px; }
+
     .tour-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      scroll-snap-align: start;
+      background: var(--bg-surface);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: all 0.25s ease;
-      position: relative;
+      cursor: pointer;
+      transition: border-color 0.25s ease, transform 0.25s ease;
     }
     .tour-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px rgba(11, 15, 25, 0.08);
-      border-color: var(--accent-border);
+      border-color: var(--accent);
+      transform: translateY(-2px);
     }
     .tour-card-img-wrap {
-      height: 140px;
+      height: 158px;
       position: relative;
-      background: #151d2f;
+      background: var(--bg-sand);
       overflow: hidden;
     }
     .tour-card-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .tour-card:hover .tour-card-img {
-      transform: scale(1.06);
-    }
+    .tour-card:hover .tour-card-img { transform: scale(1.05); }
     .tour-card-pill {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(11, 15, 25, 0.75);
-      backdrop-filter: blur(6px);
-      color: #faf8f5;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      letter-spacing: 0.2px;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(17, 19, 23, 0.88);
+      color: #F7F5F0;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: var(--radius-sharp);
+      letter-spacing: 0.4px;
+    }
+    .tour-card-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--bg-surface);
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 3px 7px;
+      border-radius: var(--radius-sharp);
+      border: 1px solid var(--hairline);
     }
     .tour-card-body {
-      padding: 16px 14px 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       flex: 1;
     }
-    .tour-card-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--navy);
+    .tour-card-dest-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--accent-dark);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 4px;
-      line-height: 1.3;
     }
-    .tour-card-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 10px;
+    .tour-card-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 8px;
     }
     .tour-card-features {
-      font-size: 11.5px;
-      color: var(--text-secondary);
+      font-size: 12.5px;
+      color: var(--ink-secondary);
       line-height: 1.5;
       margin-bottom: 14px;
       flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .tour-card-foot {
+      padding-top: 12px;
+      border-top: 1px solid var(--hairline);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tour-card-pricing-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding-top: 10px;
-      border-top: 1px solid #f1ece4;
+      align-items: baseline;
+      gap: 8px;
     }
     .tour-card-price-label {
-      font-size: 10.5px;
-      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--ink-muted);
+      letter-spacing: 0.6px;
       text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.4px;
     }
     .tour-card-price {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--navy);
-    }
-    .tour-card-btn {
-      background: #faf8f5;
-      border: 1px solid var(--accent-border);
-      color: #85621e;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
+      font-family: var(--font-serif);
+      font-size: 23px;
       font-weight: 700;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .tour-card-adv {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--sage);
+      font-weight: 600;
+    }
+    .tour-card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .tour-card-btn-secondary {
+      background: #ffffff;
+      border: 1px solid var(--hairline-strong);
+      color: var(--ink-secondary);
+      padding: 8px 8px;
+      border-radius: var(--radius-sharp);
+      font-size: 11.5px;
+      font-weight: 600;
       cursor: pointer;
       font-family: inherit;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .tour-card-btn-secondary:hover { border-color: var(--ink); color: var(--ink); }
+    .tour-card-btn {
+      background: var(--bg-dark);
+      border: 1px solid var(--bg-dark);
+      color: #F7F5F0;
+      padding: 8px 8px;
+      border-radius: var(--radius-sharp);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
       transition: all 0.2s ease;
     }
-    .tour-card:hover .tour-card-btn {
-      background: var(--accent);
-      color: #0b0f19;
-      border-color: var(--accent);
+    .tour-card-btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+    /* Split Commissioning Studio Workspace */
+    .studio-workspace {
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 46px 28px 88px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+    @media (min-width: 980px) {
+      .studio-workspace {
+        grid-template-columns: 7.5fr 4.5fr;
+        gap: 44px;
+      }
+      .studio-sidebar {
+        position: sticky;
+        top: 90px;
+      }
     }
 
-    /* Main Container & Form */
-    .main-wrap { max-width: 920px; margin: 0 auto; padding: 0 18px; }
     .form-card {
-      background: var(--card-bg);
+      background: var(--bg-surface);
+      border: 1px solid var(--hairline);
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      padding: 38px 34px;
-      border: 1px solid var(--border);
-      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      padding: 36px 34px;
+      transition: border-color 0.3s ease;
     }
-    @media (min-width: 640px) { .form-card { padding: 48px 44px; } }
-
-    .highlight-pulse {
-      animation: goldPulse 1.6s ease;
-    }
-    @keyframes goldPulse {
-      0% { box-shadow: 0 0 0 0 rgba(184, 146, 75, 0.4); border-color: var(--accent); }
-      70% { box-shadow: 0 0 0 14px rgba(184, 146, 75, 0); border-color: var(--accent); }
-      100% { box-shadow: var(--shadow-lg); border-color: var(--border); }
+    .highlight-pulse { animation: studioPulse 1.5s ease; }
+    @keyframes studioPulse {
+      0% { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(158, 107, 48, 0.15); }
+      100% { border-color: var(--hairline); box-shadow: none; }
     }
 
     .form-header-meta {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 28px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid var(--border);
+      align-items: flex-end;
       flex-wrap: wrap;
       gap: 10px;
+      margin-bottom: 26px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--hairline);
     }
     .form-header-meta h2 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 24px;
-      color: var(--navy);
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--ink);
       font-weight: 600;
-      letter-spacing: -0.3px;
+      line-height: 1.15;
     }
     .form-header-pill {
-      font-size: 11.5px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.9px;
       text-transform: uppercase;
-      color: #64748b;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      padding: 5px 12px;
-      border-radius: 20px;
+      color: var(--sage);
+      background: var(--sage-tint);
+      padding: 5px 10px;
+      border-radius: var(--radius-sharp);
     }
 
     .section-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--navy);
-      margin: 32px 0 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 30px 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--hairline);
       display: flex;
       align-items: center;
       gap: 12px;
-      letter-spacing: -0.2px;
     }
     .section-title:first-of-type { margin-top: 0; }
     .section-title .num {
-      width: 28px;
-      height: 28px;
-      background: var(--accent-light);
-      color: #85621e;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-dark);
+      background: var(--accent-tint);
       border: 1px solid var(--accent-border);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12.5px;
-      font-weight: 800;
-      flex-shrink: 0;
+      padding: 3px 7px;
+      border-radius: var(--radius-sharp);
     }
 
     .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -419,116 +500,137 @@
     .form-group { margin-bottom: 16px; }
     label {
       display: block;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #374151;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-secondary);
       margin-bottom: 7px;
-      letter-spacing: 0.1px;
     }
     .form-control {
       width: 100%;
       padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius-sharp);
       font-size: 14px;
       font-family: inherit;
-      color: var(--text);
+      color: var(--ink);
       background: #ffffff;
-      transition: all 0.2s;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .form-control:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(184, 146, 75, 0.18);
+      box-shadow: 0 0 0 3px rgba(158, 107, 48, 0.12);
     }
 
-    /* Budget Range Slider Box */
     .budget-box {
-      background: #faf8f5;
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 20px;
+      background: var(--bg-paper);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 18px;
     }
     .budget-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 12px;
       margin-bottom: 16px;
     }
     .budget-amount {
-      font-size: 30px;
-      font-weight: 800;
-      color: var(--navy);
-      letter-spacing: -0.5px;
+      font-family: var(--font-serif);
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
     }
-    .budget-disclosure {
-      font-size: 11.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
+    .budget-disclosure { font-size: 12px; color: var(--ink-muted); margin-top: 3px; }
+    input[type="range"].editorial-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--hairline-strong);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
     }
-    .budget-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
+    input[type="range"].editorial-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+      background: var(--bg-dark);
+      border: 2px solid var(--accent);
+      cursor: pointer;
     }
+    .budget-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
     .chip {
       background: #ffffff;
-      border: 1px solid var(--border);
-      padding: 6px 14px;
-      border-radius: 20px;
+      border: 1px solid var(--hairline-strong);
+      padding: 7px 12px;
+      border-radius: var(--radius-sharp);
       font-size: 12px;
-      font-weight: 700;
-      color: #4b5563;
+      font-weight: 600;
+      color: var(--ink-secondary);
       cursor: pointer;
-      transition: all 0.18s;
+      transition: all 0.15s ease;
     }
-    .chip:hover {
-      border-color: var(--accent-border);
-      color: var(--navy);
-    }
-    .chip.active {
-      background: var(--navy);
-      color: #d8ba7a;
-      border-color: var(--navy);
-    }
+    .chip:hover { border-color: var(--ink); color: var(--ink); }
+    .chip.active { background: var(--bg-dark); color: #F7F5F0; border-color: var(--bg-dark); }
 
-    /* Inclusions Grid */
     .facilities-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
       gap: 10px;
       margin-top: 10px;
     }
+    .facility-checkbox { display: none; }
     .facility-label {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
       background: #ffffff;
-      border: 1px solid var(--border);
+      border: 1px solid var(--hairline);
       padding: 11px 14px;
-      border-radius: 10px;
+      border-radius: var(--radius-sharp);
       cursor: pointer;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       user-select: none;
-      transition: all 0.15s;
-      color: #374151;
+      color: var(--ink-secondary);
+      transition: all 0.15s ease;
     }
-    .facility-checkbox { display: none; }
+    .facility-label .check-mark {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--hairline-strong);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: transparent;
+      flex-shrink: 0;
+    }
     .facility-checkbox:checked + .facility-label {
-      background: var(--accent-light);
-      border-color: var(--accent-border);
-      color: #85621e;
-      font-weight: 700;
+      background: var(--accent-tint);
+      border-color: var(--accent);
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .facility-checkbox:checked + .facility-label .check-mark {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+      color: #ffffff;
     }
 
-    /* Consent Checkboxes */
     .consent-box {
       margin-top: 24px;
       padding-top: 18px;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--hairline);
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -538,319 +640,216 @@
       align-items: flex-start;
       gap: 10px;
       font-size: 13px;
-      color: #4b5563;
-      line-height: 1.45;
+      color: var(--ink-secondary);
+      line-height: 1.5;
+      cursor: pointer;
     }
     .checkbox-row input {
       margin-top: 3px;
-      accent-color: var(--accent);
+      accent-color: var(--accent-dark);
+      flex-shrink: 0;
     }
 
-    /* Submit Button */
     .submit-btn {
       width: 100%;
-      background: var(--navy);
-      color: #faf8f5;
+      background: var(--bg-dark);
+      color: #F7F5F0;
       padding: 16px 24px;
-      font-size: 15.5px;
-      font-weight: 700;
-      border: 1px solid var(--accent-border);
-      border-radius: 12px;
+      font-size: 14.5px;
+      font-weight: 600;
+      border: 1px solid var(--bg-dark);
+      border-radius: var(--radius-sharp);
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(11, 15, 25, 0.2);
-      transition: all 0.22s ease;
+      transition: background 0.2s ease;
       margin-top: 24px;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 10px;
       font-family: inherit;
-      letter-spacing: 0.3px;
     }
-    .submit-btn:hover {
-      background: #151d2f;
-      color: #d8ba7a;
-      transform: translateY(-1px);
-      box-shadow: 0 10px 28px rgba(11, 15, 25, 0.28);
-    }
-    .submit-btn:disabled {
-      background: #94a3b8;
-      border-color: #94a3b8;
-      color: #ffffff;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    .submit-btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+    .submit-btn:disabled { background: var(--ink-muted); border-color: var(--ink-muted); cursor: not-allowed; }
 
-    /* Trust Ribbon */
     .trust-ribbon {
       margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px solid #f1ece4;
+      padding-top: 18px;
+      border-top: 1px solid var(--hairline);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      text-align: center;
     }
-    .trust-item-title {
-      font-size: 12px;
+    .trust-item-title { font-size: 12px; font-weight: 700; color: var(--ink); }
+    .trust-item-sub { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+    /* Live Interactive Brief Dossier Sidebar */
+    .brief-dossier {
+      background: var(--bg-dark);
+      color: #F7F5F0;
+      border-radius: var(--radius);
+      padding: 28px 26px;
+      border-top: 3px solid var(--accent);
+    }
+    .brief-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #C9A467;
+      margin-bottom: 8px;
+    }
+    .brief-heading {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.15;
+      color: #ffffff;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 18px;
+    }
+    .brief-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 9px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 12px;
+    }
+    .brief-row-lbl { color: #9DA3AE; }
+    .brief-row-val { font-weight: 600; color: #FFFFFF; text-align: right; font-variant-numeric: tabular-nums; }
+    .brief-math-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .brief-math-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #C9A467;
+      margin-bottom: 12px;
+    }
+    .brief-math-main {
+      font-family: var(--font-serif);
+      font-size: 28px;
       font-weight: 700;
-      color: var(--navy);
-      letter-spacing: 0.2px;
+      color: #6EE7B7;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
     }
-    .trust-item-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .brief-note {
+      font-size: 11.5px;
+      color: #9DA3AE;
+      line-height: 1.55;
+      margin-top: 16px;
     }
 
-    /* Success / Result View */
+    /* Success / Result Card */
     .result-card {
       display: none;
-      background: var(--card-bg);
+      background: var(--bg-surface);
+      border: 1px solid var(--hairline);
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
       padding: 48px 40px;
       text-align: center;
-      border: 1px solid var(--border);
     }
     .success-icon {
-      width: 68px;
-      height: 68px;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
+      width: 56px;
+      height: 56px;
+      background: var(--sage-tint);
+      border: 1px solid #BFD8CE;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 18px;
     }
-    .success-icon svg { width: 32px; height: 32px; }
     .result-title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 26px;
+      font-family: var(--font-serif);
+      font-size: 32px;
       font-weight: 600;
       margin-bottom: 8px;
-      color: var(--navy);
+      color: var(--ink);
     }
     .result-ref {
-      font-family: monospace;
+      font-family: var(--font-mono);
       font-size: 14px;
-      font-weight: 700;
-      color: var(--navy);
-      background: var(--accent-light);
-      padding: 5px 14px;
-      border-radius: 6px;
+      font-weight: 600;
+      color: var(--ink);
+      background: var(--accent-tint);
+      padding: 6px 14px;
       border: 1px solid var(--accent-border);
       display: inline-block;
       margin-bottom: 16px;
     }
     .result-desc {
       font-size: 14.5px;
-      color: var(--text-muted);
-      max-width: 540px;
+      color: var(--ink-secondary);
+      max-width: 520px;
       margin: 0 auto 28px;
       line-height: 1.7;
     }
     .action-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary-link {
+      background: var(--bg-dark);
+      color: #F7F5F0;
+      text-decoration: none;
+      padding: 13px 24px;
+      border-radius: var(--radius-sharp);
+      font-weight: 600;
+      font-size: 13.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
     .btn-secondary {
       background: #ffffff;
-      color: var(--text);
+      color: var(--ink);
       text-decoration: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: 700;
+      padding: 13px 20px;
+      border-radius: var(--radius-sharp);
+      font-weight: 600;
       font-size: 13.5px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--hairline-strong);
       cursor: pointer;
       font-family: inherit;
-      transition: all 0.2s;
-    }
-    .btn-secondary:hover {
-      background: #faf8f5;
-      border-color: #cbd5e1;
-    }
-    .btn-primary-link {
-      background: var(--navy);
-      color: #d8ba7a;
-      text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 13.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid var(--accent-border);
-      transition: all 0.2s;
-    }
-    .btn-primary-link:hover {
-      background: #151d2f;
     }
 
-    /* Error Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #0b0f19;
-      color: #faf8f5;
-      border: 1px solid var(--accent-border);
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 13.5px;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 1000;
-      max-width: 90vw;
-      text-align: center;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* Mobile Phone Browser Responsiveness */
-    @media (max-width: 768px) {
-      header { padding: 12px 16px; }
-      .header-inner { flex-wrap: wrap; gap: 8px; }
-      .brand-logo { font-size: 20px; }
-      .header-nav { gap: 10px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
-      .nav-link { font-size: 12.5px; }
-      .partner-btn { padding: 6px 12px; font-size: 11.5px; }
-
-      .hero { padding: 36px 16px 48px; }
-      .hero h1 { font-size: 28px; line-height: 1.25; }
-      .hero p { font-size: 14px; }
-
-      .curated-wrap { padding: 0 10px; margin-top: -20px; }
-      .curated-box { padding: 16px 10px; border-radius: 14px; }
-      .curated-top { margin-bottom: 12px; }
-      .curated-title-group h2 { font-size: 19px; }
-      .curated-title-group p { font-size: 12px; }
-
-      /* Feature Signature Cards 2-by-2 together on phone */
-      .curated-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px;
-      }
-      .tour-card-img-wrap { height: 110px; }
-      .tour-card-pill {
-        top: 6px;
-        left: 6px;
-        font-size: 9.5px;
-        padding: 2px 6px;
-      }
-      .tour-card-body {
-        padding: 10px 8px 10px;
-      }
-      .tour-card-title {
-        font-size: 13px;
-        font-weight: 800;
-        margin-bottom: 2px;
-        line-height: 1.25;
-      }
-      .tour-card-subtitle {
-        font-size: 10.5px;
-        margin-bottom: 6px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .tour-card-features {
-        font-size: 10.5px;
-        line-height: 1.35;
-        margin-bottom: 8px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .tour-card-foot {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        padding-top: 6px;
-      }
-      .tour-card-foot > div {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-      }
-      .tour-card-price-label { font-size: 9px; }
-      .tour-card-price { font-size: 13.5px; }
-      .tour-card-btn {
-        width: 100%;
-        text-align: center;
-        padding: 6px 4px;
-        font-size: 11px;
-      }
-
-      .main-wrap { padding: 0 12px; }
-      .form-card { padding: 22px 16px; border-radius: 14px; }
-      .form-header-meta h2 { font-size: 20px; }
-      .section-title { font-size: 14px; margin: 24px 0 12px; }
-
-      .form-control, input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select {
-        font-size: 16px !important; /* Prevents iOS auto-zoom */
-        padding: 12px 14px;
-      }
-      .budget-amount { font-size: 24px !important; }
-
-      .facilities-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-      .facility-label {
-        padding: 9px 10px;
-        font-size: 12px;
-      }
-
-      .trust-ribbon {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        text-align: left;
-      }
-
-      .result-card { padding: 26px 18px; }
-      .result-title { font-size: 22px; }
-      .action-links { flex-direction: column; width: 100%; }
-      .btn-secondary, .btn-primary-link { width: 100%; justify-content: center; padding: 13px; }
-    }
-
-    /* Tour Details Popup Modal */
+    /* Tour Details Modal (Sticky Action Bar + Refined Editorial Specs) */
     .tour-modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(11, 15, 25, 0.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(17, 19, 23, 0.72);
       z-index: 1000;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 18px;
+      padding: 20px;
     }
-    .tour-modal-backdrop.active {
-      display: flex;
-    }
+    .tour-modal-backdrop.active { display: flex; }
     .tour-modal-card {
-      background: #ffffff;
-      border-radius: 20px;
-      max-width: 620px;
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      max-width: 680px;
       width: 100%;
       max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 60px -15px rgba(11, 15, 25, 0.4);
-      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--hairline-strong);
       position: relative;
-      animation: modalFadeIn 0.25s ease-out;
+      animation: modalFadeIn 0.24s cubic-bezier(0.22, 1, 0.36, 1);
     }
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .tour-modal-close {
       position: absolute;
@@ -859,7 +858,7 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: rgba(11, 15, 25, 0.65);
+      background: rgba(17, 19, 23, 0.78);
       border: 1px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
       font-size: 20px;
@@ -868,33 +867,26 @@
       justify-content: center;
       cursor: pointer;
       z-index: 20;
-      transition: all 0.2s;
     }
-    .tour-modal-close:hover {
-      background: #000000;
-      color: var(--accent);
-    }
+    .tour-modal-close:hover { background: var(--bg-dark); color: #C9A467; }
+    .tour-modal-scroll { overflow-y: auto; flex: 1; }
     .tour-modal-hero {
-      height: 220px;
+      height: 210px;
       position: relative;
       overflow: hidden;
-      background: #0b0f19;
+      background: var(--bg-sand);
     }
-    .tour-modal-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .tour-modal-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .tour-modal-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(11, 15, 25, 0.2) 0%, rgba(11, 15, 25, 0.75) 100%);
+      background: linear-gradient(180deg, rgba(17, 19, 23, 0.1) 0%, rgba(17, 19, 23, 0.78) 100%);
     }
     .tour-modal-badge-group {
       position: absolute;
       bottom: 14px;
-      left: 18px;
-      right: 18px;
+      left: 20px;
+      right: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -903,212 +895,223 @@
     }
     .tour-modal-badge {
       background: var(--accent);
-      color: #0b0f19;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 20px;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-sharp);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.7px;
     }
     .tour-modal-duration {
-      background: rgba(11, 15, 25, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(17, 19, 23, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
-      font-size: 12.5px;
-      font-weight: 800;
-      padding: 5px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.3px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-sharp);
     }
-    .tour-modal-content {
-      padding: 24px;
-    }
+    .tour-modal-content { padding: 24px 26px; }
     .tour-modal-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 18px;
     }
     .tour-modal-title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--navy);
-      line-height: 1.25;
+      font-family: var(--font-serif);
+      font-size: 27px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.15;
       margin-bottom: 4px;
     }
     .tour-modal-dest {
-      font-size: 13px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
       font-weight: 600;
-      color: #b8924b;
-    }
-    .tour-modal-price-box {
-      background: #faf8f5;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 14px;
-      text-align: right;
-    }
-    .tour-modal-price-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
+      color: var(--accent-dark);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+    .tour-modal-price-box {
+      background: var(--bg-paper);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sharp);
+      padding: 12px 16px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .tour-modal-price-label {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
     .tour-modal-price {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--navy);
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--ink);
       line-height: 1.1;
+      font-variant-numeric: tabular-nums;
     }
     .tour-modal-advance-pill {
-      font-size: 11px;
-      font-weight: 700;
-      color: #0f766e;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      padding: 2px 8px;
-      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--sage);
+      background: var(--sage-tint);
+      padding: 3px 8px;
+      border-radius: var(--radius-sharp);
       display: inline-block;
-      margin-top: 4px;
+      margin-top: 6px;
+      white-space: nowrap;
     }
     .tour-modal-overview {
-      font-size: 13.5px;
-      color: #4b5563;
-      line-height: 1.6;
+      font-size: 14px;
+      color: var(--ink-secondary);
+      line-height: 1.65;
       margin-bottom: 20px;
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 12px 14px;
+      background: var(--bg-paper);
+      padding: 14px 16px;
       border-left: 3px solid var(--accent);
     }
-    .tour-modal-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-    @media (max-width: 600px) {
-      .tour-modal-backdrop {
-        padding: 0;
-        align-items: flex-end;
-      }
-      .tour-modal-card {
-        border-radius: 22px 22px 0 0;
-        max-height: 88vh;
-        width: 100%;
-      }
-      .tour-modal-hero { height: 180px; }
-      .tour-modal-content { padding: 18px 16px; }
-      .tour-modal-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
-      .tour-modal-price-box {
-        text-align: left;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .tour-modal-grid { grid-template-columns: 1fr; gap: 12px; }
-    }
+    .tour-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .tour-modal-section {
+      border: 1px solid var(--hairline);
+      padding: 16px;
       background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
     }
     .tour-modal-sec-title {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--navy);
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--ink);
       text-transform: uppercase;
-      letter-spacing: 0.4px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--hairline);
     }
-    .tour-modal-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+    .tour-modal-list { list-style: none; }
     .tour-modal-list li {
       font-size: 12.5px;
-      color: #374151;
-      padding: 5px 0 5px 18px;
+      color: var(--ink-secondary);
+      padding: 6px 0 6px 16px;
       position: relative;
       line-height: 1.45;
-      border-bottom: 1px dashed #f1ece4;
+      border-bottom: 1px dashed var(--hairline);
     }
-    .tour-modal-list li:last-child {
-      border-bottom: none;
-    }
+    .tour-modal-list li:last-child { border-bottom: none; }
     .tour-modal-list li::before {
-      content: '✓';
+      content: '—';
       position: absolute;
       left: 0;
-      color: var(--accent);
-      font-weight: 800;
-      font-size: 11px;
+      color: var(--accent-dark);
+      font-weight: 700;
     }
     .tour-modal-foot {
-      border-top: 1px solid var(--border);
-      padding-top: 18px;
+      background: var(--bg-paper);
+      border-top: 1px solid var(--hairline);
+      padding: 16px 26px;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-    .tour-modal-note {
-      font-size: 11.5px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
+    .tour-modal-note { font-size: 12px; color: var(--ink-secondary); flex: 1; min-width: 200px; }
     .tour-modal-cta-btn {
-      width: 100%;
-      background: var(--navy);
-      color: #d8ba7a;
-      border: 1px solid var(--accent-border);
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 800;
+      background: var(--bg-dark);
+      color: #F7F5F0;
+      border: none;
+      padding: 13px 22px;
+      border-radius: var(--radius-sharp);
+      font-size: 13.5px;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s;
       font-family: inherit;
+      white-space: nowrap;
     }
-    .tour-modal-cta-btn:hover {
-      background: #000000;
-      color: #ffffff;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(11, 15, 25, 0.25);
+    .tour-modal-cta-btn:hover { background: var(--accent-dark); }
+
+    /* Footer */
+    footer {
+      background: var(--bg-dark);
+      color: #A7ABB4;
+      border-top: 2px solid var(--accent);
+      padding: 44px 28px 32px;
     }
-    .tour-card-btn-secondary {
-      background: transparent;
-      border: 1px solid #cbd5e1;
-      color: #475569;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
+    .footer-bottom {
+      max-width: 1340px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
     }
-    .tour-card-btn-secondary:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-      border-color: #94a3b8;
+    .footer-links { display: flex; gap: 22px; flex-wrap: wrap; }
+    .footer-links a { color: #A7ABB4; text-decoration: none; font-size: 13px; }
+    .footer-links a:hover { color: #C9A467; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-dark);
+      color: #F7F5F0;
+      border: 1px solid var(--accent);
+      padding: 12px 22px;
+      border-radius: var(--radius-sharp);
+      font-size: 13.5px;
+      font-weight: 600;
+      z-index: 1200;
+      transition: transform 0.3s ease;
+      max-width: 90vw;
+      text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 767px) {
+      .header-inner { padding: 0 16px; height: 60px; }
+      .brand-logo { font-size: 22px; }
+      .header-nav { gap: 12px; }
+      .nav-cta { padding: 7px 12px; font-size: 11.5px; }
+
+      .studio-header, .rail-section, .studio-workspace { padding-left: 16px; padding-right: 16px; }
+      .studio-header { padding-top: 24px; padding-bottom: 22px; }
+      .curated-grid { grid-auto-columns: 82%; }
+      .form-card { padding: 24px 16px; }
+      .form-control, input, select { font-size: 16px !important; }
+      .facilities-grid { grid-template-columns: 1fr; }
+      .trust-ribbon { grid-template-columns: 1fr; }
+      .result-card { padding: 28px 18px; }
+      .action-links { flex-direction: column; }
+      .btn-primary-link, .btn-secondary { width: 100%; justify-content: center; }
+
+      .tour-modal-backdrop { padding: 0; align-items: flex-end; }
+      .tour-modal-card { border-radius: 10px 10px 0 0; max-height: 90vh; }
+      .tour-modal-header { flex-direction: column; gap: 12px; }
+      .tour-modal-price-box { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+      .tour-modal-grid { grid-template-columns: 1fr; }
+      .tour-modal-foot { flex-direction: column; align-items: stretch; padding: 14px 16px; }
+      .tour-modal-cta-btn { justify-content: center; width: 100%; }
+      footer { padding: 32px 16px; }
     }
   </style>
 </head>
@@ -1119,383 +1122,471 @@
     <div class="header-inner">
       <a href="/" class="brand">
         <div class="brand-logo">Trip<span>Mozy</span></div>
-        <div class="brand-tagline">Private Tour &amp; Concierge Desk</div>
+        <div class="brand-tagline">Commissioning Studio</div>
       </a>
-      <div class="header-nav">
-        <a href="/booking" class="nav-link">My Tour Offers</a>
+      <nav class="header-nav">
+        <a href="/" class="nav-link nav-hide-mobile">Overview</a>
+        <a href="/booking" class="nav-link">My Offers</a>
         <span id="authHeaderItem">
-          <a href="/login" class="nav-link" style="color:#d8ba7a;font-weight:700;">Log In</a>
+          <a href="/login" class="nav-cta">Sign In</a>
         </span>
-      </div>
+      </nav>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-container">
-      <div class="luxury-badge">Handcrafted Holiday Experiences</div>
-      <h1>Tailor Your Private Journey. Direct From Certified Operators.</h1>
-      <p>Submit your destination, travel party, and holiday budget. TripMozy instantly connects you with verified local tour operators across India to craft customized itineraries with 100% price transparency and escrow protection.</p>
+  <!-- Studio Masthead -->
+  <section class="studio-header">
+    <div class="studio-header-inner">
+      <div>
+        <div class="studio-kicker">Commissioning Studio</div>
+        <h1>Configure your <em>private tour</em> brief.</h1>
+      </div>
+      <div class="studio-meta-right">
+        <div class="studio-meta-item">
+          <strong>Exclusivity</strong>
+          First Operator Match Lock
+        </div>
+        <div class="studio-meta-item">
+          <strong>Escrow Deposit</strong>
+          30% + 5% GST
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Suggested Tour Cards (Curated Inspiration) -->
-  <section class="curated-wrap">
-    <div class="curated-box">
-      <div class="curated-top">
-        <div class="curated-title-group">
-          <div class="curated-tag">CURATED INSPIRATION</div>
-          <h2 style="margin-top:6px;">Featured Signature Circuits</h2>
-          <p>Click any signature circuit to view duration, complete day-by-day highlights, and transparent package pricing.</p>
+  <!-- Signature Circuits Rail -->
+  <section class="rail-section">
+    <div class="rail-inner">
+      <div class="rail-top">
+        <div>
+          <h2 class="rail-title">Signature Starting Circuits</h2>
+          <p class="rail-sub">Inspect full highlights and pre-fill your commissioning dossier in one click.</p>
+        </div>
+        <div class="rail-controls">
+          <button type="button" class="rail-arrow" onclick="scrollRail(-320)" aria-label="Scroll left">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button type="button" class="rail-arrow" onclick="scrollRail(320)" aria-label="Scroll right">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
         </div>
       </div>
 
       <div class="curated-grid" id="featuredCircuitsGrid">
-        <!-- Dynamically loaded from /api/featured-tours with modal popup details -->
+        <!-- Dynamically loaded from /api/featured-tours -->
       </div>
     </div>
   </section>
 
-  <!-- Interactive Tour Details Popup Modal -->
+  <!-- Tour Details Modal -->
   <div class="tour-modal-backdrop" id="tourDetailModal" onclick="handleBackdropClick(event)">
     <div class="tour-modal-card">
-      <button type="button" class="tour-modal-close" onclick="closeTourDetailModal()">&times;</button>
-      <div class="tour-modal-hero">
-        <img id="modalImg" src="https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80" alt="Tour Circuit" class="tour-modal-img">
-        <div class="tour-modal-overlay"></div>
-        <div class="tour-modal-badge-group">
-          <span class="tour-modal-badge" id="modalBadge">Bestseller 2026</span>
-          <span class="tour-modal-duration" id="modalDuration">⏱️ 6 Days / 5 Nights</span>
+      <button type="button" class="tour-modal-close" onclick="closeTourDetailModal()" aria-label="Close modal">&times;</button>
+      <div class="tour-modal-scroll">
+        <div class="tour-modal-hero">
+          <img id="modalImg" src="/images/circuit-kashmir.jpg" alt="Tour Circuit" class="tour-modal-img">
+          <div class="tour-modal-overlay"></div>
+          <div class="tour-modal-badge-group">
+            <span class="tour-modal-badge" id="modalBadge">Bestseller 2026</span>
+            <span class="tour-modal-duration" id="modalDuration">6 Days / 5 Nights</span>
+          </div>
+        </div>
+        <div class="tour-modal-content">
+          <div class="tour-modal-header">
+            <div>
+              <h2 id="modalTitle" class="tour-modal-title">Kashmir Paradise Circuit</h2>
+              <div id="modalDest" class="tour-modal-dest">Srinagar · Gulmarg · Pahalgam</div>
+            </div>
+            <div class="tour-modal-price-box">
+              <div>
+                <div class="tour-modal-price-label">Estimated From</div>
+                <div id="modalPrice" class="tour-modal-price">&#8377;28,000</div>
+              </div>
+              <div class="tour-modal-advance-pill" id="modalAdvance">30% Adv: &#8377;8,400</div>
+            </div>
+          </div>
+
+          <div class="tour-modal-overview" id="modalOverview">
+            Experience pristine snow-clad peaks, scenic Dal Lake houseboat stays, and Himalayan valley expeditions.
+          </div>
+
+          <div class="tour-modal-grid">
+            <div class="tour-modal-section">
+              <div class="tour-modal-sec-title">Itinerary Highlights</div>
+              <ul class="tour-modal-list" id="modalHighlights"></ul>
+            </div>
+            <div class="tour-modal-section">
+              <div class="tour-modal-sec-title">Included Standards</div>
+              <ul class="tour-modal-list" id="modalInclusions"></ul>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="tour-modal-content">
-        <div class="tour-modal-header">
-          <div>
-            <h2 id="modalTitle" class="tour-modal-title">Heavenly Kashmir &amp; Ladakh Circuit</h2>
-            <div id="modalDest" class="tour-modal-dest">📍 Srinagar · Gulmarg · Pahalgam</div>
-          </div>
-          <div class="tour-modal-price-box">
-            <div class="tour-modal-price-label">ESTIMATED FROM</div>
-            <div id="modalPrice" class="tour-modal-price">₹28,000</div>
-            <div class="tour-modal-advance-pill" id="modalAdvance">30% Advance: ₹8,400</div>
-          </div>
-        </div>
 
-        <div class="tour-modal-overview" id="modalOverview">
-          Experience pristine snow-clad peaks, scenic Dal Lake houseboat stays, and breathtaking Himalayan valley expeditions.
+      <div class="tour-modal-foot">
+        <div class="tour-modal-note">
+          <strong>Escrow Guarantee:</strong> You pay the 30% deposit only after an operator locks your itinerary.
         </div>
-
-        <div class="tour-modal-grid">
-          <div class="tour-modal-section">
-            <div class="tour-modal-sec-title">🗺️ Complete Day-by-Day Highlights</div>
-            <ul class="tour-modal-list" id="modalHighlights">
-              <!-- Dynamically populated -->
-            </ul>
-          </div>
-          <div class="tour-modal-section">
-            <div class="tour-modal-sec-title">✨ Package Inclusions</div>
-            <ul class="tour-modal-list" id="modalInclusions">
-              <!-- Dynamically populated -->
-            </ul>
-          </div>
-        </div>
-
-        <div class="tour-modal-foot">
-          <div class="tour-modal-note">
-            🔒 <strong>100% Escrow Protected:</strong> You pay the 30% advance deposit only after your verified tour operator confirms your itinerary.
-          </div>
-          <button type="button" class="tour-modal-cta-btn" id="modalCtaBtn" onclick="applyAndBookTourModal()">
-            ✨ Book This Tour Circuit →
-          </button>
-        </div>
+        <button type="button" class="tour-modal-cta-btn" id="modalCtaBtn" onclick="applyAndBookTourModal()">
+          <span>Populate Brief With Circuit</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
       </div>
     </div>
   </div>
-    </div>
-  </section>
 
-  <!-- Main Request Form -->
-  <main class="main-wrap">
-    <div class="form-card" id="formCard">
-      <div class="form-header-meta">
-        <div>
-          <h2>Tour Package Request</h2>
-          <div style="font-size:13px; color:var(--text-muted); margin-top:2px;">Handcrafted tour itineraries matched with certified local operators</div>
-        </div>
-        <div class="form-header-pill">Direct Concierge Dispatch</div>
-      </div>
-
-      <form id="tourRequestForm">
-
-        <!-- 1. Destination & Dates -->
-        <div class="section-title">
-          <span class="num">1</span>
-          <span>Where &amp; When are you touring?</span>
+  <!-- Split Commissioning Workspace -->
+  <main class="studio-workspace">
+    <div>
+      <div class="form-card" id="formCard">
+        <div class="form-header-meta">
+          <div>
+            <h2>Tour Package Request</h2>
+            <div style="font-size:13px; color:var(--ink-muted); margin-top:4px;">Simultaneous dispatch to verified regional partners</div>
+          </div>
+          <div class="form-header-pill">Direct Concierge Dispatch</div>
         </div>
 
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="destination">Destination / Region *</label>
-            <input type="text" id="destination" class="form-control" placeholder="e.g. Goa, Manali, Shimla, Kerala, Rajasthan, Kashmir, Ladakh" list="destinationsList" required>
-            <datalist id="destinationsList">
-              <option value="Manali, Himachal Pradesh">
-              <option value="Shimla, Himachal Pradesh">
-              <option value="Dharamshala, Himachal Pradesh">
-              <option value="Dalhousie, Himachal Pradesh">
-              <option value="North Goa, Goa">
-              <option value="South Goa, Goa">
-              <option value="Goa">
-              <option value="Munnar, Kerala">
-              <option value="Alleppey, Kerala">
-              <option value="Kerala">
-              <option value="Jaipur, Rajasthan">
-              <option value="Udaipur, Rajasthan">
-              <option value="Rajasthan">
-              <option value="Srinagar, Jammu and Kashmir">
-              <option value="Gulmarg, Jammu and Kashmir">
-              <option value="Leh, Ladakh">
-              <option value="Rishikesh, Uttarakhand">
-              <option value="Mussoorie, Uttarakhand">
-              <option value="Ooty, Tamil Nadu">
-              <option value="Darjeeling, West Bengal">
-              <option value="Gangtok, Sikkim">
-            </datalist>
-          </div>
-          <div class="form-group">
-            <label for="propertyType">Tour Package Style</label>
-            <select id="propertyType" class="form-control">
-              <option value="any">Any Tour Style</option>
-              <option value="resort">Resort &amp; Leisure Tour</option>
-              <option value="hotel">Standard Sightseeing Tour</option>
-              <option value="homestay">Heritage &amp; Homestay Experience</option>
-            </select>
-          </div>
-        </div>
+        <form id="tourRequestForm">
 
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="checkInDate">Tour Start Date *</label>
-            <input type="date" id="checkInDate" class="form-control" required>
+          <div class="section-title">
+            <span class="num">01</span>
+            <span>Destination &amp; Dates</span>
           </div>
-          <div class="form-group">
-            <label for="checkOutDate">Tour End Date *</label>
-            <input type="date" id="checkOutDate" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label>Tour Duration</label>
-            <input type="text" id="nightsDisplay" class="form-control" value="0 Nights" readonly style="background:#faf8f5; font-weight:700;">
-          </div>
-        </div>
 
-        <!-- 2. Travelers & Vehicles/Rooms -->
-        <div class="section-title">
-          <span class="num">2</span>
-          <span>Travelers &amp; Vehicle / Accommodation Setup</span>
-        </div>
-
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="numRooms">Vehicles / Rooms Required *</label>
-            <select id="numRooms" class="form-control">
-              <option value="1" selected>1 Vehicle / Room</option>
-              <option value="2">2 Vehicles / Rooms</option>
-              <option value="3">3 Vehicles / Rooms</option>
-              <option value="4">4 Vehicles / Rooms</option>
-              <option value="5">5+ Vehicles / Rooms</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="numAdults">Adult Travelers (12+ yrs) *</label>
-            <select id="numAdults" class="form-control">
-              <option value="1">1 Adult</option>
-              <option value="2" selected>2 Adults</option>
-              <option value="3">3 Adults</option>
-              <option value="4">4 Adults</option>
-              <option value="5">5 Adults</option>
-              <option value="6">6+ Adults</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="numChildren">Child Travelers (0-11 yrs)</label>
-            <select id="numChildren" class="form-control">
-              <option value="0" selected>0 Children</option>
-              <option value="1">1 Child</option>
-              <option value="2">2 Children</option>
-              <option value="3">3+ Children</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 3. Total Tour Budget -->
-        <div class="section-title">
-          <span class="num">3</span>
-          <span>Total Tour Budget (For Whole Group &amp; Full Trip)</span>
-        </div>
-
-        <div class="budget-box">
-          <div class="budget-header">
-            <div>
-              <div style="font-size: 13px; font-weight: 700; color: #475569;">Maximum Tour Budget (INR)</div>
-              <div class="budget-disclosure">Must cover complete tour package including stays, transfers, and taxes</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="destination">Destination / Region *</label>
+              <input type="text" id="destination" class="form-control" placeholder="e.g. Goa, Manali, Shimla, Kerala, Rajasthan, Kashmir" list="destinationsList" required>
+              <datalist id="destinationsList">
+                <option value="Manali, Himachal Pradesh">
+                <option value="Shimla, Himachal Pradesh">
+                <option value="Dharamshala, Himachal Pradesh">
+                <option value="Dalhousie, Himachal Pradesh">
+                <option value="North Goa, Goa">
+                <option value="South Goa, Goa">
+                <option value="Goa">
+                <option value="Munnar, Kerala">
+                <option value="Alleppey, Kerala">
+                <option value="Kerala">
+                <option value="Jaipur, Rajasthan">
+                <option value="Udaipur, Rajasthan">
+                <option value="Rajasthan">
+                <option value="Srinagar, Jammu and Kashmir">
+                <option value="Gulmarg, Jammu and Kashmir">
+                <option value="Leh, Ladakh">
+                <option value="Rishikesh, Uttarakhand">
+                <option value="Mussoorie, Uttarakhand">
+                <option value="Ooty, Tamil Nadu">
+                <option value="Darjeeling, West Bengal">
+                <option value="Gangtok, Sikkim">
+              </datalist>
             </div>
-            <div class="budget-amount" id="budgetDisplay">&#8377;15,000</div>
+            <div class="form-group">
+              <label for="propertyType">Tour Package Style</label>
+              <select id="propertyType" class="form-control">
+                <option value="any">Any Tour Style</option>
+                <option value="resort">Resort &amp; Leisure Tour</option>
+                <option value="hotel">Standard Sightseeing Tour</option>
+                <option value="homestay">Heritage &amp; Homestay Experience</option>
+              </select>
+            </div>
           </div>
 
-          <input type="range" id="budgetSlider" min="3000" max="150000" step="1000" value="15000" style="width: 100%; accent-color: var(--accent);">
-
-          <div class="budget-chips">
-            <div class="chip" onclick="setBudget(8000)">&#8377;8,000 (Budget Explorer)</div>
-            <div class="chip active" onclick="setBudget(15000)">&#8377;15,000 (Standard Tour)</div>
-            <div class="chip" onclick="setBudget(25000)">&#8377;25,000 (Comfort Tour)</div>
-            <div class="chip" onclick="setBudget(50000)">&#8377;50,000 (Deluxe Tour)</div>
-            <div class="chip" onclick="setBudget(85000)">&#8377;85,000+ (Luxury Private Tour)</div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="checkInDate">Tour Start Date *</label>
+              <input type="date" id="checkInDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="checkOutDate">Tour End Date *</label>
+              <input type="date" id="checkOutDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Tour Duration</label>
+              <input type="text" id="nightsDisplay" class="form-control" value="0 Nights" readonly style="background:var(--bg-paper); font-weight:600; font-family:var(--font-mono); font-size:13px;">
+            </div>
           </div>
+
+          <div class="section-title">
+            <span class="num">02</span>
+            <span>Travelers &amp; Vehicle Setup</span>
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="numRooms">Vehicles / Rooms Required *</label>
+              <select id="numRooms" class="form-control">
+                <option value="1" selected>1 Vehicle / Room</option>
+                <option value="2">2 Vehicles / Rooms</option>
+                <option value="3">3 Vehicles / Rooms</option>
+                <option value="4">4 Vehicles / Rooms</option>
+                <option value="5">5+ Vehicles / Rooms</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="numAdults">Adult Travelers (12+ yrs) *</label>
+              <select id="numAdults" class="form-control">
+                <option value="1">1 Adult</option>
+                <option value="2" selected>2 Adults</option>
+                <option value="3">3 Adults</option>
+                <option value="4">4 Adults</option>
+                <option value="5">5 Adults</option>
+                <option value="6">6+ Adults</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="numChildren">Child Travelers (0-11 yrs)</label>
+              <select id="numChildren" class="form-control">
+                <option value="0" selected>0 Children</option>
+                <option value="1">1 Child</option>
+                <option value="2">2 Children</option>
+                <option value="3">3+ Children</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <span class="num">03</span>
+            <span>Total Tour Budget (Group Total)</span>
+          </div>
+
+          <div class="budget-box">
+            <div class="budget-header">
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: var(--ink);">Maximum Tour Budget (INR)</div>
+                <div class="budget-disclosure">Must cover stays, dedicated cab, permits, and applicable taxes</div>
+              </div>
+              <div class="budget-amount" id="budgetDisplay">&#8377;15,000</div>
+            </div>
+
+            <input type="range" id="budgetSlider" class="editorial-range" min="3000" max="150000" step="1000" value="15000">
+
+            <div class="budget-chips">
+              <div class="chip" onclick="setBudget(8000)">&#8377;8,000 Explorer</div>
+              <div class="chip active" onclick="setBudget(15000)">&#8377;15,000 Standard</div>
+              <div class="chip" onclick="setBudget(25000)">&#8377;25,000 Comfort</div>
+              <div class="chip" onclick="setBudget(50000)">&#8377;50,000 Deluxe</div>
+              <div class="chip" onclick="setBudget(85000)">&#8377;85,000+ Luxury</div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <span class="num">04</span>
+            <span>Transport &amp; Inclusions</span>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="roomPreference">Transport / Vehicle Preference</label>
+              <select id="roomPreference" class="form-control">
+                <option value="any">Flexible / Operator Recommended</option>
+                <option value="ac">Dedicated Air-Conditioned Cab (Sedan / SUV)</option>
+                <option value="non_ac">Standard Non-AC / Hill Taxi</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contactChannel">Preferred Update Channel</label>
+              <select id="contactChannel" class="form-control">
+                <option value="whatsapp">WhatsApp &amp; Email (Instant delivery)</option>
+                <option value="email">Email Only</option>
+                <option value="sms">SMS &amp; Email</option>
+              </select>
+            </div>
+          </div>
+
+          <label style="margin-bottom: 10px;">Must-Have Tour Inclusions:</label>
+          <div class="facilities-grid">
+            <div>
+              <input type="checkbox" id="fac_wifi" class="facility-checkbox" value="wifi" checked>
+              <label for="fac_wifi" class="facility-label"><span>Wi-Fi in Stays</span><span class="check-mark">&#10003;</span></label>
+            </div>
+            <div>
+              <input type="checkbox" id="fac_parking" class="facility-checkbox" value="parking" checked>
+              <label for="fac_parking" class="facility-label"><span>Dedicated Cab &amp; Transfers</span><span class="check-mark">&#10003;</span></label>
+            </div>
+            <div>
+              <input type="checkbox" id="fac_breakfast" class="facility-checkbox" value="breakfast" checked>
+              <label for="fac_breakfast" class="facility-label"><span>Daily Breakfast &amp; Meals</span><span class="check-mark">&#10003;</span></label>
+            </div>
+            <div>
+              <input type="checkbox" id="fac_mountain_view" class="facility-checkbox" value="mountain_view">
+              <label for="fac_mountain_view" class="facility-label"><span>Scenic Excursions</span><span class="check-mark">&#10003;</span></label>
+            </div>
+            <div>
+              <input type="checkbox" id="fac_pool" class="facility-checkbox" value="pool">
+              <label for="fac_pool" class="facility-label"><span>Pool / Leisure Resort</span><span class="check-mark">&#10003;</span></label>
+            </div>
+            <div>
+              <input type="checkbox" id="fac_accessible" class="facility-checkbox" value="accessible">
+              <label for="fac_accessible" class="facility-label"><span>Accessible Friendly</span><span class="check-mark">&#10003;</span></label>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <span class="num">05</span>
+            <span>Lead Traveler Contact</span>
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="guestName">Lead Traveler Name *</label>
+              <input type="text" id="guestName" class="form-control" placeholder="Full Name" required>
+            </div>
+            <div class="form-group">
+              <label for="guestEmail">Email Address *</label>
+              <input type="email" id="guestEmail" class="form-control" placeholder="your.email@gmail.com" required>
+            </div>
+            <div class="form-group">
+              <label for="guestPhone">Mobile Number (WhatsApp) *</label>
+              <input type="tel" id="guestPhone" class="form-control" placeholder="9876543210" required>
+            </div>
+          </div>
+
+          <div class="consent-box">
+            <label class="checkbox-row">
+              <input type="checkbox" id="commConsent" checked>
+              <span>I agree to receive automated tour package quotes, 1-click booking updates, and itineraries via WhatsApp &amp; Email.</span>
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" id="termsAccept" required>
+              <span>I accept the TripMozy Tour Marketplace Booking Terms, Privacy Policy, and 15-Minute Guaranteed Price Hold guidelines. *</span>
+            </label>
+          </div>
+
+          <button type="submit" id="submitBtn" class="submit-btn">
+            <span>Request Tour Quotes Now</span>
+          </button>
+          <div id="authSubmitHint" style="display:none; text-align:center; margin-top:12px; font-size:12px; color:var(--ink-muted); line-height:1.5;">
+            <strong>Verification note:</strong> Customize tour parameters freely. Submitting dispatches directly to verified regional operators.
+          </div>
+
+          <div class="trust-ribbon">
+            <div>
+              <div class="trust-item-title">100% Escrow Protection</div>
+              <div class="trust-item-sub">Funds securely held until departure</div>
+            </div>
+            <div>
+              <div class="trust-item-title">Verified Operators</div>
+              <div class="trust-item-sub">Handpicked, GST-registered fleets</div>
+            </div>
+            <div>
+              <div class="trust-item-title">Zero Hidden Surcharges</div>
+              <div class="trust-item-sub">Inclusive of cab, permits &amp; stays</div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Result View -->
+      <div class="result-card" id="resultCard">
+        <div class="success-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B5E44" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
-
-        <!-- 4. Transport & Inclusions -->
-        <div class="section-title">
-          <span class="num">4</span>
-          <span>Transport Style &amp; Must-Have Inclusions</span>
+        <h2 class="result-title">Tour Request Dispatched</h2>
+        <div class="result-ref" id="resultRef">TM-REQ-20261029-XXXX</div>
+        <p class="result-desc" id="resultMsg">
+          Verified local tour operators in your destination have been contacted. Quotes will arrive shortly.
+        </p>
+        <div class="action-links">
+          <a href="#" id="viewOffersBtn" class="btn-primary-link">View Live Tour Offers</a>
+          <button type="button" id="cancelFromResultBtn" onclick="cancelFromSuccessCard()" class="btn-secondary" style="border-color:#E5B7B7; color:var(--crimson);">Cancel Tour Request</button>
+          <a href="/smart-tour-booking" class="btn-secondary">Submit Another Request</a>
         </div>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="roomPreference">Transport / Vehicle Preference</label>
-            <select id="roomPreference" class="form-control">
-              <option value="any">Flexible / Operator Recommended</option>
-              <option value="ac">Dedicated Air-Conditioned Cab (Sedan / SUV)</option>
-              <option value="non_ac">Standard Non-AC / Hill Taxi</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="contactChannel">Preferred Update Channel</label>
-            <select id="contactChannel" class="form-control">
-              <option value="whatsapp">WhatsApp &amp; Email (Instant delivery)</option>
-              <option value="email">Email Only</option>
-              <option value="sms">SMS &amp; Email</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 8px;">Must-Have Tour Inclusions:</div>
-        <div class="facilities-grid">
-          <div>
-            <input type="checkbox" id="fac_wifi" class="facility-checkbox" value="wifi" checked>
-            <label for="fac_wifi" class="facility-label">Wi-Fi in Stays</label>
-          </div>
-          <div>
-            <input type="checkbox" id="fac_parking" class="facility-checkbox" value="parking" checked>
-            <label for="fac_parking" class="facility-label">Dedicated Cab &amp; Transfers</label>
-          </div>
-          <div>
-            <input type="checkbox" id="fac_breakfast" class="facility-checkbox" value="breakfast" checked>
-            <label for="fac_breakfast" class="facility-label">Daily Breakfast &amp; Meals</label>
-          </div>
-          <div>
-            <input type="checkbox" id="fac_mountain_view" class="facility-checkbox" value="mountain_view">
-            <label for="fac_mountain_view" class="facility-label">Scenic Viewpoints &amp; Excursions</label>
-          </div>
-          <div>
-            <input type="checkbox" id="fac_pool" class="facility-checkbox" value="pool">
-            <label for="fac_pool" class="facility-label">Pool / Leisure Resort Access</label>
-          </div>
-          <div>
-            <input type="checkbox" id="fac_accessible" class="facility-checkbox" value="accessible">
-            <label for="fac_accessible" class="facility-label">Elderly / Accessible Friendly</label>
-          </div>
-        </div>
-
-        <!-- 5. Traveler Contact Details -->
-        <div class="section-title">
-          <span class="num">5</span>
-          <span>Lead Traveler Contact Details for Receiving Quotes</span>
-        </div>
-
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="guestName">Lead Traveler Name *</label>
-            <input type="text" id="guestName" class="form-control" placeholder="Your Name" required>
-          </div>
-          <div class="form-group">
-            <label for="guestEmail">Email Address (for Tour Quotes) *</label>
-            <input type="email" id="guestEmail" class="form-control" placeholder="your.email@gmail.com" required>
-          </div>
-          <div class="form-group">
-            <label for="guestPhone">Mobile Number (WhatsApp) *</label>
-            <input type="tel" id="guestPhone" class="form-control" placeholder="9876543210" required>
-          </div>
-        </div>
-
-        <!-- Consent & Terms -->
-        <div class="consent-box">
-          <label class="checkbox-row">
-            <input type="checkbox" id="commConsent" checked>
-            <span>I agree to receive automated tour package quotes, 1-click booking updates, and itineraries via WhatsApp &amp; Email.</span>
-          </label>
-          <label class="checkbox-row">
-            <input type="checkbox" id="termsAccept" required>
-            <span>I accept the TripMozy Tour Marketplace Booking Terms, Privacy Policy, and 15-Minute Guaranteed Price Hold guidelines. *</span>
-          </label>
-        </div>
-
-        <button type="submit" id="submitBtn" class="submit-btn">
-          <span>Request Tour Quotes Now</span>
-        </button>
-        <div id="authSubmitHint" style="display:none; text-align:center; margin-top:12px; font-size:12px; color:#64748b; line-height:1.5;">
-          <strong>Verification required:</strong> You can customize tour details freely. Signing in verifies your identity so operators can send genuine quotes.
-        </div>
-
-        <!-- Trust Ribbon -->
-        <div class="trust-ribbon">
-          <div>
-            <div class="trust-item-title">100% Escrow Protection</div>
-            <div class="trust-item-sub">Funds securely held until tour begins</div>
-          </div>
-          <div>
-            <div class="trust-item-title">Verified Tour Operators</div>
-            <div class="trust-item-sub">Handpicked, GST-registered local experts</div>
-          </div>
-          <div>
-            <div class="trust-item-title">Zero Hidden Surcharges</div>
-            <div class="trust-item-sub">Inclusive of private cab, permits &amp; stays</div>
-          </div>
-        </div>
-
-      </form>
+      </div>
     </div>
 
-    <!-- Result / Success View -->
-    <div class="result-card" id="resultCard">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
+    <!-- Live Interactive Brief Summary Dossier -->
+    <aside class="studio-sidebar">
+      <div class="brief-dossier" id="liveBriefDossier">
+        <div class="brief-kicker">Live Brief Preview</div>
+        <div class="brief-heading" id="liveBriefDest">Custom Destination</div>
+
+        <div class="brief-row">
+          <span class="brief-row-lbl">Duration</span>
+          <span class="brief-row-val" id="liveBriefDuration">4 Days / 3 Nights</span>
+        </div>
+        <div class="brief-row">
+          <span class="brief-row-lbl">Travel Party</span>
+          <span class="brief-row-val" id="liveBriefParty">2 Adults &middot; 1 Vehicle</span>
+        </div>
+        <div class="brief-row">
+          <span class="brief-row-lbl">Package Style</span>
+          <span class="brief-row-val" id="liveBriefStyle">Any Style</span>
+        </div>
+        <div class="brief-row" style="border-bottom:none;">
+          <span class="brief-row-lbl">Target Ceiling</span>
+          <span class="brief-row-val" id="liveBriefTotal">&#8377;15,000</span>
+        </div>
+
+        <div class="brief-math-box">
+          <div class="brief-math-title">Est. 30% Advance + 5% GST Lock</div>
+          <div class="brief-math-main" id="liveBriefAdvance">&#8377;4,725</div>
+          <div style="font-size:12px; color:#A7ABB4; margin-top:6px;">
+            Remaining 70% (<span id="liveBriefBalance" style="color:#fff;font-weight:600;">&#8377;10,500</span>) payable on tour arrival or online.
+          </div>
+        </div>
+
+        <p class="brief-note">
+          Submitting creates an instant request across verified operators without collecting payment until an exclusive partner locks your itinerary.
+        </p>
       </div>
-      <h2 class="result-title">Tour Request Dispatched!</h2>
-      <div class="result-ref" id="resultRef">TM-REQ-20261029-XXXX</div>
-      <p class="result-desc" id="resultMsg">
-        Verified local tour operators in your destination have been contacted. You will receive customized tour quotes in your email and WhatsApp shortly.
-      </p>
-      <div class="action-links">
-        <a href="#" id="viewOffersBtn" class="btn-primary-link">View Live Tour Offers</a>
-        <button type="button" id="cancelFromResultBtn" onclick="cancelFromSuccessCard()" class="btn-secondary" style="border:1.5px solid #fecaca; color:#dc2626; background:#fff; cursor:pointer;">Cancel Tour Request</button>
-        <a href="/smart-tour-booking" class="btn-secondary">Submit Another Request</a>
-      </div>
-    </div>
+    </aside>
   </main>
+
+  <footer>
+    <div class="footer-bottom">
+      <span><strong>TripMozy</strong> &middot; Private Tour Commissioning Studio</span>
+      <div class="footer-links">
+        <a href="/">Overview</a>
+        <a href="/booking">Track Offers</a>
+        <a href="/partner/dashboard">Operator Desk</a>
+        <a href="/login">Account Access</a>
+      </div>
+    </div>
+  </footer>
 
   <div class="toast" id="toast">Notification</div>
 
+  <script src="/assets/tripmozy-motion.js"></script>
   <script>
-    // Set min date to today for check-in
     const checkInInput = document.getElementById('checkInDate');
     const checkOutInput = document.getElementById('checkOutDate');
     const nightsDisplay = document.getElementById('nightsDisplay');
+    const slider = document.getElementById('budgetSlider');
+    const budgetDisplay = document.getElementById('budgetDisplay');
+
+    const LOCAL_IMAGE_MAP = {
+      'kashmir': '/images/circuit-kashmir.jpg',
+      'goa': '/images/circuit-goa.jpg',
+      'rajasthan': '/images/circuit-rajasthan.jpg',
+      'jaipur': '/images/hero-jaipur-palace.jpg',
+      'kerala': '/images/circuit-kerala.jpg',
+      'manali': '/images/hero-himalaya.jpg',
+      'himachal': '/images/hero-himalaya.jpg',
+      'delhi': '/images/circuit-golden-triangle.jpg',
+      'agra': '/images/circuit-golden-triangle.jpg'
+    };
+
+    function resolveTourImage(tour) {
+      const dest = (tour.destination || tour.title || '').toLowerCase();
+      const rawUrl = tour.image_url || '';
+      if (!rawUrl || rawUrl.includes('images.unsplash.com')) {
+        for (const k of Object.keys(LOCAL_IMAGE_MAP)) {
+          if (dest.includes(k)) return LOCAL_IMAGE_MAP[k];
+        }
+      }
+      return rawUrl || '/images/circuit-kashmir.jpg';
+    }
+
+    function scrollRail(delta) {
+      const el = document.getElementById('featuredCircuitsGrid');
+      if (el) el.scrollBy({ left: delta, behavior: 'smooth' });
+    }
 
     const today = new Date().toISOString().split('T')[0];
     checkInInput.min = today;
 
-    // Default dates: tomorrow to +3 days (4 days / 3 nights)
     const defaultIn = new Date();
     defaultIn.setDate(defaultIn.getDate() + 1);
     const defaultOut = new Date();
@@ -1504,6 +1595,33 @@
     checkInInput.value = defaultIn.toISOString().split('T')[0];
     checkOutInput.min = checkInInput.value;
     checkOutInput.value = defaultOut.toISOString().split('T')[0];
+
+    function syncLiveDossier() {
+      const destVal = (document.getElementById('destination').value || '').trim();
+      const styleSel = document.getElementById('propertyType');
+      const adults = document.getElementById('numAdults').value || 2;
+      const kids = parseInt(document.getElementById('numChildren').value || '0', 10);
+      const rooms = document.getElementById('numRooms').value || 1;
+      const total = parseInt(slider.value || '15000', 10);
+      const advBase = Math.round(total * 0.30);
+      const advTotal = Math.round(advBase * 1.05);
+      const balance = total - advBase;
+
+      const dEl = document.getElementById('liveBriefDest');
+      if (dEl) dEl.textContent = destVal || 'Custom Destination';
+      const durEl = document.getElementById('liveBriefDuration');
+      if (durEl) durEl.textContent = nightsDisplay.value;
+      const partyEl = document.getElementById('liveBriefParty');
+      if (partyEl) partyEl.textContent = `${adults} Adults${kids > 0 ? ' + ' + kids + ' Child' : ''} · ${rooms} Veh.`;
+      const stEl = document.getElementById('liveBriefStyle');
+      if (stEl && styleSel.selectedOptions[0]) stEl.textContent = styleSel.selectedOptions[0].textContent;
+      const totEl = document.getElementById('liveBriefTotal');
+      if (totEl) totEl.textContent = '₹' + total.toLocaleString('en-IN');
+      const advEl = document.getElementById('liveBriefAdvance');
+      if (advEl) advEl.textContent = '₹' + advTotal.toLocaleString('en-IN');
+      const balEl = document.getElementById('liveBriefBalance');
+      if (balEl) balEl.textContent = '₹' + balance.toLocaleString('en-IN');
+    }
 
     function updateNights() {
       const inDate = new Date(checkInInput.value);
@@ -1516,6 +1634,7 @@
       } else {
         nightsDisplay.value = 'Invalid Dates';
       }
+      syncLiveDossier();
     }
 
     checkInInput.addEventListener('change', () => {
@@ -1528,11 +1647,11 @@
       updateNights();
     });
     checkOutInput.addEventListener('change', updateNights);
-    updateNights();
-
-    // Budget Slider
-    const slider = document.getElementById('budgetSlider');
-    const budgetDisplay = document.getElementById('budgetDisplay');
+    ['destination', 'propertyType', 'numRooms', 'numAdults', 'numChildren'].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener('input', syncLiveDossier);
+      if (node) node.addEventListener('change', syncLiveDossier);
+    });
 
     function setBudget(val) {
       slider.value = val;
@@ -1540,12 +1659,17 @@
       document.querySelectorAll('.chip').forEach(c => {
         c.classList.toggle('active', c.textContent.includes(parseInt(val).toLocaleString('en-IN')));
       });
+      syncLiveDossier();
     }
 
     slider.addEventListener('input', (e) => {
       budgetDisplay.textContent = '₹' + parseInt(e.target.value).toLocaleString('en-IN');
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      syncLiveDossier();
     });
+
+    updateNights();
+    syncLiveDossier();
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -1554,7 +1678,6 @@
       setTimeout(() => toast.classList.remove('show'), 4000);
     }
 
-    // Featured Tour Cards & Details Popup Modal System
     let loadedFeaturedTours = [];
     let selectedTourForModal = null;
 
@@ -1567,14 +1690,14 @@
         nights: 5,
         starting_price_inr: 28000,
         badge: 'Trending 2026',
-        image_url: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80',
+        image_url: '/images/circuit-kashmir.jpg',
         overview: 'Experience the magic of Dal Lake houseboats, Gulmarg snow slopes, and scenic Pahalgam valleys with private transport.',
         highlights: [
           'Day 1: Srinagar arrival & sunset Shikara ride on Dal Lake',
           'Day 2: Gulmarg snow gondola ride & Kongdoori peak view',
           'Day 3: Pahalgam scenic Betaab Valley & Aru Valley excursion',
           'Day 4: Sonamarg glacier drive & Thajiwas snow trail',
-          'Day 5: Mughal Gardens (Nishat & Shalimar) & local craft bazaar',
+          'Day 5: Mughal Gardens & local craft bazaar',
           'Day 6: Houseboat breakfast & departure transfer'
         ],
         inclusions: [
@@ -1592,7 +1715,7 @@
         nights: 6,
         starting_price_inr: 36000,
         badge: 'Heritage Classic',
-        image_url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80',
+        image_url: '/images/circuit-rajasthan.jpg',
         overview: 'Walk the majestic palaces of Jaipur, the blue fortresses of Jodhpur, and the romantic lakes of Udaipur.',
         highlights: [
           'Day 1-2: Jaipur Pink City, Amer Fort & Hawa Mahal',
@@ -1615,7 +1738,7 @@
         nights: 4,
         starting_price_inr: 24000,
         badge: 'Bestseller',
-        image_url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80',
+        image_url: '/images/circuit-kerala.jpg',
         overview: 'Rejuvenate in emerald Munnar tea hills, wildlife sanctuary trails of Thekkady, and a private Alleppey houseboat.',
         highlights: [
           'Day 1-2: Munnar tea plantations & Mattupetty Dam',
@@ -1638,7 +1761,7 @@
         nights: 4,
         starting_price_inr: 22000,
         badge: 'Snow Explorer',
-        image_url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=600&q=80',
+        image_url: '/images/hero-himalaya.jpg',
         overview: 'Discover the snow valleys of Solang and Atal Tunnel, Old Manali cafes, and peaceful cedar forests.',
         highlights: [
           'Day 1: Arrival Manali & Hadimba Temple walk',
@@ -1687,31 +1810,38 @@
         const price = t.starting_price_inr || 25000;
         const advance = Math.round(price * 0.3);
         const duration = t.duration || `${(t.nights || 4) + 1} Days / ${t.nights || 4} Nights`;
+        const imgSrc = resolveTourImage(t);
 
         return `
           <div class="tour-card" onclick="openTourDetailModal(${idx})">
             <div class="tour-card-img-wrap">
-              <img class="tour-card-img" src="${t.image_url || 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80'}" alt="${t.title}" loading="lazy">
-              <span class="tour-card-pill">⏱️ ${duration}</span>
+              <img class="tour-card-img" src="${imgSrc}" alt="${t.title}" onerror="this.src='/images/circuit-kashmir.jpg'">
+              <span class="tour-card-pill">${duration}</span>
+              ${t.badge ? `<span class="tour-card-badge">${t.badge}</span>` : ''}
             </div>
             <div class="tour-card-body">
+              <div class="tour-card-dest-row">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>${t.destination}</span>
+              </div>
               <div class="tour-card-title">${t.title}</div>
-              <div class="tour-card-subtitle">📍 ${t.destination}</div>
               <div class="tour-card-features">
                 ${t.overview || 'Handcrafted itinerary curated by verified tour operators.'}
               </div>
               <div class="tour-card-foot" onclick="event.stopPropagation()">
-                <div>
-                  <div class="tour-card-price-label">EST. FROM</div>
-                  <div class="tour-card-price">₹${price.toLocaleString('en-IN')}</div>
-                  <div style="font-size:10px; color:#0f766e; font-weight:700;">30% Adv: ₹${advance.toLocaleString('en-IN')}</div>
+                <div class="tour-card-pricing-row">
+                  <div>
+                    <div class="tour-card-price-label">Estimated From</div>
+                    <div class="tour-card-price">&#8377;${price.toLocaleString('en-IN')}</div>
+                  </div>
+                  <div class="tour-card-adv">30% Adv: &#8377;${advance.toLocaleString('en-IN')}</div>
                 </div>
-                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                <div class="tour-card-actions">
                   <button type="button" class="tour-card-btn-secondary" onclick="openTourDetailModal(${idx})">
-                    Explore Details &amp; Duration ℹ️
+                    Inspect Circuit
                   </button>
                   <button type="button" class="tour-card-btn" onclick="selectPresetJourney('${t.destination.replace(/'/g, "\\'")}', ${t.nights || 5}, ${price}, ['wifi', 'parking', 'breakfast'], 'resort')">
-                    Select Journey →
+                    Select Tour
                   </button>
                 </div>
               </div>
@@ -1746,7 +1876,6 @@
           'Arrival & transfer to luxury hotel / resort',
           'Private guided sightseeing with verified local driver',
           'Scenic viewpoints & cultural landmarks',
-          'Houseboat / mountain valley excursion',
           'Breakfast & departure assistance'
         ];
       }
@@ -1760,20 +1889,17 @@
         ];
       }
 
-      document.getElementById('modalImg').src = tour.image_url || 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80';
+      document.getElementById('modalImg').src = resolveTourImage(tour);
       document.getElementById('modalBadge').textContent = tour.badge || 'Bestseller 2026';
-      document.getElementById('modalDuration').textContent = `⏱️ ${duration}`;
+      document.getElementById('modalDuration').textContent = duration;
       document.getElementById('modalTitle').textContent = tour.title;
-      document.getElementById('modalDest').textContent = `📍 ${tour.destination}`;
+      document.getElementById('modalDest').textContent = tour.destination;
       document.getElementById('modalPrice').textContent = `₹${price.toLocaleString('en-IN')}`;
       document.getElementById('modalAdvance').textContent = `30% Advance: ₹${advance.toLocaleString('en-IN')}`;
       document.getElementById('modalOverview').textContent = tour.overview || 'Handcrafted itinerary matched with verified local operators.';
 
-      const hlList = document.getElementById('modalHighlights');
-      hlList.innerHTML = highlights.map(h => `<li>${h}</li>`).join('');
-
-      const incList = document.getElementById('modalInclusions');
-      incList.innerHTML = inclusions.map(inc => `<li>${inc}</li>`).join('');
+      document.getElementById('modalHighlights').innerHTML = highlights.map(h => `<li>${h}</li>`).join('');
+      document.getElementById('modalInclusions').innerHTML = inclusions.map(inc => `<li>${inc}</li>`).join('');
 
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -1786,9 +1912,7 @@
     }
 
     function handleBackdropClick(e) {
-      if (e.target && e.target.id === 'tourDetailModal') {
-        closeTourDetailModal();
-      }
+      if (e.target && e.target.id === 'tourDetailModal') closeTourDetailModal();
     }
 
     function applyAndBookTourModal() {
@@ -1798,10 +1922,8 @@
       selectPresetJourney(t.destination, t.nights || 5, t.starting_price_inr || 28000, ['wifi', 'parking', 'breakfast'], 'resort');
     }
 
-    // Call on load
     loadFeaturedTourCards();
 
-    // Select Curated Suggested Tour Journey
     function selectPresetJourney(destination, nights, budget, inclusions, style) {
       const destInput = document.getElementById('destination');
       const propStyle = document.getElementById('propertyType');
@@ -1809,7 +1931,6 @@
       if (destInput) destInput.value = destination;
       if (propStyle && style) propStyle.value = style;
 
-      // Set dates: 2 days from today to +nights
       const start = new Date();
       start.setDate(start.getDate() + 2);
       const end = new Date(start);
@@ -1820,17 +1941,16 @@
       checkOutInput.value = end.toISOString().split('T')[0];
       updateNights();
 
-      // Set budget
       setBudget(budget);
 
-      // Check inclusions
       if (Array.isArray(inclusions)) {
         document.querySelectorAll('.facility-checkbox').forEach(cb => {
           cb.checked = inclusions.includes(cb.value);
         });
       }
 
-      // Smooth scroll to form card with visual pulse
+      syncLiveDossier();
+
       const formCard = document.getElementById('formCard');
       if (formCard) {
         formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1862,7 +1982,9 @@
       return false;
     }
 
-    // Submit Request
+    let latestSubmissionId = null;
+    let autoRedirectTimer = null;
+
     document.getElementById('tourRequestForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -1927,7 +2049,6 @@
           throw new Error(data.error || 'Failed to submit tour request');
         }
 
-        // Remember customer permanently so user is never prompted to log in again while requesting tours
         localStorage.setItem('tm_user_info', JSON.stringify({
           displayName: payload.guestName,
           email: payload.guestEmail,
@@ -1966,7 +2087,6 @@
         document.cookie = `tm_user_phone=${encodeURIComponent(payload.guestPhone)}; path=/; max-age=2592000; SameSite=Lax`;
         document.cookie = `tm_user_role=customer; path=/; max-age=2592000; SameSite=Lax`;
 
-        // Show Result Card
         document.getElementById('formCard').style.display = 'none';
         const resultCard = document.getElementById('resultCard');
         resultCard.style.display = 'block';
@@ -1981,7 +2101,6 @@
 
         latestSubmissionId = data.id;
 
-        // Auto-redirect to live offers after 2 seconds
         if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
         autoRedirectTimer = setTimeout(() => {
           window.location.href = viewOffersUrl;
@@ -1993,9 +2112,6 @@
         btn.innerHTML = '<span>Request Tour Quotes Now</span>';
       }
     });
-
-    let latestSubmissionId = null;
-    let autoRedirectTimer = null;
 
     async function cancelFromSuccessCard() {
       if (!latestSubmissionId) return;
@@ -2012,7 +2128,7 @@
         const d = await res.json();
         if (!res.ok) throw new Error(d.error || 'Failed to cancel');
         document.getElementById('resultMsg').innerHTML =
-          '<span style="color:#dc2626; font-weight:700;">Tour request cancelled.</span> Local tour operators will not send quotes. You can submit another request anytime.';
+          '<span style="color:var(--crimson); font-weight:700;">Tour request cancelled.</span> Local tour operators will not send quotes. You can submit another request anytime.';
         document.getElementById('viewOffersBtn').style.display = 'none';
         btn.style.display = 'none';
         showToast('Tour request cancelled.');
@@ -2023,7 +2139,6 @@
       }
     }
 
-    // Check logged in customer session & prefill / restore pending request
     (function checkCustomerSession() {
       try {
         const raw = localStorage.getItem('tm_user_info');
@@ -2056,13 +2171,12 @@
           }
           const item = document.getElementById('authHeaderItem');
           if (item) {
-            item.innerHTML = `<span style="font-size:13px;color:#d8ba7a;">${dispName}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:#f87171;text-decoration:none;margin-left:6px;">(Sign Out)</a>`;
+            item.innerHTML = `<span style="font-size:12.5px;font-weight:600;color:var(--ink);">${dispName}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:var(--crimson);text-decoration:none;margin-left:6px;font-weight:600;">Sign Out</a>`;
           }
 
           if (btn) btn.innerHTML = '<span>Request Tour Quotes Now</span>';
           if (authHint) authHint.style.display = 'none';
 
-          // Restore pending tour request if returning from login
           const pendingRaw = localStorage.getItem('tm_pending_tour_request');
           const s = new URLSearchParams(window.location.search);
           if (pendingRaw) {
@@ -2090,6 +2204,7 @@
 
               localStorage.removeItem('tm_pending_tour_request');
               showToast('Welcome back! Your tour details have been restored.');
+              syncLiveDossier();
 
               if (s.get('action') === 'submit') {
                 window.history.replaceState({}, '', '/smart-tour-booking');
@@ -2100,8 +2215,7 @@
             } catch (_) {}
           }
         } else {
-          // Guest User (Not logged in)
-          if (btn) btn.innerHTML = '<span>Log In to Request Tour Quotes</span>';
+          if (btn) btn.innerHTML = '<span>Request Tour Quotes Now</span>';
           if (authHint) authHint.style.display = 'block';
         }
       } catch (_) {}

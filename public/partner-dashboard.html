@@ -3,275 +3,796 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Tour Operator Dashboard | TripMozy</title>
+  <title>Tour Operator Dispatch Desk | TripMozy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --navy: #0f172a;
-      --navy-light: #1e293b;
-      --accent: #f59e0b;
-      --bg: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --success: #059669;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --radius: 14px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow: 0 4px 20px rgba(15,23,42,0.07);
-      --shadow-lg: 0 25px 60px -15px rgba(15,23,42,0.15);
+      --paper: #F7F5F0;
+      --paper-pure: #FFFFFF;
+      --sand: #EFECE4;
+      --sand-dark: #E4DFD3;
+      --ink: #14171C;
+      --ink-secondary: #484E57;
+      --ink-muted: #767B84;
+      --ochre: #9E6B30;
+      --ochre-dark: #7D5220;
+      --ochre-soft: #F6EFE6;
+      --sage: #1B5E44;
+      --sage-soft: #EBF3EF;
+      --crimson: #9B2C2C;
+      --crimson-soft: #FBF0F0;
+      --hairline: #E2DDD3;
+      --hairline-strong: #C9C2B4;
+      --obsidian: #111317;
+      --obsidian-elevated: #1A1D24;
+      --brass: #C9A467;
+
+      /* Aliases preserved */
+      --primary: #9E6B30;
+      --primary-dark: #7D5220;
+      --navy: #14171C;
+      --border: #E2DDD3;
+      --text: #14171C;
+      --text-muted: #767B84;
+
+      --radius: 3px;
+      --radius-sm: 2px;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      --shadow-sm: 0 2px 6px rgba(20, 23, 28, 0.04);
+      --shadow: 0 10px 28px rgba(20, 23, 28, 0.07);
+      --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
 
-    /* ── Header ── */
-    header { background: var(--navy); color: #fff; padding: 0 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.18); }
-    .header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 62px; }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
-    .brand-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-    .brand-logo span { color: var(--accent); }
-    .brand-badge { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.28); color: var(--accent); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px; }
-    .header-right { display: flex; align-items: center; gap: 10px; }
-    .vendor-name-display { font-size: 13px; font-weight: 700; color: #fff; }
-    .vendor-status-display { font-size: 11px; color: #94a3b8; }
-    .refresh-btn { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: #fff; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: background .2s; font-family: inherit; }
-    .refresh-btn:hover { background: rgba(255,255,255,.16); }
-    .live-dot { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
-    .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-    @keyframes spin { to{transform:rotate(360deg)} }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Page Nav Tabs (the "pages") ── */
-    .page-nav { background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 62px; z-index: 90; }
-    .page-nav-inner { max-width: 1280px; margin: 0 auto; display: flex; padding: 0 24px; gap: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea { font-family: inherit; }
+
+    /* ── Header (Multi-row-safe, zero vertical bleed) ───────────────── */
+    header {
+      background: var(--obsidian);
+      color: var(--paper);
+      border-bottom: 1px solid #262A34;
+      position: sticky;
+      top: 0;
+      z-index: 150;
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--paper);
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .brand-logo span { color: var(--brass); }
+
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #9CA3AF;
+      border-left: 1px solid #2F3542;
+      padding-left: 12px;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .fleet-picker-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--obsidian-elevated);
+      border: 1px solid #2B303C;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .fleet-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8F95A0;
+    }
+
+    #vendorPicker {
+      background: var(--obsidian);
+      color: #F7F5F0;
+      border: 1px solid #353B49;
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      max-width: 190px;
+    }
+
+    .refresh-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 11px;
+      border-radius: var(--radius-sm);
+      background: rgba(27, 94, 68, 0.18);
+      border: 1px solid rgba(134, 239, 172, 0.25);
+      color: #A7F3D0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34D399;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .vendor-identity-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      padding: 0 8px;
+      border-left: 1px solid #2B303C;
+      max-width: 260px;
+    }
+
+    .vendor-name-display {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .vendor-status-display {
+      font-size: 11px;
+      color: var(--brass);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .vendor-contact-meta {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: #9CA3AF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .refresh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: var(--obsidian-elevated);
+      border: 1px solid #2F3542;
+      color: #E5E7EB;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--brass);
+      color: #fff;
+    }
+
+    .refresh-btn.danger-btn {
+      border-color: rgba(155, 44, 44, 0.5);
+      color: #FCA5A5;
+    }
+
+    .refresh-btn.danger-btn:hover {
+      background: rgba(155, 44, 44, 0.2);
+      border-color: #FCA5A5;
+    }
+
+    /* ── Page Nav Tabs ──────────────────────────────────────────────── */
+    .page-nav {
+      background: var(--paper-pure);
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .page-nav-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: stretch;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .page-nav-inner::-webkit-scrollbar { display: none; }
+
     .page-tab {
-      display: flex; align-items: center; gap: 8px;
-      padding: 16px 22px; border: none; background: transparent;
-      font-family: inherit; font-size: 14px; font-weight: 600;
-      color: var(--text-muted); cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: color .18s, border-color .18s;
-      position: relative; white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 14px 18px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--ink-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.2s ease, border-color 0.2s ease;
     }
-    .page-tab:hover { color: var(--text); }
-    .page-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .page-tab:hover { color: var(--ink); }
+
+    .page-tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--ochre);
+    }
+
     .tab-count {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-width: 22px; height: 22px; padding: 0 6px;
-      border-radius: 11px; font-size: 11px; font-weight: 800;
-      background: #f1f5f9; color: var(--text-muted);
-      transition: background .2s, color .2s;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      background: var(--sand);
+      color: var(--ink-secondary);
     }
-    .page-tab.active .tab-count { background: #dbeafe; color: var(--primary); }
-    .page-tab[data-page="pending"].active .tab-count { background: #fef3c7; color: #92400e; }
-    .page-tab[data-page="accepted"].active .tab-count { background: #d1fae5; color: #065f46; }
-    .page-tab[data-page="rejected"].active .tab-count { background: #fee2e2; color: #991b1b; }
 
-    /* ── Container ── */
-    .container { max-width: 1280px; margin: 0 auto; padding: 28px 24px 80px; }
+    .page-tab.active .tab-count {
+      background: var(--ink);
+      color: var(--paper);
+    }
 
-    /* ── Stats Bar ── */
-    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 28px; }
-    .stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); border-left: 4px solid var(--border); cursor: pointer; transition: transform .15s, box-shadow .15s; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(15,23,42,.1); }
-    .stat-card.pending  { border-left-color: var(--warning); }
-    .stat-card.accepted { border-left-color: var(--success); }
-    .stat-card.rejected { border-left-color: var(--danger); }
-    .stat-card.all      { border-left-color: var(--primary); }
-    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
-    .stat-value { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+    /* ── Main Container ─────────────────────────────────────────────── */
+    .container {
+      flex: 1 0 auto;
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 24px 64px;
+    }
 
-    /* ── Page Header ── */
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    .page-title { font-size: 18px; font-weight: 700; }
-    .page-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .section-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-    .section-badge.pending  { background: #fef3c7; color: #92400e; }
-    .section-badge.accepted { background: #d1fae5; color: #065f46; }
-    .section-badge.rejected { background: #fee2e2; color: #991b1b; }
-    .section-badge.all      { background: #eff6ff; color: #1d4ed8; }
+    /* ── Integrated Hairline Telemetry Strip ────────────────────────── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
 
-    /* ── Cards ── */
-    .requests-grid { display: flex; flex-direction: column; gap: 18px; }
+    .stat-card {
+      padding: 16px 20px;
+      border-right: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .stat-card:last-child { border-right: none; }
+    .stat-card:hover { background: var(--paper); }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--ink-muted);
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-card.pending .stat-value { color: var(--ochre-dark); }
+    .stat-card.accepted .stat-value { color: var(--sage); }
+    .stat-card.rejected .stat-value { color: var(--ink-secondary); }
+
+    /* ── Page Header ────────────────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .page-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .page-meta {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 4px;
+    }
+
+    .section-badge {
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid var(--hairline);
+    }
+
+    .section-badge.pending { background: var(--ochre-soft); color: var(--ochre-dark); border-color: rgba(158, 107, 48, 0.28); }
+    .section-badge.accepted { background: var(--sage-soft); color: var(--sage); border-color: rgba(27, 94, 68, 0.25); }
+    .section-badge.rejected { background: var(--crimson-soft); color: var(--crimson); border-color: rgba(155, 44, 44, 0.25); }
+    .section-badge.all { background: var(--sand); color: var(--ink-secondary); }
+
+    /* ── Lead Cards Grid ────────────────────────────────────────────── */
+    .requests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(560px, 1fr));
+      gap: 20px;
+    }
 
     .request-card {
-      background: var(--card-bg); border-radius: var(--radius);
-      box-shadow: var(--shadow); border: 1px solid var(--border);
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
-      transition: transform .15s, opacity .3s, max-height .4s;
+      transition: transform 0.35s var(--ease-editorial), opacity 0.35s ease, max-height 0.4s ease, margin 0.4s ease;
     }
-    .request-card:hover { transform: translateY(-2px); }
+
     .request-card.removing {
-      opacity: 0; transform: translateX(40px) scale(.97);
-      max-height: 0 !important; margin: 0; overflow: hidden;
-      border: none; box-shadow: none;
-      transition: opacity .35s ease, transform .35s ease, max-height .4s ease .1s, margin .4s ease .1s;
+      opacity: 0;
+      transform: translateY(-10px);
+      max-height: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
     }
 
-    .card-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
-    .request-ref { font-size: 12px; font-weight: 700; color: var(--primary); font-family: monospace; margin-bottom: 4px; }
-    .prop-name { font-size: 16px; font-weight: 700; }
-    .prop-loc   { font-size: 13px; color: var(--text-muted); }
-    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .card-header {
+      padding: 18px 22px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
 
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .badge-pending  { background: #fef3c7; color: #92400e; }
-    .badge-accepted { background: #d1fae5; color: #065f46; }
-    .badge-rejected { background: #fee2e2; color: #991b1b; }
-    .badge-expired  { background: #f1f5f9; color: #64748b; }
-    .countdown { font-size: 11px; font-weight: 700; color: #ef4444; }
-    .countdown.safe { color: var(--success); }
+    .request-ref {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ochre-dark);
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
 
-    .card-body { padding: 18px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media(max-width:640px){ .card-body { grid-template-columns: 1fr; } }
+    .prop-name {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.15;
+    }
 
-    .detail-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
-    .detail-value { font-size: 14px; font-weight: 600; }
-    .detail-value.big { font-size: 20px; font-weight: 800; color: var(--primary); }
-    .detail-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .fac-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .fac-chip { background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .prop-loc {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
 
-    .card-footer { padding: 14px 22px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
 
-    /* ── Accepted / Rejected footer info ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-pending { background: var(--ochre-soft); color: var(--ochre-dark); border: 1px solid rgba(158, 107, 48, 0.28); }
+    .badge-accepted { background: var(--sage-soft); color: var(--sage); border: 1px solid rgba(27, 94, 68, 0.28); }
+    .badge-rejected, .badge-expired { background: var(--crimson-soft); color: var(--crimson); border: 1px solid rgba(155, 44, 44, 0.28); }
+
+    .countdown {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--crimson);
+    }
+
+    .countdown.safe { color: var(--sage); }
+
+    .card-body {
+      padding: 20px 22px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px 20px;
+    }
+
+    .detail-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .detail-value.big {
+      font-family: var(--font-mono);
+      font-size: 19px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .detail-sub {
+      font-size: 12px;
+      color: var(--ink-secondary);
+      margin-top: 2px;
+    }
+
+    .fac-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .fac-chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--paper);
+      border: 1px solid var(--hairline);
+      color: var(--ink-secondary);
+    }
+
+    .card-footer {
+      padding: 16px 22px 20px;
+      background: var(--paper);
+      border-top: 1px solid var(--hairline);
+    }
+
     .outcome-banner {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 16px; border-radius: 10px; width: 100%;
-      font-size: 13px; font-weight: 600;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--hairline);
+      background: var(--paper-pure);
     }
-    .outcome-banner.accepted { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .outcome-banner.rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    .outcome-icon { font-size: 18px; line-height: 1; }
-    .outcome-text { display: flex; flex-direction: column; gap: 2px; }
-    .outcome-title { font-weight: 700; }
-    .outcome-sub { font-size: 12px; font-weight: 500; opacity: .8; }
 
-    /* ── Buttons ── */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all .18s; }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-accept { background: var(--success); color: #fff; }
-    .btn-accept:hover:not(:disabled) { background: #047857; transform: translateY(-1px); }
-    .btn-reject { background: #fff; color: var(--danger); border: 2px solid var(--danger); }
-    .btn-reject:hover:not(:disabled) { background: var(--danger); color: #fff; }
-    .btn-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+    .outcome-banner.accepted {
+      background: var(--sage-soft);
+      border-color: rgba(27, 94, 68, 0.3);
+    }
 
-    /* ── Empty / Loading / Error ── */
-    .empty-state { text-align: center; padding: 80px 32px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
-    .empty-icon  { font-size: 48px; margin-bottom: 14px; }
-    .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .empty-desc  { font-size: 14px; color: var(--text-muted); max-width: 380px; margin: 0 auto 18px; }
-    .empty-cta   { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--primary); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; }
-    .loading-state { text-align: center; padding: 60px; }
-    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 14px; }
-    .error-banner { background: #fee2e2; border: 1px solid #fca5a5; border-radius: var(--radius); padding: 18px 20px; color: #991b1b; font-weight: 600; }
+    .outcome-banner.rejected {
+      background: var(--crimson-soft);
+      border-color: rgba(155, 44, 44, 0.3);
+    }
 
-    /* ── Reject Modal ── */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px); }
-    .modal-overlay.hidden { display: none; }
-    .modal { background: #fff; border-radius: 18px; padding: 30px; max-width: 460px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,.2); }
-    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-    .modal-ref { font-size: 12px; color: var(--text-muted); font-family: monospace; margin-bottom: 20px; }
-    .form-label { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: block; color: var(--text); }
-    .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 14px; }
-    .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
-    .btn-cancel  { background: #f1f5f9; color: var(--text-muted); }
-    .btn-cancel:hover { background: var(--border); }
-    .btn-do-reject { background: var(--danger); color: #fff; }
-    .btn-do-reject:hover { background: #dc2626; }
+    .outcome-title { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+    .outcome-sub { font-size: 12px; color: var(--ink-secondary); margin-top: 3px; line-height: 1.45; }
 
-    /* ── Refresh countdown chip ── */
-    .refresh-chip { display: flex; align-items: center; gap: 7px; padding: 6px 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 20px; font-size: 11px; color: #94a3b8; }
+    /* ── Buttons ────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s var(--ease-editorial);
+    }
 
-    /* ── Mobile Phone Browser Responsiveness ── */
-    @media (max-width: 768px) {
-      header { padding: 0 12px; }
-      .header-inner { height: auto; min-height: 56px; padding: 8px 0; flex-wrap: wrap; gap: 6px; }
-      .brand-logo { font-size: 19px; }
-      .brand-badge { font-size: 10px; padding: 2px 6px; }
-      .header-right { gap: 6px; flex-wrap: wrap; }
-      .refresh-chip { display: none; }
-      #vendorContactMeta { display: none; }
-      .vendor-name-display { font-size: 12px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .vendor-status-display { display: none; }
-      .refresh-btn { padding: 6px 10px; font-size: 12px; }
+    .btn-accept {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
 
-      .page-nav {
-        top: 0;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-      .page-nav::-webkit-scrollbar { display: none; }
-      .page-nav-inner {
-        width: max-content;
-        min-width: 100%;
-        padding: 0 8px;
-      }
-      .page-tab {
-        padding: 12px 14px;
-        font-size: 13px;
-        gap: 6px;
-      }
+    .btn-accept:hover:not(:disabled) {
+      background: var(--sage);
+      border-color: var(--sage);
+    }
 
-      .container { padding: 14px 10px 80px; }
+    .btn-reject, .btn-do-reject {
+      background: var(--crimson-soft);
+      color: var(--crimson);
+      border-color: rgba(155, 44, 44, 0.35);
+    }
 
-      .stats-bar {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      .stat-card {
-        padding: 12px 14px;
-        border-radius: 10px;
-      }
-      .stat-label { font-size: 10px; margin-bottom: 2px; }
-      .stat-value { font-size: 22px; }
+    .btn-reject:hover, .btn-do-reject:hover {
+      background: var(--crimson);
+      color: #fff;
+    }
 
-      .card-header {
-        padding: 14px 16px 10px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .card-right {
-        align-items: flex-start;
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-      }
-      .card-body { padding: 14px 16px; gap: 12px; grid-template-columns: 1fr; }
-      .card-footer {
-        padding: 12px 14px;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .card-footer .btn {
-        width: 100%;
-        justify-content: center;
-      }
+    .btn-cancel {
+      background: transparent;
+      color: var(--ink-secondary);
+      border-color: var(--hairline-strong);
+    }
 
-      .btn {
-        padding: 11px 16px;
-        font-size: 13px;
-      }
+    .btn-cancel:hover {
+      background: var(--sand);
+      color: var(--ink);
+    }
 
-      .modal {
-        padding: 20px 16px;
-        border-radius: 14px;
-        max-width: 95vw;
-        max-height: 85vh;
-        overflow-y: auto;
-      }
-      .form-select, .form-textarea, input[type="text"], input[type="email"], input[type="number"] {
-        font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
-      }
+    /* ── Empty / Loading States ─────────────────────────────────────── */
+    .empty-state, .loading-state {
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      padding: 56px 24px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--hairline);
+      border-top-color: var(--ochre);
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 14px;
+      border-radius: var(--radius-sm);
+      background: var(--ochre-soft);
+      border: 1px solid rgba(158, 107, 48, 0.25);
+      color: var(--ochre-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-title {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      font-size: 14px;
+      color: var(--ink-secondary);
+      max-width: 460px;
+      margin: 0 auto 18px;
+    }
+
+    .empty-cta {
+      padding: 10px 18px;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── Modals ─────────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 19, 23, 0.62);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9000;
+    }
+
+    .modal-overlay.hidden { display: none !important; }
+
+    .modal {
+      width: 100%;
+      max-width: 460px;
+      background: var(--paper-pure);
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .modal-ref {
+      font-size: 12.5px;
+      color: var(--ink-muted);
+      margin: 4px 0 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--radius-sm);
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 13.5px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+
+    .form-select:focus, .form-textarea:focus {
+      border-color: var(--ink);
+      background: var(--paper-pure);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .site-footer {
+      background: var(--obsidian);
+      color: #A1A7B3;
+      padding: 36px 24px;
+      border-top: 1px solid #262A34;
+    }
+
+    .footer-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand { font-family: var(--font-serif); font-size: 22px; color: var(--paper); font-weight: 600; }
+    .footer-brand span { color: var(--brass); }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a { color: #A1A7B3; text-decoration: none; font-size: 12px; }
+    .footer-links a:hover { color: var(--paper); }
+
+    /* ── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .requests-grid { grid-template-columns: 1fr; }
+      .header-inner { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px 16px; }
+      .header-right { justify-content: flex-start; }
+      .vendor-identity-block { align-items: flex-start; text-align: left; border-left: none; padding-left: 0; max-width: 100%; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .stat-card:nth-child(2n) { border-right: none; }
+      .stat-card { border-bottom: 1px solid var(--hairline); }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 18px 14px 48px; }
+      .page-nav-inner { padding: 0 10px; gap: 2px; }
+      .page-tab { padding: 12px 10px; font-size: 12px; gap: 5px; }
+      .card-body { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+      .card-header, .card-footer { padding: 16px; }
+      .brand-badge { display: none; }
     }
   </style>
 </head>
@@ -291,7 +812,7 @@
       <option value="other">Other</option>
     </select>
     <label class="form-label">Additional note (optional)</label>
-    <textarea class="form-textarea" id="rejectNote" rows="3" placeholder="e.g. Fully booked for the season…"></textarea>
+    <textarea class="form-textarea" id="rejectNote" rows="3" placeholder="e.g. Fully booked for this departure week..."></textarea>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeRejectModal()">Cancel</button>
       <button class="btn btn-do-reject" onclick="confirmReject()">Confirm Decline</button>
@@ -303,15 +824,15 @@
 <div class="modal-overlay hidden" id="contactModal">
   <div class="modal">
     <div class="modal-title">Operator Contact Settings</div>
-    <div class="modal-ref">Configure phone &amp; email for WhatsApp alerts and main email notifications</div>
-    
+    <div class="modal-ref">Configure dispatch alerts for WhatsApp and email dispatches</div>
+
     <label class="form-label">WhatsApp Contact Number *</label>
     <input type="text" class="form-select" id="settingsPhone" placeholder="e.g. +91 98765 43210">
-    <div style="font-size:11px;color:var(--text-muted);margin:-10px 0 14px;">Used to dispatch real-time WhatsApp tour requests and 1-click action links.</div>
+    <div style="font-size:11px;color:var(--ink-muted);margin:-10px 0 14px;">Used for real-time WhatsApp tour alerts and 1-click accept links.</div>
 
     <label class="form-label">Notification Email Address *</label>
     <input type="email" class="form-select" id="settingsEmail" placeholder="e.g. partner@example.com">
-    <div style="font-size:11px;color:var(--text-muted);margin:-10px 0 14px;">Used to receive official tour request dispatches and booking confirmation vouchers.</div>
+    <div style="font-size:11px;color:var(--ink-muted);margin:-10px 0 14px;">Receives official tour briefs and confirmed escrow vouchers.</div>
 
     <label class="form-label">Business Name</label>
     <input type="text" class="form-select" id="settingsBusinessName" placeholder="Operator name">
@@ -328,27 +849,30 @@
   <div class="header-inner">
     <a href="/partner/dashboard" class="brand">
       <div class="brand-logo">Trip<span>Mozy</span></div>
-      <div class="brand-badge">TOUR OPERATOR PORTAL</div>
+      <div class="brand-badge">Dispatch Desk</div>
     </a>
     <div class="header-right">
-      <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);padding:6px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);">
-        <label for="vendorPicker" style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:0.5px;">OPERATOR FLEET:</label>
-        <select id="vendorPicker" style="background:#0f172a;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:4px 8px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;outline:none;" onchange="switchVendor(this.value)">
-          <option value="">Loading operators…</option>
+      <div class="fleet-picker-wrap">
+        <label for="vendorPicker" class="fleet-label">Fleet</label>
+        <select id="vendorPicker" onchange="switchVendor(this.value)">
+          <option value="">Loading operators...</option>
         </select>
       </div>
-      <div class="refresh-chip" style="cursor:pointer;" onclick="loadDashboard()" title="Click to refresh incoming requests immediately">
+      <div class="refresh-chip" onclick="loadDashboard()" title="Click to refresh incoming requests immediately">
         <div class="pulse"></div>
         <span id="countdown">Live Sync (4s)</span>
       </div>
-      <div style="text-align:right">
-        <div class="vendor-name-display" id="vendorName">Loading…</div>
+      <div class="vendor-identity-block">
+        <div class="vendor-name-display" id="vendorName">Loading...</div>
         <div class="vendor-status-display" id="vendorMeta">Verified Partner</div>
-        <div style="font-size:11px;color:#cbd5e1;margin-top:2px;" id="vendorContactMeta"><span id="vPhone">...</span> · <span id="vEmail">...</span></div>
+        <div class="vendor-contact-meta" id="vendorContactMeta"><span id="vPhone">...</span> · <span id="vEmail">...</span></div>
       </div>
       <button class="refresh-btn" onclick="openContactSettingsModal()" title="Update Notification Contacts">Settings</button>
-      <button class="refresh-btn" onclick="loadDashboard()">⚡ Refresh</button>
-      <button class="refresh-btn" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.35);color:#fca5a5;" onclick="logout()">Sign Out</button>
+      <button class="refresh-btn" onclick="loadDashboard()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>Refresh</span>
+      </button>
+      <button class="refresh-btn danger-btn" onclick="logout()">Sign Out</button>
     </div>
   </div>
 </header>
@@ -378,14 +902,14 @@
 <!-- Main Content -->
 <div class="container">
 
-  <!-- Stats Bar (clickable → switches page) -->
+  <!-- Integrated Hairline Telemetry Strip -->
   <div class="stats-bar">
-    <div class="stat-card pending"  onclick="switchPage('pending')"  title="View pending requests">
-      <div class="stat-label">Awaiting Response</div>
+    <div class="stat-card pending" onclick="switchPage('pending')" title="View pending requests">
+      <div class="stat-label">Awaiting</div>
       <div class="stat-value" id="s-pending">—</div>
     </div>
     <div class="stat-card accepted" onclick="switchPage('accepted')" title="View accepted requests">
-      <div class="stat-label">Offers Sent</div>
+      <div class="stat-label">Quoted</div>
       <div class="stat-value" id="s-accepted">—</div>
     </div>
     <div class="stat-card rejected" onclick="switchPage('rejected')" title="View declined requests">
@@ -393,7 +917,7 @@
       <div class="stat-value" id="s-rejected">—</div>
     </div>
     <div class="stat-card all" onclick="switchPage('all')" title="View all requests">
-      <div class="stat-label">Total Received</div>
+      <div class="stat-label">Received</div>
       <div class="stat-value" id="s-all">—</div>
     </div>
   </div>
@@ -402,7 +926,7 @@
   <div class="page-header">
     <div>
       <div class="page-title" id="pageTitle">Pending Requests</div>
-      <div class="page-meta" id="pageMeta">Loading…</div>
+      <div class="page-meta" id="pageMeta">Loading...</div>
     </div>
     <span class="section-badge pending" id="pageBadge">Awaiting Response</span>
   </div>
@@ -411,12 +935,24 @@
   <div id="cardsArea">
     <div class="loading-state">
       <div class="spinner"></div>
-      <div style="color:var(--text-muted);font-size:14px">Loading requests from database…</div>
+      <div style="color:var(--ink-muted);font-size:14px">Loading requests from dispatch ledger...</div>
     </div>
   </div>
 
 </div>
 
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Trip<span>Mozy</span> Partner</div>
+    <nav class="footer-links" aria-label="Operator links">
+      <a href="/">Home</a>
+      <a href="/smart-tour-booking">Traveler Brief</a>
+      <a href="/booking">Booking Lookup</a>
+      <a href="/login">Partner Auth</a>
+    </nav>
+    <div style="font-size:12px; color:#6B7280;">Real-time exclusivity dispatch · 4s poll synchronization</div>
+  </div>
+</footer>
 <script>
 // =============================================================================
 // TripMozy Partner Dashboard — Page-based navigation
@@ -431,11 +967,16 @@ let cdTimer        = null;
 let cdSec          = 30;
 
 // ─── Page config ─────────────────────────────────────────────────────────────
+const SVG_EMPTY_MAIL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>';
+const SVG_EMPTY_CHECK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>';
+const SVG_EMPTY_ARCHIVE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>';
+const SVG_EMPTY_GLOBE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+
 const PAGE_CONFIG = {
-  pending:  { title: 'Pending Tour Requests',  badge: 'Awaiting Response', badgeCls: 'pending',  emptyIcon: '📭', emptyTitle: 'No pending tour requests', emptyDesc: 'All clear! When travelers submit tour requests matching your destination, they will appear here.' },
-  accepted: { title: 'Accepted Tour Quotes',   badge: 'Quotes Sent',       badgeCls: 'accepted', emptyIcon: '🤝', emptyTitle: 'No accepted tour quotes yet', emptyDesc: 'Quotes you send to travelers will move here. Start accepting pending requests to send quotes.' },
-  rejected: { title: 'Declined Tour Requests', badge: 'Declined',          badgeCls: 'rejected', emptyIcon: '📁', emptyTitle: 'No declined requests', emptyDesc: 'Requests you decline will be archived here for your records.' },
-  all:      { title: 'All Tour Requests',      badge: 'All',               badgeCls: 'all',      emptyIcon: '📂', emptyTitle: 'No tour requests received', emptyDesc: 'No tour requests have been dispatched to your packages yet.' }
+  pending:  { title: 'Pending Tour Requests',  badge: 'Awaiting Response', badgeCls: 'pending',  emptyIcon: SVG_EMPTY_MAIL,    emptyTitle: 'No pending tour requests', emptyDesc: 'All clear. When travelers commission itineraries matching your destination, they appear here in real time.' },
+  accepted: { title: 'Accepted Tour Quotes',   badge: 'Quotes Sent',       badgeCls: 'accepted', emptyIcon: SVG_EMPTY_CHECK,   emptyTitle: 'No accepted tour quotes yet', emptyDesc: 'Quotes you issue to travelers appear here. Accept any pending brief to begin coordination.' },
+  rejected: { title: 'Declined Tour Requests', badge: 'Declined',          badgeCls: 'rejected', emptyIcon: SVG_EMPTY_ARCHIVE, emptyTitle: 'No declined requests', emptyDesc: 'Requests you decline are archived here for your dispatch records.' },
+  all:      { title: 'All Tour Requests',      badge: 'All',               badgeCls: 'all',      emptyIcon: SVG_EMPTY_GLOBE,   emptyTitle: 'No tour requests received', emptyDesc: 'No traveler briefs have been dispatched to your operator desk yet.' }
 };
 
 let currentVendorData = null;
@@ -609,7 +1150,7 @@ async function loadDashboard(isAuto = false) {
     // Trigger instant chime & toast when new requests arrive in real time
     if (isAuto && prevRequestsCount > 0 && fetched.length > prevRequestsCount) {
       playChimeNotification();
-      showToast('🔔 New Tour Request received from Traveler!', 'success');
+      showToast('New Tour Request received from Traveler', 'success');
     }
     prevRequestsCount = fetched.length;
 
@@ -621,15 +1162,15 @@ async function loadDashboard(isAuto = false) {
           if (card) {
             const badgeCol = card.querySelector('.card-right');
             if (badgeCol) {
-              badgeCol.innerHTML = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-weight:800;">⚠️ Accepted by other partner</span>`;
+              badgeCol.innerHTML = `<span class="badge badge-rejected">Accepted by other partner</span>`;
             }
             const footerElem = card.querySelector('.card-footer');
             if (footerElem) {
               footerElem.innerHTML = `
-                <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
+                <div class="outcome-banner rejected" style="width:100%;">
                   <div class="outcome-text">
-                    <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Sorry, this request has been accepted by other partner</div>
-                    <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;line-height:1.4;">This tour request was just accepted by another partner and has been removed from your active pool.</div>
+                    <div class="outcome-title" style="color:var(--crimson);">Accepted by another operator partner</div>
+                    <div class="outcome-sub">This tour request was just claimed by another partner and removed from your active queue.</div>
                   </div>
                 </div>`;
             }
@@ -743,16 +1284,16 @@ function buildCard(r) {
   const badgeMap = {
     accepted: `<span class="badge badge-accepted">Offer Sent</span>`,
     rejected: `<span class="badge badge-rejected">Declined</span>`,
-    cancelled: `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`,
+    cancelled: `<span class="badge badge-rejected">Cancelled by Traveler</span>`,
   };
 
   let statusBadge = '';
   if (isAcceptedByOther) {
-    statusBadge = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-weight:800;">⚠️ Accepted by other partner</span>`;
+    statusBadge = `<span class="badge badge-rejected">Accepted by other partner</span>`;
   } else if (isCancelled) {
-    statusBadge = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;">Cancelled by Traveler</span>`;
+    statusBadge = `<span class="badge badge-rejected">Cancelled by Traveler</span>`;
   } else if (r.request_status === 'booked' && status === 'accepted') {
-    statusBadge = `<span class="badge" style="background:#dcfce7;color:#166534;border:1px solid #86efac;font-weight:800;">🎉 Tour Confirmed &amp; Paid</span>`;
+    statusBadge = `<span class="badge badge-accepted">Tour Confirmed &amp; Paid</span>`;
   } else {
     statusBadge = badgeMap[status] || (expired ? `<span class="badge badge-expired">Expired</span>` : `<span class="badge badge-pending">Action Required</span>`);
   }
@@ -774,39 +1315,39 @@ function buildCard(r) {
   const facs = r.required_facilities || [];
   const facsHtml = facs.length
     ? `<div class="fac-list">${facs.map(f => `<span class="fac-chip">${esc(f)}</span>`).join('')}</div>`
-    : `<span style="color:var(--text-muted);font-size:13px">None specified</span>`;
+    : `<span style="color:var(--ink-muted);font-size:13px">None specified</span>`;
 
   // Footer based on status
   let footer = '';
   if (isAcceptedByOther) {
     footer = `
-      <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
+      <div class="outcome-banner rejected" style="width:100%;">
         <div class="outcome-text">
-          <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Sorry, this request has been accepted by other partner</div>
-          <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;">This tour request has already been claimed by another partner. It is no longer available.</div>
+          <div class="outcome-title" style="color:var(--crimson);">Accepted by another operator partner</div>
+          <div class="outcome-sub">This tour request has already been claimed by another partner and is no longer available.</div>
         </div>
       </div>`;
   } else if (isCancelled) {
     footer = `
-      <div class="outcome-banner rejected" style="background:#fef2f2;border-color:#fecaca;">
+      <div class="outcome-banner rejected">
         <div class="outcome-text">
-          <div class="outcome-title" style="color:#991b1b;">Cancelled by Traveler</div>
-          <div class="outcome-sub" style="color:#b91c1c;">The customer has cancelled this tour request. No response or quote is required.</div>
+          <div class="outcome-title" style="color:var(--crimson);">Cancelled by Traveler</div>
+          <div class="outcome-sub">The customer has cancelled this tour request. No response or quote is required.</div>
         </div>
       </div>`;
   } else if (status === 'accepted') {
     if (r.request_status === 'booked') {
       footer = `
-        <div class="outcome-banner accepted" style="background:#ecfdf5;border:1.5px solid #6ee7b7;width:100%;box-sizing:border-box;">
+        <div class="outcome-banner accepted" style="width:100%;">
           <div class="outcome-text" style="width:100%;">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-              <div class="outcome-title" style="color:#065f46;font-size:15px;font-weight:800;">🎉 Tour Confirmed &amp; 30% Advance Secured</div>
-              <span style="font-size:11px;background:#dcfce7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:700;">TripMozy Escrow Protected</span>
+              <div class="outcome-title" style="color:var(--sage);font-size:14.5px;">Tour Confirmed &amp; 30% Advance Secured</div>
+              <span style="font-size:10.5px;background:#fff;color:var(--sage);padding:3px 8px;border:1px solid rgba(27,94,68,0.28);border-radius:2px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Escrow Protected</span>
             </div>
-            <div class="outcome-sub" style="color:#047857;margin-top:4px;">TripMozy Advance Received: &#8377;${payableNowINR.toLocaleString('en-IN')}. Booking Reference: <strong>${esc(r.booking?.bookingReference || r.request_reference)}</strong></div>
-            <div style="background:#fff;border:1px solid #a7f3d0;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;color:#065f46;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-              <span><strong>Remaining 70% Balance to Collect:</strong> &#8377;${remainingBalanceINR.toLocaleString('en-IN')}</span>
-              <span style="font-size:11px;color:#059669;font-weight:600;">(Due upon tour commencement)</span>
+            <div class="outcome-sub" style="margin-top:4px;">TripMozy Advance Received: <strong style="font-family:var(--font-mono);">&#8377;${payableNowINR.toLocaleString('en-IN')}</strong> · Booking Ref: <strong style="font-family:var(--font-mono);">${esc(r.booking?.bookingReference || r.request_reference)}</strong></div>
+            <div style="background:#fff;border:1px solid rgba(27,94,68,0.25);border-radius:2px;padding:8px 12px;margin-top:8px;font-size:12px;color:var(--sage);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+              <span><strong>Remaining 70% Balance to Collect:</strong> <span style="font-family:var(--font-mono);font-weight:700;">&#8377;${remainingBalanceINR.toLocaleString('en-IN')}</span></span>
+              <span style="font-size:11px;color:var(--ink-secondary);">(Due upon tour commencement)</span>
             </div>
           </div>
         </div>`;
@@ -814,8 +1355,8 @@ function buildCard(r) {
       footer = `
         <div class="outcome-banner accepted">
           <div class="outcome-text">
-            <div class="outcome-title">Tour quote of &#8377;${budgetINR} sent successfully</div>
-            <div class="outcome-sub">TripMozy Advance (30%+5% GST): &#8377;${payableNowINR.toLocaleString('en-IN')} · Balance Collected: &#8377;${remainingBalanceINR.toLocaleString('en-IN')}. Traveler is reviewing.</div>
+            <div class="outcome-title" style="color:var(--sage);">Tour quote of &#8377;${budgetINR} sent successfully</div>
+            <div class="outcome-sub">TripMozy Advance (30%+5% GST): &#8377;${payableNowINR.toLocaleString('en-IN')} · Operator Balance: &#8377;${remainingBalanceINR.toLocaleString('en-IN')}. Traveler is reviewing.</div>
           </div>
         </div>`;
     }
@@ -824,31 +1365,31 @@ function buildCard(r) {
     footer = `
       <div class="outcome-banner rejected">
         <div class="outcome-text">
-          <div class="outcome-title">Declined · ${esc(reason)}</div>
-          <div class="outcome-sub">This request has been declined and removed from your active queue.</div>
+          <div class="outcome-title" style="color:var(--crimson);">Declined · ${esc(reason)}</div>
+          <div class="outcome-sub">This request has been declined and archived from your active queue.</div>
         </div>
       </div>`;
   } else if (expired) {
-    footer = `<span style="color:var(--text-muted);font-size:13px;padding:4px 0">This request expired without a response.</span>`;
+    footer = `<span style="color:var(--ink-muted);font-size:13px;padding:4px 0">This request expired without a response.</span>`;
   } else {
     footer = `
-      <div style="display:flex; flex-direction:column; gap:6px; width:100%; margin-bottom:10px; background:#eff6ff; padding:10px 12px; border-radius:10px; border:1px solid #bfdbfe;">
+      <div style="display:flex; flex-direction:column; gap:6px; width:100%; margin-bottom:12px; background:var(--ochre-soft); padding:12px 14px; border-radius:2px; border:1px solid rgba(158,107,48,0.28);">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <span style="font-size:12px; font-weight:700; color:#1e40af;">Tour Package Quote:</span>
-          <div style="display:flex; align-items:center; gap:4px;">
-            <span style="font-size:15px; font-weight:800; color:#1e40af;">&#8377;</span>
-            <input type="number" id="quote-${r.recipient_id}" value="${totalTourINR}" min="1000" step="500" style="padding:6px 10px; border:1.5px solid #93c5fd; border-radius:8px; font-size:16px; font-weight:800; width:130px; font-family:inherit; color:#0f172a;" oninput="updateCardPricing('${r.recipient_id}')">
+          <span style="font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ochre-dark);">Quote Workbench (INR)</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-family:var(--font-mono); font-size:15px; font-weight:700; color:var(--ink);">&#8377;</span>
+            <input type="number" id="quote-${r.recipient_id}" value="${totalTourINR}" min="1000" step="500" style="padding:6px 10px; border:1px solid var(--hairline-strong); border-radius:2px; font-family:var(--font-mono); font-size:15px; font-weight:600; width:134px; background:#fff; color:var(--ink);" oninput="updateCardPricing('${r.recipient_id}')">
           </div>
         </div>
-        <div id="split-info-${r.recipient_id}" style="font-size:11px; color:#1d4ed8; font-weight:600; line-height:1.4;">
+        <div id="split-info-${r.recipient_id}" style="font-family:var(--font-mono); font-size:11px; color:var(--ochre-dark); line-height:1.45;">
           TripMozy Advance: &#8377;${payableNowINR.toLocaleString('en-IN')} (30%+5% GST) · Operator Balance: &#8377;${remainingBalanceINR.toLocaleString('en-IN')}
         </div>
       </div>
       <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
-        <button class="btn btn-accept" style="width:100%; justify-content:center; padding:12px; font-size:14px;" onclick="acceptRequest('${r.recipient_id}', this)">Accept &amp; Send Tour Quote</button>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; width:100%;">
-          <button class="btn btn-reject" style="width:100%; justify-content:center; padding:10px; font-size:13px;" onclick="openRejectModal('${r.recipient_id}', '${esc(r.request_reference)}')">Decline</button>
-          ${r.waDirectLink ? `<a href="${r.waDirectLink}" target="_blank" class="btn" style="background:#25D366; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; font-size:13px; padding:10px; border-radius:8px; width:100%;" title="Open pre-filled WhatsApp tour request alert">WhatsApp</a>` : ''}
+        <button class="btn btn-accept" style="width:100%; justify-content:center; padding:12px; font-size:13.5px;" onclick="acceptRequest('${r.recipient_id}', this)">Accept &amp; Send Tour Quote</button>
+        <div style="display:grid; grid-template-columns: 1fr ${r.waDirectLink ? '1fr' : ''}; gap:8px; width:100%;">
+          <button class="btn btn-reject" style="width:100%; justify-content:center; padding:10px; font-size:12.5px;" onclick="openRejectModal('${r.recipient_id}', '${esc(r.request_reference)}')">Decline</button>
+          ${r.waDirectLink ? `<a href="${r.waDirectLink}" target="_blank" class="btn" style="background:var(--sage); color:#fff; border-color:var(--sage); text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:600; font-size:12.5px; padding:10px; width:100%;" title="Open pre-filled WhatsApp tour request alert">WhatsApp Alert</a>` : ''}
         </div>
       </div>`;
   }
@@ -875,11 +1416,11 @@ function buildCard(r) {
         <div>
           <div class="detail-label">Traveler Budget</div>
           <div class="detail-value big">&#8377;${budgetINR}</div>
-          <div class="detail-sub">Total tour budget</div>
+          <div class="detail-sub">Target package ceiling</div>
         </div>
         <div>
           <div class="detail-label">Tour Dates</div>
-          <div class="detail-value">${fmtDate(r.check_in_date)} → ${fmtDate(r.check_out_date)}</div>
+          <div class="detail-value">${fmtDate(r.check_in_date)} &rarr; ${fmtDate(r.check_out_date)}</div>
           <div class="detail-sub">${r.nights + 1} Days / ${r.nights} Night${r.nights>1?'s':''}</div>
         </div>
         <div>
@@ -896,27 +1437,29 @@ function buildCard(r) {
           <div class="detail-value" style="font-size:14px">${esc(r.property_name)}</div>
           <div class="detail-sub">${esc(r.property_city||'')}</div>
         </div>
-        <div>
+        <div style="grid-column: 1 / -1;">
           ${r.request_status === 'booked' && (r.guest_phone || r.guest?.phone) ? `
-            <div class="detail-label" style="color:#059669;">Traveler Contact (Advance Confirmed ✓)</div>
-            <div class="detail-value" style="font-size:14px; font-weight:800; color:#0f172a;">
+            <div class="detail-label" style="color:var(--sage);">Traveler Contact (Advance Confirmed)</div>
+            <div class="detail-value" style="font-size:14px; font-weight:700; color:var(--ink);">
               ${esc(r.guest_name || r.guest?.name || 'Verified Traveler')}
             </div>
-            <div style="display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap;">
-              <a href="tel:${(r.guest_phone || r.guest?.phone || '').replace(/[^\d+]/g, '')}" style="background:#eff6ff; color:#1d4ed8; text-decoration:none; padding:4px 10px; border-radius:6px; font-weight:700; font-size:12px; border:1px solid #bfdbfe; display:inline-flex; align-items:center; gap:4px;">
-                📞 Call ${esc(r.guest_phone || r.guest?.phone)}
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;">
+              <a href="tel:${(r.guest_phone || r.guest?.phone || '').replace(/[^\d+]/g, '')}" style="background:var(--paper); color:var(--ink); text-decoration:none; padding:5px 11px; border-radius:2px; font-family:var(--font-mono); font-weight:600; font-size:12px; border:1px solid var(--hairline-strong); display:inline-flex; align-items:center; gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>${esc(r.guest_phone || r.guest?.phone)}</span>
               </a>
-              <a href="https://wa.me/${(r.guest_phone || r.guest?.phone || '').replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(r.guest_name || r.guest?.name || 'Traveler')},%20this%20is%20${encodeURIComponent(r.property_name)}%20coordinating%20your%20TripMozy%20tour%20(${encodeURIComponent(r.request_reference)})" target="_blank" style="background:#25D366; color:#fff; text-decoration:none; padding:4px 10px; border-radius:6px; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:4px;">
-                💬 WhatsApp
+              <a href="https://wa.me/${(r.guest_phone || r.guest?.phone || '').replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(r.guest_name || r.guest?.name || 'Traveler')},%20this%20is%20${encodeURIComponent(r.property_name)}%20coordinating%20your%20TripMozy%20tour%20(${encodeURIComponent(r.request_reference)})" target="_blank" style="background:var(--sage); color:#fff; text-decoration:none; padding:5px 11px; border-radius:2px; font-weight:600; font-size:12px; display:inline-flex; align-items:center; gap:5px;">
+                <span>WhatsApp Traveler</span>
               </a>
             </div>
-            ${(r.guest_email || r.guest?.email) ? `<div class="detail-sub" style="margin-top:4px;">Email: <a href="mailto:${esc(r.guest_email || r.guest?.email)}" style="color:#2563eb; font-weight:600;">${esc(r.guest_email || r.guest?.email)}</a></div>` : ''}
+            ${(r.guest_email || r.guest?.email) ? `<div class="detail-sub" style="margin-top:6px;">Email: <a href="mailto:${esc(r.guest_email || r.guest?.email)}" style="color:var(--ochre-dark); font-weight:600;">${esc(r.guest_email || r.guest?.email)}</a></div>` : ''}
           ` : `
             <div class="detail-label">Traveler Contact</div>
-            <div class="detail-value" style="font-size:12px; color:#64748b; font-weight:700;">
-              🔒 Phone &amp; Email revealed upon 30% advance confirmation
+            <div class="detail-value" style="font-size:12.5px; color:var(--ink-secondary); font-weight:600; display:flex; align-items:center; gap:6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Phone &amp; Email revealed upon 30% advance confirmation</span>
             </div>
-            <div class="detail-sub" style="color:#94a3b8; font-size:11px;">TripMozy Anti-Circumvention Policy</div>
+            <div class="detail-sub" style="color:var(--ink-muted); font-size:11px;">TripMozy Escrow Anti-Circumvention Policy</div>
           `}
         </div>
       </div>
@@ -977,21 +1520,21 @@ async function acceptRequest(recipientId, btn) {
       if (card) {
         const badgeCol = card.querySelector('.card-right');
         if (badgeCol) {
-          badgeCol.innerHTML = `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;font-weight:800;">⚠️ Accepted by other partner</span>`;
+          badgeCol.innerHTML = `<span class="badge badge-rejected">Accepted by other partner</span>`;
         }
         const footerElem = card.querySelector('.card-footer');
         if (footerElem) {
           footerElem.innerHTML = `
-            <div class="outcome-banner rejected" style="background:#fef2f2;border:1.5px solid #fca5a5;width:100%;box-sizing:border-box;">
+            <div class="outcome-banner rejected" style="width:100%;">
               <div class="outcome-text">
-                <div class="outcome-title" style="color:#991b1b;font-weight:800;font-size:14px;">⚠️ Sorry, this request has been accepted by other partner</div>
-                <div class="outcome-sub" style="color:#b91c1c;font-size:12px;margin-top:4px;line-height:1.4;">This tour request has already been claimed by <strong>${esc(partnerName)}</strong> and is no longer available.</div>
+                <div class="outcome-title" style="color:var(--crimson);">Accepted by another operator partner</div>
+                <div class="outcome-sub">This tour request has already been claimed by <strong>${esc(partnerName)}</strong> and is no longer available.</div>
               </div>
             </div>`;
         }
       }
 
-      showToast(`⚠️ Sorry, the request has been accepted by other partner (${partnerName}).`, 'error');
+      showToast(`Request already claimed by ${partnerName}`, 'error');
 
       // Remove from local allRequests
       allRequests = allRequests.filter(x => x.recipient_id !== recipientId);
@@ -1073,13 +1616,13 @@ function animateCardOut(recipientId, callback) {
 
 // ─── Toast notification ────────────────────────────────────────────────────────
 function showToast(msg, type) {
-  const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6' };
+  const colors = { success: '#1B5E44', error: '#9B2C2C', info: '#14171C' };
   const t = document.createElement('div');
   t.style.cssText = `
     position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
-    background:${colors[type]||'#1e293b'}; color:#fff; padding:12px 24px;
-    border-radius:10px; font-size:14px; font-weight:600; z-index:9999;
-    box-shadow:0 8px 30px rgba(0,0,0,.2); transition:all .3s ease; opacity:0;
+    background:${colors[type]||'#14171C'}; color:#F7F5F0; padding:12px 22px;
+    border-radius:3px; border:1px solid rgba(255,255,255,0.14); font-size:13.5px; font-weight:600; z-index:9999;
+    box-shadow:0 12px 32px rgba(17,19,23,0.28); transition:all .3s ease; opacity:0;
     max-width:90vw; text-align:center;
   `;
   t.textContent = msg;
@@ -1099,7 +1642,7 @@ function startAutoRefresh() {
 }
 function resetCountdown() {
   const el = document.getElementById('countdown');
-  if (el) el.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;margin-right:5px;box-shadow:0 0 6px #10b981;"></span>Live Sync Active (4s)`;
+  if (el) el.textContent = 'Live Sync Active (4s)';
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1124,5 +1667,6 @@ document.getElementById('rejectModal').addEventListener('click', e => { if (e.ta
 // Boot
 init();
 </script>
+<script src="/assets/tripmozy-motion.js" defer></script>
 </body>
 </html>

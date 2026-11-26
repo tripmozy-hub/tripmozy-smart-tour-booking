@@ -2,792 +2,674 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>TripMozy Sovereign Admin Console | Private Master Oversight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sovereign Oversight Console | TripMozy Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #d8ba7a;
-      --primary-dark: #b8924b;
-      --primary-light: #f5e8cc;
-      --gold-gradient: linear-gradient(135deg, #f5e3b5 0%, #d8ba7a 50%, #9c7a36 100%);
-      --gold-border: rgba(216, 186, 122, 0.28);
-      --gold-border-subtle: rgba(216, 186, 122, 0.14);
-      --gold-glow: 0 0 24px rgba(216, 186, 122, 0.18);
-      
-      --bg: #070a12;
-      --bg-card: rgba(14, 20, 34, 0.88);
-      --bg-card-raised: rgba(22, 31, 52, 0.95);
-      --bg-header: rgba(7, 10, 18, 0.92);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-gold: #e2c78f;
-      
-      --border: rgba(255, 255, 255, 0.08);
-      --success: #10b981;
-      --success-glow: rgba(16, 185, 129, 0.2);
-      --danger: #f43f5e;
-      --warning: #f59e0b;
-      --radius: 16px;
-      --radius-sm: 10px;
-      --shadow-luxury: 0 16px 40px -10px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(216, 186, 122, 0.15);
+      --bg-dark: #0F1115;
+      --bg-card: #161920;
+      --bg-surface: #1D212B;
+      --brass: #C9A467;
+      --brass-dark: #A68246;
+      --brass-soft: rgba(201, 164, 103, 0.14);
+      --gold-border: rgba(201, 164, 103, 0.34);
+      --gold-border-subtle: #252A36;
+      --text-main: #F4F1EA;
+      --text-muted: #8E95A2;
+      --text-gold: #E2C692;
+      --sage: #34D399;
+      --sage-bg: rgba(27, 94, 68, 0.25);
+      --crimson: #FCA5A5;
+      --crimson-bg: rgba(155, 44, 44, 0.24);
+      --radius: 3px;
+      --radius-sm: 2px;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      background-image: 
-        radial-gradient(ellipse at 50% -10%, rgba(216, 186, 122, 0.14) 0%, rgba(7, 10, 18, 0) 70%),
-        radial-gradient(ellipse at 100% 40%, rgba(184, 146, 75, 0.06) 0%, rgba(7, 10, 18, 0) 50%),
-        linear-gradient(180deg, #090e1a 0%, #05080e 100%);
-      background-attachment: fixed;
-      color: var(--text);
-      line-height: 1.5;
+      font-family: var(--font-sans);
+      background: var(--bg-dark);
+      color: var(--text-main);
       min-height: 100vh;
-      padding-bottom: env(safe-area-inset-bottom, 30px);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Prevent iOS Safari auto-zoom on input focus */
-    @media (max-width: 640px) {
-      input, select, textarea { font-size: 16px !important; }
+    body.gated header,
+    body.gated main {
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    /* ============================================================ */
-    /* TOP LUXURY HEADER                                            */
-    /* ============================================================ */
+    button, input, select, textarea { font-family: inherit; }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
     header {
-      background: var(--bg-header);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(15, 17, 21, 0.96);
       border-bottom: 1px solid var(--gold-border-subtle);
       position: sticky;
       top: 0;
-      z-index: 100;
-      padding: 0 16px;
+      z-index: 120;
     }
+
     .header-inner {
-      max-width: 1400px;
+      max-width: 1360px;
       margin: 0 auto;
+      padding: 0 24px;
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 64px;
+      gap: 16px;
     }
+
     .brand-wrap {
       display: flex;
       align-items: center;
-      gap: 10px;
-      text-decoration: none;
+      gap: 12px;
+      min-width: 0;
     }
+
     .brand-crown {
-      color: var(--primary);
-      font-size: 18px;
-      filter: drop-shadow(0 0 6px rgba(216, 186, 122, 0.4));
-    }
-    .brand-logo {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      color: #ffffff;
-    }
-    .brand-logo span {
-      background: var(--gold-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .admin-crest {
-      background: rgba(216, 186, 122, 0.1);
-      border: 1px solid var(--gold-border);
-      color: var(--text-gold);
-      font-size: 10.5px;
-      font-weight: 800;
-      padding: 3px 10px;
-      border-radius: 9999px;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
+      width: 22px;
+      height: 22px;
+      color: var(--brass);
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
+      flex-shrink: 0;
     }
-    @media (max-width: 480px) {
-      .admin-crest span.crest-text { display: none; }
+
+    .brand-logo {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .brand-logo span { color: var(--brass); }
+
+    .admin-crest {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--brass-soft);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-gold);
+      white-space: nowrap;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      flex-shrink: 0;
     }
+
     .live-status-pill {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #cbd5e1;
+      padding: 6px 11px;
+      background: var(--sage-bg);
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--sage);
+      letter-spacing: 0.08em;
     }
+
     .pulse-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      animation: pulseLive 2s infinite ease-in-out;
+      background: var(--sage);
+      animation: adminPulse 2s ease-in-out infinite;
     }
-    @keyframes pulseLive {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+
+    @keyframes adminPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
     }
 
     .btn-header-luxury {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
-      color: #e2e8f0;
-      padding: 7px 12px;
-      border-radius: 10px;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s ease;
-      font-family: inherit;
-      min-height: 38px;
-    }
-    .btn-header-luxury:hover, .btn-header-luxury:active {
-      background: rgba(216, 186, 122, 0.14);
-      border-color: var(--gold-border);
-      color: #ffffff;
-    }
-    .btn-logout-luxury {
-      background: rgba(244, 63, 94, 0.1);
-      border: 1px solid rgba(244, 63, 94, 0.25);
-      color: #fca5a5;
-    }
-    .btn-logout-luxury:hover, .btn-logout-luxury:active {
-      background: rgba(244, 63, 94, 0.22);
-      border-color: #f43f5e;
-      color: #ffffff;
-    }
-
-    /* ============================================================ */
-    /* CONTAINER & MASTER HERO STATS                                */
-    /* ============================================================ */
-    .admin-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    @media (min-width: 768px) {
-      .admin-container { padding: 24px; }
-    }
-
-    /* Master Top Bar */
-    .sovereign-banner {
-      background: linear-gradient(135deg, rgba(216, 186, 122, 0.08) 0%, rgba(14, 20, 34, 0.8) 100%);
+      padding: 8px 13px;
+      background: var(--bg-surface);
       border: 1px solid var(--gold-border-subtle);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-    .sovereign-banner::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0; width: 120px; height: 100%;
-      background: radial-gradient(circle at top right, rgba(216, 186, 122, 0.15), transparent 70%);
-      pointer-events: none;
-    }
-    .sovereign-title-group h1 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #ffffff;
-      line-height: 1.25;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sovereign-title-group p {
+      color: var(--text-main);
+      border-radius: var(--radius-sm);
       font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 3px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
+
+    .btn-header-luxury:hover {
+      border-color: var(--brass);
+      color: var(--text-gold);
+    }
+
+    .btn-logout-luxury {
+      border-color: rgba(252, 165, 165, 0.35);
+      color: var(--crimson);
+    }
+
+    .btn-logout-luxury:hover {
+      background: var(--crimson-bg);
+      border-color: var(--crimson);
+      color: #fff;
+    }
+
+    /* ── Main Container ─────────────────────────────────────────────── */
+    .admin-container {
+      flex: 1 0 auto;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 32px 24px 72px;
+    }
+
+    /* ── Executive Masthead ─────────────────────────────────────────── */
+    .sovereign-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-left: 3px solid var(--brass);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .sovereign-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--brass);
+      margin-bottom: 6px;
+    }
+
+    .sovereign-title-group h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 3vw, 2.45rem);
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .sovereign-title-group p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      max-width: 620px;
+    }
+
     .sovereign-meta {
       display: flex;
-      align-items: center;
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .meta-chip {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 11.5px;
-      color: #cbd5e1;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      padding: 8px 12px;
+      background: var(--bg-dark);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-muted);
     }
 
-    /* Luxury Key Metrics Grid (Optimized for Phones) */
+    /* ── Telemetry Grid ─────────────────────────────────────────────── */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 22px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
     }
-    @media (min-width: 900px) {
-      .stats-grid { grid-template-columns: repeat(5, 1fr); gap: 16px; }
-    }
+
     .stat-card-luxury {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--gold-border-subtle);
       border-radius: var(--radius);
-      padding: 14px 16px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      transition: transform 0.2s, border-color 0.2s;
+      padding: 18px 20px;
+      transition: border-color 0.2s ease;
     }
-    .stat-card-luxury:active, .stat-card-luxury:hover {
+
+    .stat-card-luxury:hover {
       border-color: var(--gold-border);
-      transform: translateY(-2px);
     }
-    .stat-card-luxury.span-full-mobile {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, rgba(22, 31, 52, 0.95) 0%, rgba(14, 20, 34, 0.95) 100%);
-      border: 1px solid var(--gold-border);
+
+    .stat-head-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
     }
-    @media (min-width: 900px) {
-      .stat-card-luxury.span-full-mobile { grid-column: span 1; }
-    }
+
     .stat-icon {
-      font-size: 16px;
-      margin-bottom: 6px;
-      display: inline-block;
+      color: var(--brass);
+      display: inline-flex;
     }
+
     .stat-label-luxury {
       font-size: 10.5px;
       font-weight: 700;
-      color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 4px;
-    }
-    .stat-num-luxury {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: #ffffff;
-      line-height: 1.1;
-    }
-    .stat-num-luxury.gold {
-      background: var(--gold-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .stat-num-luxury.emerald {
-      color: #34d399;
-    }
-    .stat-num-luxury.amber {
-      color: #fbbf24;
-    }
-    .stat-sub-luxury {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
     }
 
-    /* ============================================================ */
-    /* SEGMENTED LUXURY TABS (TOUCH-SCROLLABLE)                    */
-    /* ============================================================ */
-    .tabs-wrapper {
-      position: relative;
-      margin-bottom: 20px;
+    .stat-num-luxury {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 600;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
     }
+
+    .stat-num-luxury.amber { color: var(--text-gold); }
+    .stat-num-luxury.emerald { color: var(--sage); }
+    .stat-num-luxury.gold { color: var(--brass); }
+
+    .stat-sub-luxury {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* ── Navigation Tabs ────────────────────────────────────────────── */
+    .tabs-wrapper {
+      border-bottom: 1px solid var(--gold-border-subtle);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
     .nav-tabs-luxury {
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 4px;
-    }
-    .nav-tabs-luxury::-webkit-scrollbar { display: none; }
-    
-    .nav-tab-luxury {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 10px 18px;
-      border-radius: 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-      transition: all 0.22s ease;
-      min-height: 44px; /* Touch target */
-    }
-    .nav-tab-luxury:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .nav-tab-luxury.active {
-      color: #0b0f19;
-      background: var(--gold-gradient);
-      border-color: #d8ba7a;
-      box-shadow: var(--gold-glow);
-    }
-    .tab-counter {
-      background: rgba(0, 0, 0, 0.35);
-      color: #ffffff;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 12px;
-    }
-    .nav-tab-luxury.active .tab-counter {
-      background: #0b0f19;
-      color: #d8ba7a;
+      gap: 6px;
     }
 
-    /* ============================================================ */
-    /* CONTROLS BAR (SEARCH & FILTERS)                              */
-    /* ============================================================ */
-    .controls-luxury {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    @media (min-width: 768px) {
-      .controls-luxury {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-    .search-box-luxury {
-      position: relative;
-      width: 100%;
-      max-width: 500px;
-    }
-    .search-box-luxury input {
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid var(--gold-border-subtle);
-      color: #ffffff;
-      padding: 12px 14px 12px 42px;
-      border-radius: 12px;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.2s;
-    }
-    .search-box-luxury input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 16px rgba(216, 186, 122, 0.2);
-    }
-    .search-icon-luxury {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-      font-size: 15px;
-    }
-    .filter-pills-row {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 2px;
-    }
-    .filter-pills-row::-webkit-scrollbar { display: none; }
-    .filter-pill {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 7px 13px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-      min-height: 36px;
+    .nav-tab-luxury {
       display: inline-flex;
       align-items: center;
-    }
-    .filter-pill.active, .filter-pill:hover {
-      background: rgba(216, 186, 122, 0.15);
-      border-color: var(--gold-border);
-      color: #ffffff;
-    }
-    .btn-action-gold {
-      background: var(--gold-gradient);
-      color: #0b0f19;
+      gap: 9px;
+      padding: 13px 20px;
       border: none;
-      padding: 10px 18px;
-      border-radius: 12px;
-      font-size: 13.5px;
-      font-weight: 800;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-tab-luxury:hover { color: var(--text-main); }
+
+    .nav-tab-luxury.active {
+      color: var(--text-gold);
+      border-bottom-color: var(--brass);
+    }
+
+    .tab-counter {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+    }
+
+    .nav-tab-luxury.active .tab-counter {
+      background: var(--brass-soft);
+      color: var(--text-gold);
+    }
+
+    /* ── Controls & Search Bar ──────────────────────────────────────── */
+    .controls-luxury {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .search-box-luxury {
+      flex: 1 1 280px;
+      max-width: 440px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon-luxury {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+      display: inline-flex;
+    }
+
+    .search-box-luxury input {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box-luxury input:focus { border-color: var(--brass); }
+
+    .filter-pills-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      padding: 8px 13px;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-pill:hover { color: #fff; border-color: var(--text-muted); }
+
+    .filter-pill.active {
+      background: var(--brass-soft);
+      border-color: var(--gold-border);
+      color: var(--text-gold);
+    }
+
+    .btn-action-gold {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.2s;
-      font-family: inherit;
-      min-height: 42px;
-      box-shadow: 0 4px 16px rgba(216, 186, 122, 0.25);
-    }
-    .btn-action-gold:hover, .btn-action-gold:active {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(216, 186, 122, 0.4);
+      padding: 11px 18px;
+      background: var(--brass);
+      color: #111317;
+      border: 1px solid var(--brass);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    /* ============================================================ */
-    /* TAB 1: MOVEMENTS & LIVE REQUESTS (MOBILE-LUXURY)             */
-    /* ============================================================ */
+    .btn-action-gold:hover {
+      background: var(--text-gold);
+      border-color: var(--text-gold);
+    }
+
+    /* ── Movement Dossiers ──────────────────────────────────────────── */
     .movements-stream {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-    }
-    .movement-dossier {
-      background: var(--bg-card);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--gold-border-subtle);
-      border-radius: var(--radius);
-      padding: 18px;
-      position: relative;
-      box-shadow: var(--shadow-luxury);
-      transition: border-color 0.2s ease;
-    }
-    @media (min-width: 768px) {
-      .movement-dossier { padding: 24px; }
-    }
-    .movement-dossier:hover {
-      border-color: var(--gold-border);
+      gap: 16px;
     }
 
-    /* Dossier Top Bar */
+    .movement-dossier {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
     .dossier-top {
+      padding: 14px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--gold-border-subtle);
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      padding-bottom: 14px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      gap: 12px;
       flex-wrap: wrap;
     }
+
     .ref-block {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
+
     .ref-stamp {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--text-gold);
-      background: rgba(216, 186, 122, 0.12);
-      border: 1px solid var(--gold-border);
-      padding: 3px 10px;
-      border-radius: 8px;
-      letter-spacing: 0.5px;
-    }
-    .dossier-time {
+      font-family: var(--font-mono);
       font-size: 12px;
-      color: #94a3b8;
+      font-weight: 600;
+      color: var(--text-gold);
+      background: var(--brass-soft);
+      border: 1px solid var(--gold-border);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
     }
 
-    /* Luxury Status Badges */
-    .status-gem {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .dossier-time {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-muted);
       display: inline-flex;
       align-items: center;
       gap: 5px;
     }
-    .gem-awaiting {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      color: #fbbf24;
-    }
-    .gem-quoted {
-      background: rgba(96, 165, 250, 0.15);
-      border: 1px solid rgba(96, 165, 250, 0.35);
-      color: #93c5fd;
-    }
-    .gem-booked {
-      background: rgba(16, 185, 129, 0.18);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #6ee7b7;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+
+    .status-gem {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
-    /* Dossier Grid: 4 Sections */
+    .gem-awaiting { background: var(--brass-soft); color: var(--text-gold); border: 1px solid var(--gold-border); }
+    .gem-quoted { background: rgba(255, 255, 255, 0.08); color: #F4F1EA; border: 1px solid #353B49; }
+    .gem-booked { background: var(--sage-bg); color: var(--sage); border: 1px solid rgba(52, 211, 153, 0.3); }
+
     .dossier-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-    @media (min-width: 640px) {
-      .dossier-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (min-width: 1080px) {
-      .dossier-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+      grid-template-columns: repeat(4, 1fr);
     }
 
     .dossier-col {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 14px;
+      padding: 18px 20px;
+      border-right: 1px solid var(--gold-border-subtle);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      gap: 12px;
     }
+
+    .dossier-col:last-child { border-right: none; }
+
     .col-header {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-gold);
+      font-size: 10.5px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 10px;
+      letter-spacing: 0.1em;
+      color: var(--brass);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--gold-border-subtle);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
     }
+
     .data-row {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 6px;
-      font-size: 12.5px;
-    }
-    .data-row:last-child { margin-bottom: 0; }
-    .data-lbl { color: #94a3b8; }
-    .data-val { font-weight: 700; color: #f1f5f9; text-align: right; }
-    .unmasked-gold {
-      font-family: 'JetBrains Mono', monospace;
-      color: #34d399;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      gap: 10px;
+      padding: 4px 0;
+      font-size: 12px;
     }
 
-    /* Direct Contact Buttons on Mobile (Dial / WhatsApp / Email) */
+    .data-lbl { color: var(--text-muted); flex-shrink: 0; }
+    .data-val { color: var(--text-main); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+    .unmasked-gold { color: var(--text-gold); font-family: var(--font-mono); }
+
     .contact-action-bar {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
     }
+
     .btn-contact-pill {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #ffffff;
-      text-decoration: none;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 11.5px;
-      font-weight: 700;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 5px;
-      min-height: 38px;
-      transition: all 0.2s;
-    }
-    .btn-contact-pill.whatsapp {
-      background: rgba(37, 211, 102, 0.15);
-      border-color: rgba(37, 211, 102, 0.35);
-      color: #25d366;
-    }
-    .btn-contact-pill.whatsapp:active, .btn-contact-pill.whatsapp:hover {
-      background: #25d366;
-      color: #000000;
-    }
-    .btn-contact-pill.phone {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.35);
-      color: #60a5fa;
-    }
-    .btn-contact-pill.phone:active, .btn-contact-pill.phone:hover {
-      background: #3b82f6;
-      color: #ffffff;
-    }
-
-    .dossier-foot {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    /* ============================================================ */
-    /* TAB 2: OPERATORS (RESPONSIVE CARDS FOR MOBILE + TABLE PC)    */
-    /* ============================================================ */
-    /* Mobile Cards Container */
-    .operators-cards-mobile {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    @media (min-width: 900px) {
-      .operators-cards-mobile { display: none; }
-    }
-    .operator-card-luxury {
-      background: var(--bg-card);
-      border: 1px solid var(--gold-border-subtle);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow-luxury);
-    }
-    .op-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-    .op-biz-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .op-biz-id {
-      font-family: 'JetBrains Mono', monospace;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
       font-size: 11px;
-      color: #94a3b8;
-    }
-    .op-details-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      font-size: 12px;
-      margin-bottom: 14px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .op-action-btns {
-      display: flex;
-      gap: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--gold-border-subtle);
+      color: var(--text-main);
+      background: var(--bg-surface);
     }
 
-    /* Desktop Table */
+    .btn-contact-pill.whatsapp {
+      background: #1B5E44;
+      border-color: rgba(52, 211, 153, 0.35);
+      color: #fff;
+    }
+
+    .btn-pill-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--bg-surface);
+      border: 1px solid var(--gold-border-subtle);
+      color: var(--text-main);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-pill-action:hover { border-color: var(--brass); }
+
+    .btn-pill-danger {
+      color: var(--crimson);
+      border-color: rgba(252, 165, 165, 0.35);
+    }
+
+    .btn-pill-danger:hover {
+      background: var(--crimson-bg);
+      color: #fff;
+    }
+
+    /* ── Operators Table & Cards ────────────────────────────────────── */
     .table-container-luxury {
-      display: none;
       background: var(--bg-card);
       border: 1px solid var(--gold-border-subtle);
       border-radius: var(--radius);
       overflow-x: auto;
-      box-shadow: var(--shadow-luxury);
     }
-    @media (min-width: 900px) {
-      .table-container-luxury { display: block; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
     }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+
     th {
-      background: rgba(255, 255, 255, 0.02);
-      color: var(--text-gold);
-      font-weight: 800;
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
+      text-align: left;
+      padding: 13px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--gold-border-subtle);
+      font-size: 10.5px;
+      font-weight: 700;
       text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      white-space: nowrap;
     }
+
     td {
-      padding: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: #e2e8f0;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gold-border-subtle);
+      font-size: 12.5px;
+      color: var(--text-main);
       vertical-align: middle;
     }
+
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(216, 186, 122, 0.02); }
 
-    .btn-pill-action {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #e2e8f0;
-      padding: 6px 12px;
-      border-radius: 8px;
+    .operators-cards-mobile { display: none; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+
+    .op-card-lux {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .op-details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 14px 0;
       font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-    .btn-pill-action:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
-    .btn-pill-danger {
-      background: rgba(244, 63, 94, 0.12);
-      border-color: rgba(244, 63, 94, 0.3);
-      color: #fca5a5;
-    }
-    .btn-pill-danger:hover {
-      background: rgba(244, 63, 94, 0.25);
-      color: #ffffff;
     }
 
-    /* ============================================================ */
-    /* TAB 3: FEATURED TOUR CARDS (MOBILE & DESKTOP)                */
-    /* ============================================================ */
+    .op-action-btns { display: flex; gap: 8px; }
+
+    /* ── Featured Circuits Grid ─────────────────────────────────────── */
     .featured-grid-luxury {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
     }
-    @media (min-width: 640px) {
-      .featured-grid-luxury { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (min-width: 1080px) {
-      .featured-grid-luxury { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    }
+
     .feat-card-luxury {
       background: var(--bg-card);
       border: 1px solid var(--gold-border-subtle);
@@ -795,222 +677,223 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: var(--shadow-luxury);
     }
-    .feat-hero-wrap {
-      height: 180px;
-      position: relative;
-      background: #0b0f19;
-    }
-    .feat-hero-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+
+    .feat-hero-wrap { position: relative; height: 190px; overflow: hidden; background: var(--bg-surface); }
+    .feat-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
     .feat-badge-top {
       position: absolute;
       top: 12px;
       left: 12px;
-      background: var(--gold-gradient);
-      color: #0b0f19;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
+      background: var(--bg-dark);
+      border: 1px solid var(--gold-border);
+      color: var(--text-gold);
+      font-size: 10.5px;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 9px;
+      border-radius: var(--radius-sm);
     }
+
     .feat-duration-pill {
       position: absolute;
       bottom: 12px;
       right: 12px;
-      background: rgba(7, 10, 18, 0.85);
-      border: 1px solid var(--gold-border);
-      color: #ffffff;
-      font-size: 11.5px;
-      font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 20px;
-      backdrop-filter: blur(8px);
+      background: rgba(15, 17, 21, 0.88);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.14);
     }
+
     .feat-body-luxury {
-      padding: 18px;
+      padding: 18px 20px;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
+
     .feat-title-lux {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 17px;
-      font-weight: 700;
-      color: #ffffff;
-      line-height: 1.3;
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.2;
       margin-bottom: 4px;
     }
+
     .feat-dest-lux {
-      font-size: 12.5px;
-      font-weight: 600;
+      font-size: 12px;
       color: var(--text-gold);
       margin-bottom: 10px;
+      font-weight: 600;
     }
+
     .feat-price-lux {
+      font-family: var(--font-mono);
       font-size: 20px;
-      font-weight: 800;
-      color: #34d399;
-      margin-bottom: 12px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
     }
 
-    /* ============================================================ */
-    /* MODALS: LUXURY BOTTOM-SHEET ON MOBILE                        */
-    /* ============================================================ */
-    .modal-overlay-lux {
-      position: fixed;
-      inset: 0;
-      background: rgba(5, 8, 14, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-    .modal-overlay-lux.active { display: flex; }
-    
-    .modal-card-lux {
-      background: #0f1627;
-      border: 1px solid var(--gold-border);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 92vh;
-      overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), var(--gold-glow);
-      position: relative;
-      animation: modalSlideUp 0.25s ease-out;
-    }
-    @media (max-width: 600px) {
-      .modal-overlay-lux {
-        align-items: flex-end;
-        padding: 0;
-      }
-      .modal-card-lux {
-        border-radius: 24px 24px 0 0;
-        max-height: 88vh;
-        padding: 20px;
-      }
-    }
-    @keyframes modalSlideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .modal-header-lux {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 14px;
-      margin-bottom: 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .modal-title-lux {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 19px;
-      font-weight: 700;
-      color: #ffffff;
-    }
-    .modal-close-lux {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #94a3b8;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .modal-close-lux:hover { color: #fff; background: rgba(255, 255, 255, 0.15); }
-    
-    .form-group-lux { margin-bottom: 14px; }
-    .form-label-lux {
-      display: block;
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-gold);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 6px;
-    }
-    .form-input-lux, .form-textarea-lux {
-      width: 100%;
-      background: rgba(7, 10, 18, 0.7);
-      border: 1px solid var(--border);
-      color: #ffffff;
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-    .form-input-lux:focus, .form-textarea-lux:focus {
-      border-color: var(--primary);
-    }
-    .form-row-lux {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    @media (min-width: 600px) {
-      .form-row-lux { grid-template-columns: 1fr 1fr; }
-    }
-    .modal-footer-lux {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    /* Auth Gate Overlay */
+    /* ── Modals & Sovereign Auth Gate ──────────────────────────────── */
     #authGateOverlay {
       position: fixed;
       inset: 0;
-      background: #070a12;
-      z-index: 9999;
-      display: none;
+      background: var(--bg-dark);
+      z-index: 9500;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
+
     .gate-box-lux {
-      background: #0e1422;
-      border: 1px solid var(--gold-border);
-      border-radius: 20px;
-      padding: 32px 24px;
-      max-width: 420px;
       width: 100%;
+      max-width: 420px;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-top: 3px solid var(--brass);
+      border-radius: var(--radius);
+      padding: 36px 32px;
       text-align: center;
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), var(--gold-glow);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65);
+    }
+
+    .modal-overlay-lux {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 12, 16, 0.78);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9600;
+      overflow-y: auto;
+    }
+
+    .modal-overlay-lux.active { display: flex; }
+
+    .modal-card-lux, .modal-content-lux {
+      width: 100%;
+      max-width: 560px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-border-subtle);
+      border-top: 2px solid var(--brass);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .modal-header-lux {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--gold-border-subtle);
+    }
+
+    .modal-title-lux {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .modal-close-lux {
+      background: none;
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius-sm);
+      width: 30px;
+      height: 30px;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .form-group-lux { margin-bottom: 14px; }
+
+    .form-label-lux {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-input-lux, .form-textarea-lux {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-dark);
+      border: 1px solid var(--gold-border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .form-input-lux:focus, .form-textarea-lux:focus {
+      border-color: var(--brass);
+    }
+
+    .form-row-lux {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .modal-footer-lux {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 1080px) {
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .dossier-grid { grid-template-columns: repeat(2, 1fr); }
+      .dossier-col:nth-child(2n) { border-right: none; }
+      .dossier-col { border-bottom: 1px solid var(--gold-border-subtle); }
+    }
+
+    @media (max-width: 760px) {
+      .header-inner { padding: 0 16px; }
+      .admin-crest { display: none; }
+      .admin-container { padding: 20px 14px 48px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .span-full-mobile { grid-column: 1 / -1; }
+      .dossier-grid, .form-row-lux { grid-template-columns: 1fr; }
+      .dossier-col { border-right: none; }
+      .table-container-luxury { display: none; }
+      .operators-cards-mobile { display: flex; }
+      .gate-box-lux { padding: 28px 20px; }
     }
   </style>
 </head>
-<body>
+<body class="gated">
 
-  <!-- Top Luxury Header -->
+  <!-- Top Console Header -->
   <header>
     <div class="header-inner">
       <div class="brand-wrap">
-        <span class="brand-crown">✦</span>
+        <span class="brand-crown">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/></svg>
+        </span>
         <a href="/" style="text-decoration: none;" class="brand-logo">Trip<span>Mozy</span></a>
         <div class="admin-crest">
-          <span>👑</span>
           <span class="crest-text">Master Console</span>
         </div>
       </div>
@@ -1019,8 +902,9 @@
           <span class="pulse-dot"></span>
           <span style="font-weight: 700;">LIVE</span>
         </div>
-        <button class="btn-header-luxury" onclick="loadAllAdminData()" title="Sync Live Marketplace">
-          <span>🔄</span>
+        <button class="btn-header-luxury" onclick="loadAllAdminData()" title="Sync Live Marketplace" aria-label="Sync Live Marketplace">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          <span>Sync</span>
         </button>
         <button class="btn-header-luxury btn-logout-luxury" onclick="adminSignOut()" title="Secure Logout">
           <span>Sign Out</span>
@@ -1035,91 +919,102 @@
     <!-- Sovereign Executive Banner -->
     <section class="sovereign-banner">
       <div class="sovereign-title-group">
-        <h1>Private Master Oversight Console</h1>
-        <p>Full real-time visibility of traveler requests, operator acceptance, live quotes, and payment escrow.</p>
+        <div class="sovereign-eyebrow">TripMozy Oversight Ledger</div>
+        <h1>Private Master Console</h1>
+        <p>Real-time supervision across traveler commissioning briefs, operator claim locks, quote splits, and escrow settlement.</p>
       </div>
       <div class="sovereign-meta">
         <div class="meta-chip">
-          <span>👤 Master Admin:</span>
+          <span>Master Admin:</span>
           <strong id="headerAdminEmail" style="color: var(--text-gold);">tripmozy@gmail.com</strong>
         </div>
         <div class="meta-chip">
-          <span>🛡️ Mode:</span>
-          <span style="color:#34d399; font-weight:700;">Unmasked PII Enabled</span>
+          <span>Visibility:</span>
+          <span style="color: var(--sage); font-weight: 700;">Unmasked PII Enabled</span>
         </div>
       </div>
     </section>
 
-    <!-- Top Key Metrics (Mobile-Optimized Luxury Grid) -->
+    <!-- Top Key Metrics -->
     <section class="stats-grid">
       <div class="stat-card-luxury">
-        <div class="stat-icon">🗺️</div>
-        <div class="stat-label-luxury">Tour Requests</div>
+        <div class="stat-head-row">
+          <div class="stat-label-luxury">Tour Requests</div>
+          <div class="stat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+        </div>
         <div class="stat-num-luxury" id="statTotalReqs">0</div>
         <div class="stat-sub-luxury">Across Indian circuits</div>
       </div>
 
       <div class="stat-card-luxury">
-        <div class="stat-icon">⏳</div>
-        <div class="stat-label-luxury">Awaiting Operator</div>
+        <div class="stat-head-row">
+          <div class="stat-label-luxury">Awaiting Operator</div>
+          <div class="stat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        </div>
         <div class="stat-num-luxury amber" id="statAwaiting">0</div>
         <div class="stat-sub-luxury">Pending quotes / claim</div>
       </div>
 
       <div class="stat-card-luxury">
-        <div class="stat-icon">📋</div>
-        <div class="stat-label-luxury">Active Quotes</div>
+        <div class="stat-head-row">
+          <div class="stat-label-luxury">Active Quotes</div>
+          <div class="stat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        </div>
         <div class="stat-num-luxury" id="statQuoted">0</div>
         <div class="stat-sub-luxury">Offer sent to traveler</div>
       </div>
 
       <div class="stat-card-luxury">
-        <div class="stat-icon">💎</div>
-        <div class="stat-label-luxury">Paid & Confirmed</div>
+        <div class="stat-head-row">
+          <div class="stat-label-luxury">Paid &amp; Confirmed</div>
+          <div class="stat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        </div>
         <div class="stat-num-luxury emerald" id="statBooked">0</div>
         <div class="stat-sub-luxury" id="statDepositSum">₹0 deposit collected</div>
       </div>
 
       <div class="stat-card-luxury span-full-mobile">
-        <div class="stat-icon">👑</div>
-        <div class="stat-label-luxury">Total Marketplace GMV</div>
+        <div class="stat-head-row">
+          <div class="stat-label-luxury">Total Marketplace GMV</div>
+          <div class="stat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        </div>
         <div class="stat-num-luxury gold" id="statGmv">₹0</div>
         <div class="stat-sub-luxury">Gross tour package volume</div>
       </div>
     </section>
 
-    <!-- Segmented Touch-Scrollable Navigation Tabs -->
+    <!-- Navigation Tabs -->
     <div class="tabs-wrapper">
       <nav class="nav-tabs-luxury">
         <button class="nav-tab-luxury active" onclick="switchAdminTab('movements')">
-          <span>🎯 Live Movements</span>
+          <span>Live Movements</span>
           <span class="tab-counter" id="badgeMovements">0</span>
         </button>
         <button class="nav-tab-luxury" onclick="switchAdminTab('operators')">
-          <span>🏢 Tour Operators</span>
+          <span>Tour Operators</span>
           <span class="tab-counter" id="badgeOperators">0</span>
         </button>
         <button class="nav-tab-luxury" onclick="switchAdminTab('featured')">
-          <span>✨ Featured Cards</span>
+          <span>Featured Circuits</span>
           <span class="tab-counter" id="badgeFeatured">0</span>
         </button>
       </nav>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- TAB 1: MOVEMENTS & LIVE REQUESTS                             -->
-    <!-- ============================================================ */ -->
+    <!-- TAB 1: MOVEMENTS & LIVE REQUESTS -->
     <div id="tabMovements" class="tab-pane">
       <div class="controls-luxury">
         <div class="search-box-luxury">
-          <span class="search-icon-luxury">🔍</span>
+          <span class="search-icon-luxury">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
           <input type="text" id="movementSearch" placeholder="Search traveler, phone, city, operator, ref..." oninput="filterMovements()">
         </div>
         <div class="filter-pills-row">
           <button class="filter-pill active" data-filter="all" onclick="setMovementFilter('all', this)">All Movements</button>
           <button class="filter-pill" data-filter="awaiting" onclick="setMovementFilter('awaiting', this)">Awaiting Operator</button>
           <button class="filter-pill" data-filter="quoted" onclick="setMovementFilter('quoted', this)">Quotes Active</button>
-          <button class="filter-pill" data-filter="booked" onclick="setMovementFilter('booked', this)">Paid & Confirmed</button>
+          <button class="filter-pill" data-filter="booked" onclick="setMovementFilter('booked', this)">Paid &amp; Confirmed</button>
         </div>
       </div>
 
@@ -1130,13 +1025,13 @@
       </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- TAB 2: TOUR OPERATORS DIRECTORY                              -->
-    <!-- ============================================================ */ -->
+    <!-- TAB 2: TOUR OPERATORS DIRECTORY -->
     <div id="tabOperators" class="tab-pane" style="display: none;">
       <div class="controls-luxury">
         <div class="search-box-luxury">
-          <span class="search-icon-luxury">🔍</span>
+          <span class="search-icon-luxury">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
           <input type="text" id="operatorSearch" placeholder="Search tour operators by agency, city, contact..." oninput="filterOperators()">
         </div>
         <button class="btn-action-gold" onclick="openAddOperatorModal()">
@@ -1144,12 +1039,8 @@
         </button>
       </div>
 
-      <!-- Mobile Cards View (Phones) -->
-      <div class="operators-cards-mobile" id="operatorsCardsContainer">
-        <!-- Rendered dynamically for mobile -->
-      </div>
+      <div class="operators-cards-mobile" id="operatorsCardsContainer"></div>
 
-      <!-- Desktop Table View (Laptops & PC) -->
       <div class="table-container-luxury">
         <table>
           <thead>
@@ -1173,30 +1064,24 @@
       </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- TAB 3: FEATURED TOUR CARDS                                   -->
-    <!-- ============================================================ */ -->
+    <!-- TAB 3: FEATURED TOUR CARDS -->
     <div id="tabFeatured" class="tab-pane" style="display: none;">
       <div class="controls-luxury">
         <div>
-          <h3 style="font-family:'Playfair Display',serif; font-size: 18px; font-weight: 700; color: #fff;">Featured Signature Circuits</h3>
-          <p style="font-size: 12.5px; color: var(--text-muted);">Display cards rendered on customer page with complete duration and itinerary popup.</p>
+          <h3 style="font-family:var(--font-serif); font-size: 24px; font-weight: 600; color: #fff;">Featured Signature Circuits</h3>
+          <p style="font-size: 12.5px; color: var(--text-muted);">Showcase circuits synced with the editorial landing page and commissioning studio.</p>
         </div>
         <button class="btn-action-gold" onclick="openAddFeaturedModal()">
           <span>+ Add Featured Card</span>
         </button>
       </div>
 
-      <div class="featured-grid-luxury" id="featuredGridContainer">
-        <!-- Rendered dynamically -->
-      </div>
+      <div class="featured-grid-luxury" id="featuredGridContainer"></div>
     </div>
 
   </main>
 
-  <!-- ============================================================ -->
-  <!-- MODAL: ADD TOUR OPERATOR                                     -->
-  <!-- ============================================================ -->
+  <!-- MODAL: ADD TOUR OPERATOR -->
   <div class="modal-overlay-lux" id="addOperatorModal">
     <div class="modal-card-lux">
       <div class="modal-header-lux">
@@ -1240,9 +1125,7 @@
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- MODAL: ADD FEATURED TOUR CARD                                -->
-  <!-- ============================================================ -->
+  <!-- MODAL: ADD FEATURED TOUR CARD -->
   <div class="modal-overlay-lux" id="addFeaturedModal">
     <div class="modal-card-lux">
       <div class="modal-header-lux">
@@ -1261,7 +1144,7 @@
           </div>
           <div class="form-group-lux">
             <label class="form-label-lux">Badge Label</label>
-            <input type="text" name="badge" class="form-input-lux" placeholder="e.g. Trending 2026 / Bestseller" value="Trending 2026">
+            <input type="text" name="badge" class="form-input-lux" placeholder="e.g. Signature 2026" value="Trending 2026">
           </div>
         </div>
         <div class="form-row-lux">
@@ -1276,19 +1159,19 @@
         </div>
         <div class="form-group-lux">
           <label class="form-label-lux">Cover Image URL *</label>
-          <input type="url" name="imageUrl" class="form-input-lux" placeholder="https://images.unsplash.com/..." required>
+          <input type="url" name="imageUrl" class="form-input-lux" placeholder="/images/circuit-kashmir.jpg or https://..." required>
         </div>
         <div class="form-group-lux">
           <label class="form-label-lux">Tour Overview</label>
-          <textarea name="overview" class="form-textarea-lux" rows="2" placeholder="Experience the breathtaking Dal Lake, Gulmarg gondola ride, and Pahalgam valleys."></textarea>
+          <textarea name="overview" class="form-textarea-lux" rows="2" placeholder="Experience Dal Lake shikaras, Gulmarg meadows, and Pahalgam valleys."></textarea>
         </div>
         <div class="form-group-lux">
           <label class="form-label-lux">Day-by-Day Highlights (One per line)</label>
-          <textarea name="highlights" class="form-textarea-lux" rows="3" placeholder="Day 1: Srinagar Shikara ride&#10;Day 2: Gulmarg snow gondola&#10;Day 3: Pahalgam Betaab Valley"></textarea>
+          <textarea name="highlights" class="form-textarea-lux" rows="3" placeholder="Day 1: Srinagar Shikara ride&#10;Day 2: Gulmarg snow gondola"></textarea>
         </div>
         <div class="form-group-lux">
           <label class="form-label-lux">Package Inclusions (One per line)</label>
-          <textarea name="inclusions" class="form-textarea-lux" rows="3" placeholder="Deluxe 4-Star Stays&#10;Daily Breakfast & Dinner&#10;Private Cab with Chauffeur&#10;Toll, Parking, Permits"></textarea>
+          <textarea name="inclusions" class="form-textarea-lux" rows="3" placeholder="Heritage 4-Star Stays&#10;Daily Breakfast &amp; Dinner&#10;Private SUV with Chauffeur"></textarea>
         </div>
         <div class="modal-footer-lux">
           <button type="button" class="btn-header-luxury" onclick="closeModal('addFeaturedModal')">Cancel</button>
@@ -1298,14 +1181,15 @@
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- AUTH GATE: PRIVATE MASTER CONSOLE LOGIN                      -->
-  <!-- ============================================================ -->
+  <!-- AUTH GATE: SOVEREIGN ADMIN CONSOLE LOGIN -->
   <div id="authGateOverlay">
     <div class="gate-box-lux">
-      <div style="font-size: 32px; margin-bottom: 8px;">👑</div>
-      <h2 style="font-family:'Playfair Display',serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px;">TripMozy Sovereign Vault</h2>
-      <p style="font-size: 13px; color: #94a3b8; margin-bottom: 22px;">Executive administrator credentials required for portal access.</p>
+      <div style="width:44px; height:44px; margin:0 auto 16px; border:1px solid var(--gold-border); background:var(--brass-soft); border-radius:2px; display:flex; align-items:center; justify-content:center; color:var(--brass);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.16em; color:var(--brass); margin-bottom:6px;">Executive Oversight</div>
+      <h2 style="font-family:var(--font-serif); font-size: 28px; font-weight: 600; color: #fff; margin-bottom: 6px;">TripMozy Sovereign Vault</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">Executive administrator credentials required for unmasked dossier and escrow supervision.</p>
       <form onsubmit="handleGateLogin(event)">
         <div class="form-group-lux" style="text-align: left;">
           <label class="form-label-lux">Admin ID / Email</label>
@@ -1314,18 +1198,21 @@
         <div class="form-group-lux" style="text-align: left;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label class="form-label-lux" style="margin-bottom:0;">Master Password</label>
-            <a href="javascript:void(0)" onclick="openResetPasswordModal()" style="font-size:11.5px; color:#d8ba7a; text-decoration:none; font-weight:600;">Forgot / Reset Password? 🔐</a>
+            <a href="javascript:void(0)" onclick="openResetPasswordModal()" style="font-size:11.5px; color:var(--text-gold); text-decoration:none; font-weight:600;">Reset Password</a>
           </div>
-          <input type="password" id="gatePassword" class="form-input-lux" placeholder="••••••••••••" required>
+          <input type="password" id="gatePassword" class="form-input-lux" placeholder="Enter master passphrase" required>
         </div>
-        <div id="gateError" style="color: #f87171; font-size: 12.5px; margin-bottom: 14px; display: none;"></div>
+        <div id="gateError" style="color: var(--crimson); font-size: 12.5px; margin-bottom: 14px; display: none;"></div>
         <button type="submit" class="btn-action-gold" style="width: 100%;" id="btnGateSubmit">
           Unlock Master Console
         </button>
       </form>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--gold-border-subtle); display:flex; justify-content:space-between; font-size:11.5px;">
+        <a href="/" style="color:var(--text-muted); text-decoration:none;">&larr; Return to Editorial Home</a>
+        <a href="/login" style="color:var(--text-gold); text-decoration:none;">Traveler / Operator Sign In</a>
+      </div>
     </div>
   </div>
-
   <script>
     // Global State
     let movementsData = [];
@@ -1364,6 +1251,7 @@
     async function checkAdminSession() {
       const token = getAdminToken();
       if (!token) {
+        document.body.classList.add('gated');
         document.getElementById('authGateOverlay').style.display = 'flex';
         return;
       }
@@ -1374,12 +1262,14 @@
           if (user && user.authenticated && user.role === 'admin') {
             const email = (user.user && user.user.email) || user.email || 'tripmozy@gmail.com';
             document.getElementById('headerAdminEmail').textContent = email;
+            document.body.classList.remove('gated');
             document.getElementById('authGateOverlay').style.display = 'none';
             loadAllAdminData();
             return;
           }
         }
       } catch (_) {}
+      document.body.classList.add('gated');
       document.getElementById('authGateOverlay').style.display = 'flex';
     }
 
@@ -1406,6 +1296,7 @@
             localStorage.setItem('tm_session_token', token);
             document.cookie = `tm_session_token=${token}; Path=/; max-age=2592000; SameSite=Lax`;
           }
+          document.body.classList.remove('gated');
           document.getElementById('authGateOverlay').style.display = 'none';
           document.getElementById('headerAdminEmail').textContent = (data.user && data.user.email) || data.email || identifier;
           loadAllAdminData();
@@ -1542,9 +1433,9 @@
       }
 
       container.innerHTML = filtered.map(r => {
-        let statusBadge = '<span class="status-gem gem-awaiting">⏳ Awaiting Operator</span>';
-        if (r.status === 'offers_available') statusBadge = '<span class="status-gem gem-quoted">📋 Offer Quoted</span>';
-        if (r.status === 'booked' || (r.payment && r.payment.isPaid)) statusBadge = '<span class="status-gem gem-booked">💎 Confirmed &amp; Paid</span>';
+        let statusBadge = '<span class="status-gem gem-awaiting">Awaiting Operator</span>';
+        if (r.status === 'offers_available') statusBadge = '<span class="status-gem gem-quoted">Offer Quoted</span>';
+        if (r.status === 'booked' || (r.payment && r.payment.isPaid)) statusBadge = '<span class="status-gem gem-booked">Confirmed &amp; Paid</span>';
 
         const cust = r.customer || {};
         const tour = r.tour || {};
@@ -1555,6 +1446,10 @@
         const cleanPhone = (cust.phone || '').replace(/\D/g, '');
         const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone}` : null;
         const bookingPortalUrl = `/booking?id=${r.id}`;
+        const receiptIdOrRef = (pay && (pay.bookingReference || pay.booking_reference)) || r.reference || r.id;
+        const adminTok = getAdminToken() || '';
+        const invNum = `TM-INV-${String(r.reference || r.id).replace(/^TM-REQ-/, '')}`;
+        const adminPdfDlUrl = `/api/bookings/${encodeURIComponent(receiptIdOrRef)}/receipt.pdf?download=1${adminTok ? `&auth=${encodeURIComponent(adminTok)}` : ''}`;
 
         const createdDate = new Date(r.created_at || r.createdAt || Date.now()).toLocaleString('en-IN', {
           timeZone: 'Asia/Kolkata',
@@ -1571,12 +1466,20 @@
             <div class="dossier-top">
               <div class="ref-block">
                 <span class="ref-stamp">${r.reference || r.id.slice(0, 8).toUpperCase()}</span>
-                <span class="dossier-time">🕒 ${createdDate}</span>
+                <span class="dossier-time">${createdDate}</span>
               </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 ${statusBadge}
+                ${(r.status === 'booked' || (pay && pay.isPaid)) ? `
+                  <button type="button" onclick="openAdminReceiptModal('${r.id}')" class="btn-pill-action" style="color:var(--sage); border-color:rgba(52,211,153,0.38);">
+                    View Receipt
+                  </button>
+                  <a href="${adminPdfDlUrl}" download="TripMozy-Receipt-${invNum}.pdf" class="btn-pill-action" style="background:var(--brass); color:#111317; border-color:var(--brass); font-weight:700;">
+                    Download PDF
+                  </a>
+                ` : ''}
                 <a href="${bookingPortalUrl}" target="_blank" class="btn-pill-action" style="color:var(--text-gold); border-color:var(--gold-border);" title="Open Customer Portal">
-                  🔗 Portal
+                  Open Portal &rarr;
                 </a>
               </div>
             </div>
@@ -1585,7 +1488,7 @@
               <!-- Column 1: Traveler Profile (Unmasked PII) -->
               <div class="dossier-col">
                 <div>
-                  <div class="col-header">👤 Traveler (Unmasked PII)</div>
+                  <div class="col-header">Traveler (Unmasked PII)</div>
                   <div class="data-row">
                     <span class="data-lbl">Name:</span>
                     <span class="data-val" style="font-size:13px; color:#fff;">${cust.name || 'Anonymous Traveler'}</span>
@@ -1601,26 +1504,26 @@
                 </div>
 
                 <div class="contact-action-bar">
-                  ${cust.phone ? `<a href="tel:${cust.phone}" class="btn-contact-pill phone">📞 Call</a>` : ''}
-                  ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="btn-contact-pill whatsapp">💬 WhatsApp</a>` : ''}
+                  ${cust.phone ? `<a href="tel:${cust.phone}" class="btn-contact-pill phone">Call</a>` : ''}
+                  ${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="btn-contact-pill whatsapp">WhatsApp</a>` : ''}
                 </div>
               </div>
 
               <!-- Column 2: Tour Circuit & Specs -->
               <div class="dossier-col">
                 <div>
-                  <div class="col-header">🗺️ Circuit Specs</div>
+                  <div class="col-header">Circuit Specs</div>
                   <div class="data-row">
                     <span class="data-lbl">Destination:</span>
-                    <span class="data-val" style="color: #60a5fa;">${tour.destination || 'India Tour'}</span>
+                    <span class="data-val" style="color: #fff;">${tour.destination || 'India Tour'}</span>
                   </div>
                   <div class="data-row">
                     <span class="data-lbl">Duration:</span>
-                    <span class="data-val" style="color: var(--text-gold); font-weight: 800;">⏱️ ${durationStr}</span>
+                    <span class="data-val" style="color: var(--text-gold); font-weight: 700;">${durationStr}</span>
                   </div>
                   <div class="data-row">
                     <span class="data-lbl">Dates:</span>
-                    <span class="data-val">${tour.check_in_date || 'Flexible'} → ${tour.check_out_date || ''}</span>
+                    <span class="data-val">${tour.check_in_date || 'Flexible'} &rarr; ${tour.check_out_date || ''}</span>
                   </div>
                   <div class="data-row">
                     <span class="data-lbl">Travelers:</span>
@@ -1636,11 +1539,11 @@
               <!-- Column 3: Accepting Operator -->
               <div class="dossier-col">
                 <div>
-                  <div class="col-header">🏢 Assigned Operator</div>
+                  <div class="col-header">Assigned Operator</div>
                   ${op ? `
                     <div class="data-row">
                       <span class="data-lbl">Agency:</span>
-                      <span class="data-val" style="color: #fbbf24;">${op.business_name || op.businessName}</span>
+                      <span class="data-val" style="color: var(--text-gold);">${op.business_name || op.businessName}</span>
                     </div>
                     <div class="data-row">
                       <span class="data-lbl">Contact:</span>
@@ -1652,22 +1555,22 @@
                     </div>
                     <div class="data-row">
                       <span class="data-lbl">Operator ID:</span>
-                      <span class="data-val" style="font-family:monospace; font-size:11px;">${(op.vendor_id || op.vendorId || '').slice(0, 8)}</span>
+                      <span class="data-val" style="font-family:var(--font-mono); font-size:11px;">${(op.vendor_id || op.vendorId || '').slice(0, 8)}</span>
                     </div>
                     <div class="data-row">
                       <span class="data-lbl">Fleet:</span>
                       <span class="data-val" style="font-size:11.5px;">${op.property_name || op.propertyName || 'Fleet'}</span>
                     </div>
                   ` : `
-                    <div style="text-align: center; padding: 20px 10px; color: #64748b; font-size: 12px;">
+                    <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12px;">
                       <em>Waiting for a tour operator to claim and quote...</em>
                     </div>
                   `}
                 </div>
                 ${op && (op.phone || op.contactPhone) ? `
                   <div class="contact-action-bar">
-                    <a href="tel:${op.phone || op.contactPhone}" class="btn-contact-pill phone">📞 Dial</a>
-                    <a href="https://wa.me/${(op.phone || op.contactPhone).replace(/\D/g, '')}" target="_blank" class="btn-contact-pill whatsapp">💬 Chat</a>
+                    <a href="tel:${op.phone || op.contactPhone}" class="btn-contact-pill phone">Dial</a>
+                    <a href="https://wa.me/${(op.phone || op.contactPhone).replace(/\D/g, '')}" target="_blank" class="btn-contact-pill whatsapp">WhatsApp</a>
                   </div>
                 ` : ''}
               </div>
@@ -1675,28 +1578,28 @@
               <!-- Column 4: Pricing & Payment Ledger -->
               <div class="dossier-col">
                 <div>
-                  <div class="col-header">💳 Financial &amp; Escrow</div>
+                  <div class="col-header">Financial &amp; Escrow</div>
                   ${offer ? `
                     <div class="data-row">
                       <span class="data-lbl">Total Tour:</span>
-                      <span class="data-val" style="color:#60a5fa; font-size:14px;">₹${(offer.total_price_inr || offer.totalPackageINR || 0).toLocaleString('en-IN')}</span>
+                      <span class="data-val" style="color:#fff; font-size:14px;">₹${(offer.total_price_inr || offer.totalPackageINR || 0).toLocaleString('en-IN')}</span>
                     </div>
                     <div class="data-row">
                       <span class="data-lbl">30% Advance:</span>
-                      <span class="data-val" style="color:var(--text-gold); font-weight:800;">₹${(offer.advance_deposit_inr || offer.advancePayableINR || 0).toLocaleString('en-IN')}</span>
+                      <span class="data-val" style="color:var(--text-gold); font-weight:700;">₹${(offer.advance_deposit_inr || offer.advancePayableINR || 0).toLocaleString('en-IN')}</span>
                     </div>
                     <div class="data-row">
                       <span class="data-lbl">Escrow Status:</span>
                       <span class="data-val">
                         ${pay.payment_status === 'captured' || pay.isPaid || r.status === 'booked' 
-                          ? '<span style="color:#34d399; font-weight:800;">✅ Advance Paid</span>' 
-                          : '<span style="color:#fbbf24;">⏳ Awaiting Payment</span>'}
+                          ? '<span style="color:var(--sage); font-weight:700;">Advance Paid</span>' 
+                          : '<span style="color:var(--text-gold);">Awaiting Payment</span>'}
                       </span>
                     </div>
                     ${pay.gateway_payment_id || pay.paymentReference ? `
                       <div class="data-row">
                         <span class="data-lbl">${(pay.gateway_payment_id || pay.paymentReference || '').includes('demo') ? 'Demo Ref:' : 'Razorpay ID:'}</span>
-                        <span class="data-val" style="font-family:monospace; font-size:10.5px; color:${(pay.gateway_payment_id || pay.paymentReference || '').includes('demo') ? '#34d399' : '#cbd5e1'};">${pay.gateway_payment_id || pay.paymentReference}</span>
+                        <span class="data-val" style="font-family:var(--font-mono); font-size:10.5px; color:${(pay.gateway_payment_id || pay.paymentReference || '').includes('demo') ? 'var(--sage)' : '#CBD5E1'};">${pay.gateway_payment_id || pay.paymentReference}</span>
                       </div>
                     ` : ''}
                     <div class="data-row">
@@ -1704,11 +1607,21 @@
                       <span class="data-val">₹${(offer.remaining_balance_inr || offer.remainingBalanceINR || 0).toLocaleString('en-IN')}</span>
                     </div>
                   ` : `
-                    <div style="text-align: center; padding: 20px 10px; color: #64748b; font-size: 12px;">
+                    <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12px;">
                       <em>No quote submitted yet</em>
                     </div>
                   `}
                 </div>
+                ${(r.status === 'booked' || (pay && pay.isPaid)) ? `
+                  <div class="contact-action-bar" style="padding-top:8px; border-top:1px solid var(--gold-border-subtle);">
+                    <button type="button" onclick="openAdminReceiptModal('${r.id}')" class="btn-pill-action" style="flex:1; justify-content:center; color:var(--text-gold); border-color:var(--gold-border);">
+                      View Receipt
+                    </button>
+                    <a href="${adminPdfDlUrl}" download="TripMozy-Receipt-${invNum}.pdf" class="btn-pill-action" style="flex:1; justify-content:center; background:var(--sage); border-color:var(--sage); color:#fff;">
+                      Receipt PDF
+                    </a>
+                  </div>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -1832,8 +1745,8 @@
             </div>
 
             <div class="contact-action-bar" style="margin-bottom: 12px;">
-              ${cPhone ? `<a href="tel:${cPhone}" class="btn-contact-pill phone">📞 Dial</a>` : ''}
-              ${cPhone ? `<a href="https://wa.me/${cPhone.replace(/\D/g, '')}" target="_blank" class="btn-contact-pill whatsapp">💬 WhatsApp</a>` : ''}
+              ${cPhone ? `<a href="tel:${cPhone}" class="btn-contact-pill phone">Dial</a>` : ''}
+              ${cPhone ? `<a href="https://wa.me/${cPhone.replace(/\D/g, '')}" target="_blank" class="btn-contact-pill whatsapp">WhatsApp</a>` : ''}
             </div>
 
             <div class="op-action-btns">
@@ -1950,14 +1863,14 @@
         return `
           <div class="feat-card-luxury">
             <div class="feat-hero-wrap">
-              <img src="${f.image_url || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'}" class="feat-hero-img" alt="${f.title}" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'">
+              <img src="${f.image_url || '/images/hero-jaipur-palace.jpg'}" class="feat-hero-img" alt="${f.title}" onerror="this.src='/images/hero-jaipur-palace.jpg'">
               ${f.badge ? `<div class="feat-badge-top">${f.badge}</div>` : ''}
-              <div class="feat-duration-pill">⏱️ ${f.duration || '6 Days / 5 Nights'}</div>
+              <div class="feat-duration-pill">${f.duration || '6 Days / 5 Nights'}</div>
             </div>
             <div class="feat-body-luxury">
               <div>
                 <div class="feat-title-lux">${f.title}</div>
-                <div class="feat-dest-lux">📍 ${f.destination}</div>
+                <div class="feat-dest-lux">${f.destination}</div>
                 <div class="feat-price-lux">₹${(f.starting_price_inr || 0).toLocaleString('en-IN')} <span style="font-size: 11.5px; color: #94a3b8; font-weight: 500;">/ person</span></div>
                 <p style="font-size: 12.5px; color: #94a3b8; margin-bottom: 12px; line-height: 1.5;">${f.overview || ''}</p>
                 ${highlights.length ? `
@@ -2187,17 +2100,17 @@
   <div id="resetPasswordModal" class="modal-overlay-lux" style="display:none;" role="dialog" aria-modal="true">
     <div class="modal-content-lux" style="max-width: 440px; text-align: left;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 id="resetModalTitle" style="font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:#fff; margin:0;">🔐 Reset Account Password</h3>
-        <button type="button" class="btn-close-modal" onclick="closeResetPasswordModal()" style="color:#94a3b8; font-size:20px; background:none; border:none; cursor:pointer;">&times;</button>
+        <h3 id="resetModalTitle" style="font-family:var(--font-serif); font-size:24px; font-weight:600; color:#fff; margin:0;">Reset Account Password</h3>
+        <button type="button" class="btn-close-modal" onclick="closeResetPasswordModal()" style="color:var(--text-muted); font-size:20px; background:none; border:none; cursor:pointer;">&times;</button>
       </div>
 
       <!-- Step A -->
       <div id="resetModalStepA">
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 18px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
           Applicable for <strong>Super Admin</strong>, <strong>Tour Operators</strong>, and <strong>Travelers</strong>. Enter your email address to receive a 6-digit confirmation code.
         </p>
 
-        <div id="resetAlertA" style="display:none; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5;"></div>
+        <div id="resetAlertA" style="display:none; padding:10px 14px; border-radius:2px; font-size:12.5px; margin-bottom:14px; background:var(--crimson-bg); border:1px solid rgba(252,165,165,0.35); color:var(--crimson);"></div>
 
         <div class="form-group-lux">
           <label class="form-label-lux">Registered Email Address</label>
@@ -2205,21 +2118,21 @@
         </div>
 
         <button type="button" class="btn-action-gold" style="width:100%; margin-top:10px;" id="btnSendResetOtp" onclick="sendPasswordResetOtp()">
-          Send 6-Digit Reset Code →
+          Send 6-Digit Reset Code &rarr;
         </button>
       </div>
 
       <!-- Step B -->
       <div id="resetModalStepB" style="display:none;">
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 14px;">
-          Verification code sent to <strong id="resetTargetDisplay" style="color:#d8ba7a;">...</strong>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+          Verification code sent to <strong id="resetTargetDisplay" style="color:var(--text-gold);">...</strong>
         </p>
 
-        <div id="resetAlertB" style="display:none; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5;"></div>
+        <div id="resetAlertB" style="display:none; padding:10px 14px; border-radius:2px; font-size:12.5px; margin-bottom:14px; background:var(--crimson-bg); border:1px solid rgba(252,165,165,0.35); color:var(--crimson);"></div>
 
         <div class="form-group-lux">
           <label class="form-label-lux">6-Digit Verification Code</label>
-          <input type="text" id="resetOtpCode" class="form-input-lux" maxlength="6" placeholder="123456" style="letter-spacing:6px; font-size:20px; text-align:center; font-family:monospace; font-weight:800;">
+          <input type="text" id="resetOtpCode" class="form-input-lux" maxlength="6" placeholder="123456" style="letter-spacing:6px; font-size:20px; text-align:center; font-family:var(--font-mono); font-weight:700;">
         </div>
 
         <div class="form-group-lux">
@@ -2233,28 +2146,191 @@
         </div>
 
         <button type="button" class="btn-action-gold" style="width:100%; margin-top:10px;" id="btnUpdatePassword" onclick="confirmPasswordReset()">
-          Update Password &amp; Invalidate Old →
+          Update Password &amp; Invalidate Old &rarr;
         </button>
 
         <div style="margin-top:12px; text-align:center;">
-          <a href="javascript:void(0)" onclick="backToResetStepA()" style="font-size:12px; color:#94a3b8; text-decoration:underline;">← Re-enter Email Address</a>
+          <a href="javascript:void(0)" onclick="backToResetStepA()" style="font-size:12px; color:var(--text-muted); text-decoration:underline;">&larr; Re-enter Email Address</a>
         </div>
       </div>
 
       <!-- Step C -->
       <div id="resetModalStepC" style="display:none; text-align:center;">
-        <div style="font-size:42px; margin-bottom:12px;">✅</div>
-        <h3 style="font-family:'Playfair Display',serif; font-size:20px; color:#10b981; margin:0 0 8px;">Password Updated!</h3>
-        <p style="font-size:13px; color:#94a3b8; margin-bottom:20px;">
-          Your previous password has been removed and invalidated. You can now unlock the console with your new password.
+        <div style="width:48px; height:48px; margin:0 auto 14px; border-radius:2px; background:var(--sage-bg); border:1px solid rgba(52,211,153,0.35); color:var(--sage); display:flex; align-items:center; justify-content:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 style="font-family:var(--font-serif); font-size:24px; color:var(--sage); margin:0 0 8px;">Password Updated</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+          Your previous password has been removed and invalidated. You can now unlock the console with your new passphrase.
         </p>
         <button type="button" class="btn-action-gold" style="width:100%;" onclick="finishResetAndLogin()">
-          Proceed to Sign In →
+          Proceed to Sign In &rarr;
         </button>
       </div>
 
     </div>
   </div>
 
+  <!-- ADMIN OFFICIAL RECEIPT VIEWER MODAL -->
+  <div id="adminReceiptModal" class="modal-overlay-lux" role="dialog" aria-modal="true" onclick="if(event.target===this) closeAdminReceiptModal()">
+    <div class="modal-card-lux" style="max-width:780px; padding:0; overflow:hidden; background:#F7F5F0; color:#14171C;">
+      <div style="background:#111317; color:#F7F5F0; padding:14px 22px; border-bottom:2px solid #9E6B30; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-family:var(--font-serif); font-size:22px; font-weight:700; color:#fff;">Trip<span style="color:#C9A467;">Mozy</span> Receipt</span>
+          <span id="adminRvInv" style="font-family:var(--font-mono); font-size:11px; color:#E2C692; background:rgba(201,164,103,0.14); border:1px solid rgba(201,164,103,0.35); padding:3px 9px; border-radius:2px;">TM-INV</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <a id="adminRvDlBtn" href="#" download="TripMozy-Receipt.pdf" style="background:#1B5E44; color:#fff; border:1px solid #1B5E44; padding:8px 14px; border-radius:2px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">Download Official PDF</a>
+          <a id="adminRvRawPdf" href="#" target="_blank" style="background:rgba(255,255,255,0.1); color:#F7F5F0; border:1px solid rgba(255,255,255,0.22); padding:8px 12px; border-radius:2px; font-size:12px; font-weight:600; text-decoration:none;">Open PDF Tab</a>
+          <button type="button" onclick="closeAdminReceiptModal()" style="background:transparent; color:#9CA3AF; border:1px solid rgba(255,255,255,0.2); width:30px; height:30px; border-radius:2px; font-size:18px; cursor:pointer;">&times;</button>
+        </div>
+      </div>
+      <div id="adminReceiptModalBody" style="padding:22px 24px; max-height:78vh; overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <script>
+    function escReceipt(s) {
+      if (s === null || s === undefined) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function openAdminReceiptModal(reqId) {
+      const m = movementsData.find(x => x.id === reqId || x.reference === reqId);
+      const modal = document.getElementById('adminReceiptModal');
+      const body = document.getElementById('adminReceiptModalBody');
+      const invBadge = document.getElementById('adminRvInv');
+      const dlBtn = document.getElementById('adminRvDlBtn');
+      const rawLink = document.getElementById('adminRvRawPdf');
+      if (!modal || !body) return;
+
+      body.innerHTML = '<div style="padding:36px; text-align:center; color:#767B84;">Loading official TripMozy receipt...</div>';
+      modal.classList.add('active');
+
+      const targetId = (m && (m.payment?.bookingReference || m.payment?.booking_reference || m.reference || m.id)) || reqId;
+      const adminTok = getAdminToken() || '';
+      const invRef = `TM-INV-${String((m && m.reference) || reqId).replace(/^TM-REQ-/, '')}`;
+      const authQ = adminTok ? `&auth=${encodeURIComponent(adminTok)}` : '';
+      dlBtn.href = `/api/bookings/${encodeURIComponent(targetId)}/receipt.pdf?download=1${authQ}`;
+      dlBtn.setAttribute('download', `TripMozy-Receipt-${invRef}.pdf`);
+      rawLink.href = `/api/bookings/${encodeURIComponent(targetId)}/receipt.pdf?view=1${authQ}`;
+
+      try {
+        const res = await fetch(`/api/bookings/${encodeURIComponent(targetId)}/receipt`, { headers: getAdminHeaders() });
+        const data = await res.json();
+        if (!res.ok || !data.receipt) throw new Error(data.error || 'Could not load receipt');
+        const r = data.receipt;
+        if (invBadge) invBadge.textContent = r.invoiceNumber;
+
+        body.innerHTML = `
+          <div style="background:#fff; border:1px solid #C9C2B4; padding:24px; color:#14171C;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; padding-bottom:16px; border-bottom:2px solid #14171C;">
+              <div>
+                <div style="font-family:var(--font-serif); font-size:26px; font-weight:700;">Trip<span style="color:#9E6B30;">Mozy</span>.com</div>
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#7D5220; margin-top:4px;">Official Payment Receipt &amp; Escrow Tax Invoice (SAC 998552)</div>
+              </div>
+              <div style="text-align:right;">
+                <span style="display:inline-block; background:#EBF3EF; color:#1B5E44; border:1px solid rgba(27,94,68,0.35); padding:4px 10px; border-radius:2px; font-size:10.5px; font-weight:700; text-transform:uppercase;">Paid &amp; Escrow Confirmed</span>
+                <div style="font-family:var(--font-mono); font-size:12px; font-weight:700; margin-top:6px;">${escReceipt(r.invoiceNumber)}</div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(145px, 1fr)); gap:10px; background:#F7F5F0; border:1px solid #E2DDD3; padding:12px; margin:14px 0; font-size:12px;">
+              <div><div style="font-size:9.5px; text-transform:uppercase; color:#767B84;">Booking Ref</div><strong style="font-family:var(--font-mono);">${escReceipt(r.bookingReference)}</strong></div>
+              <div><div style="font-size:9.5px; text-transform:uppercase; color:#767B84;">Request Ref</div><strong style="font-family:var(--font-mono);">${escReceipt(r.requestReference)}</strong></div>
+              <div><div style="font-size:9.5px; text-transform:uppercase; color:#767B84;">Payment Date</div><strong>${escReceipt(r.paymentDateFormatted)}</strong></div>
+              <div><div style="font-size:9.5px; text-transform:uppercase; color:#767B84;">Payment Ref</div><strong style="font-family:var(--font-mono); font-size:11px; overflow-wrap:anywhere;">${escReceipt(r.paymentReference)}</strong></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:14px; font-size:12.5px;">
+              <div style="background:#F7F5F0; border:1px solid #E2DDD3; padding:14px;">
+                <div style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#767B84; margin-bottom:6px;">Billed To (Traveler)</div>
+                <div style="font-family:var(--font-serif); font-size:19px; font-weight:600; margin-bottom:4px;">${escReceipt(r.traveler.name)}</div>
+                <div>Phone: <strong style="font-family:var(--font-mono);">${escReceipt(r.traveler.phone)}</strong></div>
+                <div>Email: ${escReceipt(r.traveler.email)}</div>
+                <div>Route: <strong>${escReceipt(r.destination)}</strong> (${escReceipt(r.checkInFormatted)} &rarr; ${escReceipt(r.checkOutFormatted)})</div>
+              </div>
+              <div style="background:#fff; border:1px solid #14171C; padding:14px;">
+                <div style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#7D5220; margin-bottom:6px;">Assigned Tour Operator</div>
+                <div style="font-family:var(--font-serif); font-size:19px; font-weight:600; margin-bottom:4px;">${escReceipt(r.vendor.businessName)}</div>
+                <div>Direct Phone: <strong style="font-family:var(--font-mono);">${escReceipt(r.vendor.contactPhone)}</strong></div>
+                <div>Manager: ${escReceipt(r.vendor.contactPerson)}</div>
+                <div>Email: ${escReceipt(r.vendor.contactEmail)}</div>
+              </div>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse; border:1px solid #E2DDD3; font-size:12.5px; color:#14171C;">
+              <thead>
+                <tr style="background:#EFECE4;">
+                  <th style="text-align:left; padding:10px 12px; font-size:10.5px; text-transform:uppercase; color:#484E57; background:#EFECE4; border-bottom:1px solid #C9C2B4;">Particulars</th>
+                  <th style="text-align:right; padding:10px 12px; font-size:10.5px; text-transform:uppercase; color:#484E57; background:#EFECE4; border-bottom:1px solid #C9C2B4;">Amount (INR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:11px 12px; color:#14171C; background:#FFFFFF; border-bottom:1px solid #E2DDD3;"><strong>Custom Tour Package &mdash; ${escReceipt(r.destination)}</strong> (${r.days} Days / ${r.nights} Nights)<div style="font-size:11px; color:#767B84;">${escReceipt(r.mealPlan)}</div></td>
+                  <td style="padding:11px 12px; text-align:right; color:#14171C; background:#FFFFFF; font-family:var(--font-mono); font-weight:700; border-bottom:1px solid #E2DDD3;">&#8377;${r.pricing.totalTourINR.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="background:#F7F5F0;">
+                  <td style="padding:9px 12px 9px 22px; color:#484E57; background:#F7F5F0; border-bottom:1px solid #E2DDD3;">30% Tour Advance Deposit (Base Escrow)</td>
+                  <td style="padding:9px 12px; text-align:right; color:#484E57; background:#F7F5F0; font-family:var(--font-mono); border-bottom:1px solid #E2DDD3;">&#8377;${r.pricing.advanceBaseINR.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="background:#F7F5F0;">
+                  <td style="padding:9px 12px 9px 22px; color:#484E57; background:#F7F5F0; border-bottom:1px solid #E2DDD3;">5% GST on Tour Advance (SAC 998552)</td>
+                  <td style="padding:9px 12px; text-align:right; color:#484E57; background:#F7F5F0; font-family:var(--font-mono); border-bottom:1px solid #E2DDD3;">&#8377;${r.pricing.advanceGstINR.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="background:#EBF3EF;">
+                  <td style="padding:11px 12px; background:#EBF3EF; border-bottom:1px solid rgba(27,94,68,0.3); color:#1B5E44;"><strong>Total Advance Received by TripMozy Escrow</strong></td>
+                  <td style="padding:11px 12px; text-align:right; background:#EBF3EF; font-family:var(--font-mono); font-size:15px; font-weight:700; color:#1B5E44; border-bottom:1px solid rgba(27,94,68,0.3);">&#8377;${r.pricing.advancePaidINR.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 12px; color:#14171C; background:#FFFFFF;"><strong>Remaining 70% Balance</strong><div style="font-size:11px; color:#767B84;">${escReceipt(r.pricing.remainingModeLabel)}</div></td>
+                  <td style="padding:10px 12px; text-align:right; color:#14171C; background:#FFFFFF; font-family:var(--font-mono); font-weight:700;">&#8377;${r.pricing.remainingBalanceINR.toLocaleString('en-IN')}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        body.innerHTML = `<div style="padding:30px; text-align:center; color:#9B2C2C;">${escReceipt(err.message || 'Unable to load receipt preview')}</div>`;
+      }
+    }
+
+    function closeAdminReceiptModal() {
+      const m = document.getElementById('adminReceiptModal');
+      if (m) m.classList.remove('active');
+    }
+
+    async function downloadAdminReceiptPdf(idOrRef, btn) {
+      const orig = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Preparing...'; }
+      try {
+        const res = await fetch(`/api/bookings/${encodeURIComponent(idOrRef)}/receipt.pdf?download=1`, {
+          headers: getAdminHeaders()
+        });
+        if (!res.ok) {
+          const e = await res.json().catch(() => ({}));
+          throw new Error(e.error || 'Could not generate PDF');
+        }
+        const blob = await res.blob();
+        const disp = res.headers.get('Content-Disposition') || '';
+        const match = disp.match(/filename="?([^"]+)"?/i);
+        const filename = (match && match[1]) || `TripMozy-Receipt-${idOrRef}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 1000);
+      } catch (err) {
+        alert(err.message || 'PDF download failed');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = orig; }
+      }
+    }
+  </script>
+
+<script src="/assets/tripmozy-motion.js" defer></script>
 </body>
 </html>
