@@ -1075,7 +1075,10 @@
                 if (loginData.user) localStorage.setItem('tm_user_info', JSON.stringify(loginData.user));
                 if (loginData.vendor) {
                   localStorage.setItem('tm_vendor_info', JSON.stringify(loginData.vendor));
-                  if (loginData.vendor.id) localStorage.setItem('tm_vendor_id', loginData.vendor.id);
+                  if (loginData.vendor.id) {
+                    localStorage.setItem('tm_vendor_id', loginData.vendor.id);
+                    document.cookie = `tm_vendor_id=${loginData.vendor.id}; path=/; max-age=2592000; SameSite=Lax`;
+                  }
                 }
               }
               showAlert('Signed in successfully. Redirecting...', 'success');

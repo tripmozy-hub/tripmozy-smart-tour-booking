@@ -13,49 +13,116 @@ class VendorService {
     this.notifService = notifService;
   }
 
+  // Guarantee vendor has an active fleet property AND at least one active room_type + room_rate
+  ensureVendorActiveFleet(dbOrTx, vendorId) {
+    let vendorProp = dbOrTx.queryOne(
+      "SELECT id, name, city FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1",
+      [vendorId]
+    );
+    if (!vendorProp) {
+      const vendorAcc = dbOrTx.queryOne('SELECT id, business_name, contact_person FROM vendor_accounts WHERE id = ?', [vendorId]);
+      if (!vendorAcc) return null;
+
+      const newPropId = dbOrTx.uuid();
+      dbOrTx.execute(`
+        INSERT INTO properties (
+          id, vendor_id, name, slug, property_type, star_rating,
+          description, address_line, city, state, pincode, country,
+          latitude, longitude, timezone, check_in_time, check_out_time,
+          status, inventory_mode
+        ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, 'India Operations', 'All Destinations', 'India', '110001', 'India', 28.6139, 77.2090, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
+      `, [
+        newPropId,
+        vendorId,
+        `${vendorAcc.business_name} - Tour Fleet`,
+        `fleet-${vendorId.slice(0, 8)}-${Date.now()}`,
+        `Verified Tour Operator Partner (${vendorAcc.business_name})`
+      ]);
+      vendorProp = { id: newPropId, name: `${vendorAcc.business_name} - Tour Fleet`, city: 'All Destinations' };
+    }
+
+    let room = dbOrTx.queryOne(
+      'SELECT rt.id FROM room_types rt JOIN room_rates rr ON rt.id = rr.room_type_id WHERE rt.property_id = ? AND rt.is_active = 1 AND rr.is_active = 1 LIMIT 1',
+      [vendorProp.id]
+    );
+    if (!room) {
+      let existingRoomType = dbOrTx.queryOne('SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1', [vendorProp.id]);
+      const roomTypeId = existingRoomType ? existingRoomType.id : dbOrTx.uuid();
+      if (!existingRoomType) {
+        dbOrTx.execute(`
+          INSERT INTO room_types (id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_accessible, is_active)
+          VALUES (?, ?, 'Custom Tour Package', 'King', 10, 5, 20, 1, 1, 1)
+        `, [roomTypeId, vendorProp.id]);
+      }
+      const existingRate = dbOrTx.queryOne('SELECT id FROM room_rates WHERE room_type_id = ? AND is_active = 1 LIMIT 1', [roomTypeId]);
+      if (!existingRate) {
+        const rateId = dbOrTx.uuid();
+        dbOrTx.execute(`
+          INSERT INTO room_rates (id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, cancellation_rule, is_active)
+          VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 'moderate', 1)
+        `, [rateId, roomTypeId]);
+      }
+    }
+
+    return vendorProp;
+  }
+
+  // Rehydrate an authenticated partner account on cold serverless containers from signed session data
+  rehydrateVendorFromSession(session) {
+    if (!session || !session.authenticated || session.role !== 'vendor' || !session.vendorId) {
+      return null;
+    }
+    const vendorId = session.vendorId;
+    const existing = this.db.queryOne('SELECT id FROM vendor_accounts WHERE id = ?', [vendorId]);
+    if (existing) {
+      this.ensureVendorActiveFleet(this.db, vendorId);
+      return existing.id;
+    }
+
+    return this.db.transaction((tx) => {
+      const recheck = tx.queryOne('SELECT id FROM vendor_accounts WHERE id = ?', [vendorId]);
+      if (recheck) {
+        this.ensureVendorActiveFleet(tx, vendorId);
+        return recheck.id;
+      }
+
+      const email = (session.user && session.user.email) || `partner_${vendorId.slice(0, 8)}@tripmozy.local`;
+      const phone = (session.user && session.user.phone) || '+91 98765 43210';
+      const displayName = (session.user && session.user.displayName) || 'Verified Partner';
+      const businessName = (session.vendor && session.vendor.businessName) || displayName;
+
+      let user = tx.queryOne('SELECT id FROM user_profiles WHERE id = ? OR LOWER(email) = LOWER(?) LIMIT 1', [
+        (session.user && session.user.id) || vendorId,
+        email
+      ]);
+      const userId = user ? user.id : ((session.user && session.user.id) || tx.uuid());
+      if (!user) {
+        tx.execute(`
+          INSERT OR IGNORE INTO user_profiles (id, email, phone, role, display_name, status, is_email_verified, is_phone_verified)
+          VALUES (?, ?, ?, 'vendor', ?, 'active', 1, 1)
+        `, [userId, email, phone, displayName]);
+      }
+
+      tx.execute(`
+        INSERT OR IGNORE INTO vendor_accounts (
+          id, user_id, business_name, contact_person, contact_phone, contact_email,
+          verification_status, commission_rate_basis_points, status
+        ) VALUES (?, ?, ?, ?, ?, ?, 'verified', 1500, 'active')
+      `, [vendorId, userId, businessName, displayName, phone, email]);
+
+      this.ensureVendorActiveFleet(tx, vendorId);
+      return vendorId;
+    });
+  }
+
   // Retrieve all pending or active requests for a vendor
   getIncomingRequests(vendorId, actorContext) {
     if (actorContext && !actorContext.canManageProperty({ vendor_id: vendorId })) {
       throw new AccessControlError('Not authorized to view requests for this vendor');
     }
 
-    // 1. Ensure vendor has at least one active property & room type so requests can be quoted
-    let vendorProp = this.db.queryOne(
-      "SELECT id, name, city FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1",
-      [vendorId]
-    );
-    if (!vendorProp) {
-      const vendorAcc = this.db.queryOne('SELECT id, business_name, contact_person FROM vendor_accounts WHERE id = ?', [vendorId]);
-      if (vendorAcc) {
-        const newPropId = this.db.uuid();
-        this.db.execute(`
-          INSERT INTO properties (
-            id, vendor_id, name, slug, property_type, star_rating,
-            description, address_line, city, state, pincode, country,
-            latitude, longitude, timezone, check_in_time, check_out_time,
-            status, inventory_mode
-          ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, 'India Operations', 'All Destinations', 'India', '110001', 'India', 28.6139, 77.2090, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
-        `, [
-          newPropId,
-          vendorId,
-          `${vendorAcc.business_name} - Tour Fleet`,
-          `fleet-${vendorId.slice(0, 8)}-${Date.now()}`,
-          `Verified Tour Operator Partner (${vendorAcc.business_name})`
-        ]);
-        vendorProp = { id: newPropId, name: `${vendorAcc.business_name} - Tour Fleet`, city: 'All Destinations' };
-
-        const roomTypeId = this.db.uuid();
-        this.db.execute(`
-          INSERT INTO room_types (id, property_id, name, bed_type, max_adults, max_children, total_inventory, is_ac, is_accessible, is_active)
-          VALUES (?, ?, 'Custom Tour Package', 'King', 4, 2, 20, 1, 1, 1)
-        `, [roomTypeId, newPropId]);
-        const rateId = this.db.uuid();
-        this.db.execute(`
-          INSERT INTO room_rates (id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points, meal_plan, cancellation_rule, is_active)
-          VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 'moderate', 1)
-        `, [rateId, roomTypeId]);
-      }
-    }
+    // 1. Ensure vendor has an active property, room type, and rate so requests can always be quoted
+    const vendorProp = this.ensureVendorActiveFleet(this.db, vendorId);
 
     // 2. Dynamic backfill: Ensure all active unassigned requests are delivered to this vendor's dashboard
     if (vendorProp) {

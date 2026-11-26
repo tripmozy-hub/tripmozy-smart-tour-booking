@@ -2020,6 +2020,11 @@
         if (data.requestToken) {
           localStorage.setItem('tm_latest_request_token', data.requestToken);
           document.cookie = `tm_latest_request_token=${encodeURIComponent(data.requestToken)}; path=/; max-age=604800; SameSite=Lax`;
+          try {
+            const existing = JSON.parse(localStorage.getItem('tm_recent_request_tokens') || '[]');
+            const updated = [{ token: data.requestToken, ref: data.reference || '', ts: Date.now() }, ...(Array.isArray(existing) ? existing.filter(x => (x && x.token) !== data.requestToken) : [])].slice(0, 10);
+            localStorage.setItem('tm_recent_request_tokens', JSON.stringify(updated));
+          } catch (_) {}
         }
         localStorage.setItem('tm_latest_request_id', data.id);
         document.cookie = `tm_latest_request_id=${encodeURIComponent(data.id)}; path=/; max-age=604800; SameSite=Lax`;

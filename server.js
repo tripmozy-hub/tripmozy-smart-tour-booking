@@ -1371,9 +1371,47 @@ const appHandler = async (req, res) => {
   // ROUTING: Vendor API Endpoints
   // --------------------------------------------------------------------------
 
+  // Helper to resolve & cold-start rehydrate an authenticated vendor from HMAC session token
+  const ensureSessionVendorRehydrated = () => {
+    const token = getAuthToken();
+    if (!token) return null;
+    try {
+      const session = authService.validateSession(token);
+      if (session && session.authenticated && session.role === 'vendor' && session.vendorId) {
+        vendorService.rehydrateVendorFromSession(session);
+        return session.vendorId;
+      }
+    } catch (_) {}
+    return null;
+  };
+
+  // POST /api/vendor/rehydrate-requests — Ensure HMAC-signed active tour requests exist on this instance for all active vendors
+  if (pathname === '/api/vendor/rehydrate-requests' && method === 'POST') {
+    readBody((err, body) => {
+      if (err) return sendJson(400, { error: 'Invalid JSON request body' });
+      try {
+        const tokens = Array.isArray(body && body.tokens) ? body.tokens.slice(0, 20) : [];
+        let rehydratedCount = 0;
+        for (const t of tokens) {
+          if (typeof t === 'string' && t.includes('.') && reqService.rehydrateRequestFromToken(t)) {
+            rehydratedCount++;
+          }
+        }
+        sendJson(200, { success: true, rehydratedCount });
+      } catch (e) {
+        sendJson(400, { error: e.message });
+      }
+    });
+    return;
+  }
+
   // GET /api/vendor/requests?vendorId=xxx  — List all incoming requests for a vendor
   if (pathname === '/api/vendor/requests' && method === 'GET') {
+    const sessionVendorId = ensureSessionVendorRehydrated();
     let vendorId = reqUrl.searchParams.get('vendorId');
+    if (!vendorId || vendorId === 'null' || vendorId === 'undefined') {
+      vendorId = sessionVendorId;
+    }
     if (!vendorId || vendorId === 'null' || vendorId === 'undefined') {
       const cookieHeader = req.headers['cookie'] || '';
       const vMatch = cookieHeader.match(/(^|;\s*)tm_vendor_id=([^;]*)/);
@@ -1413,7 +1451,11 @@ const appHandler = async (req, res) => {
 
   // GET /api/vendor/info?vendorId=xxx  — Get vendor and property info
   if (pathname === '/api/vendor/info' && method === 'GET') {
+    const sessionVendorId = ensureSessionVendorRehydrated();
     let vendorId = reqUrl.searchParams.get('vendorId');
+    if (!vendorId || vendorId === 'null' || vendorId === 'undefined') {
+      vendorId = sessionVendorId;
+    }
     if (!vendorId || vendorId === 'null' || vendorId === 'undefined') {
       const cookieHeader = req.headers['cookie'] || '';
       const vMatch = cookieHeader.match(/(^|;\s*)tm_vendor_id=([^;]*)/);
@@ -1423,8 +1465,9 @@ const appHandler = async (req, res) => {
       vendorId = '30913fc5-870f-44a9-a077-99a5bfbd9f6e';
     }
     try {
-      const vendor = db.queryOne('SELECT id, business_name, contact_person, contact_email, contact_phone, verification_status, status FROM vendor_accounts WHERE id = ?', [vendorId]);
+      let vendor = db.queryOne('SELECT id, business_name, contact_person, contact_email, contact_phone, verification_status, status FROM vendor_accounts WHERE id = ?', [vendorId]);
       if (!vendor) return sendJson(404, { error: 'Vendor not found' });
+      vendorService.ensureVendorActiveFleet(db, vendorId);
       const properties = db.query('SELECT id, name, city, state, property_type, star_rating, status FROM properties WHERE vendor_id = ?', [vendorId]);
       sendJson(200, { success: true, vendor, properties });
     } catch (e) {
@@ -1435,11 +1478,12 @@ const appHandler = async (req, res) => {
 
   // GET /api/vendor/list  — List all vendors (for dashboard login/selection)
   if (pathname === '/api/vendor/list' && method === 'GET') {
+    ensureSessionVendorRehydrated();
     try {
       const vendors = db.query(`
         SELECT id, business_name, contact_person, verification_status, status 
         FROM vendor_accounts 
-        WHERE status = 'active'
+        WHERE LOWER(TRIM(status)) = 'active'
         ORDER BY 
           CASE WHEN id = '2f9816f8-f5e9-4f65-bee1-4b378133da81' THEN 0 ELSE 1 END,
           business_name ASC

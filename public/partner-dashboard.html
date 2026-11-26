@@ -1007,43 +1007,89 @@ function playChimeNotification() {
   } catch (_) {}
 }
 
+function getPartnerAuthHeaders(extra = {}) {
+  const token = localStorage.getItem('tm_session_token') || getCookie('tm_session_token') || '';
+  const headers = { ...extra };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+
+async function syncRecentRequestTokens() {
+  try {
+    const tokens = [];
+    const latestTok = localStorage.getItem('tm_latest_request_token') || getCookie('tm_latest_request_token');
+    if (latestTok) tokens.push(latestTok);
+    const listRaw = localStorage.getItem('tm_recent_request_tokens');
+    if (listRaw) {
+      try {
+        const arr = JSON.parse(listRaw);
+        if (Array.isArray(arr)) {
+          arr.forEach(item => {
+            const tok = typeof item === 'string' ? item : (item && item.token);
+            if (tok && !tokens.includes(tok)) tokens.push(tok);
+          });
+        }
+      } catch (_) {}
+    }
+    if (tokens.length > 0) {
+      await fetch('/api/vendor/rehydrate-requests', {
+        method: 'POST',
+        headers: getPartnerAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ tokens })
+      });
+    }
+  } catch (_) {}
+}
+
 // ─── Boot ────────────────────────────────────────────────────────────────────
 async function init() {
   const params = new URLSearchParams(window.location.search);
   let targetVendorId = params.get('vendorId');
+  const authHeaders = getPartnerAuthHeaders();
 
-  // 1. Populate vendor selector from active vendors list
+  // 0. If no vendorId in URL, resolve authenticated session's vendorId FIRST (fixes stale localStorage / vendor_id typo)
+  if (!targetVendorId) {
+    try {
+      const meRes = await fetch('/api/auth/me', { headers: authHeaders });
+      const meData = await meRes.json();
+      const resolvedId = meData.vendorId || meData.vendor_id || (meData.vendor && meData.vendor.id);
+      if (meData.authenticated && meData.role === 'vendor' && resolvedId) {
+        targetVendorId = resolvedId;
+      }
+    } catch (_) {}
+  }
+
+  // 1. Ensure active requests in recent tokens exist before querying vendors & queues
+  await syncRecentRequestTokens();
+
+  // 2. Populate vendor selector from active vendors list
+  let listedVendors = [];
   try {
-    const r = await fetch('/api/vendor/list');
+    const r = await fetch('/api/vendor/list', { headers: authHeaders });
     const d = await r.json();
     if (d.vendors && d.vendors.length > 0) {
+      listedVendors = d.vendors;
       const picker = document.getElementById('vendorPicker');
       if (picker) {
-        picker.innerHTML = d.vendors.map(v => 
+        picker.innerHTML = listedVendors.map(v =>
           `<option value="${v.id}">${v.business_name} (${v.contact_person || 'Partner'})</option>`
         ).join('');
       }
-
-      // If no vendorId in URL, check if authenticated session exists
-      if (!targetVendorId) {
-        try {
-          const meRes = await fetch('/api/auth/me');
-          const meData = await meRes.json();
-          if (meData.authenticated && meData.role === 'vendor' && meData.vendor_id) {
-            targetVendorId = meData.vendor_id;
-          }
-        } catch (_) {}
-      }
-
-      // Fallback to Aman Vishwakarma Tours & Travels or localStorage
-      const defaultAman = '2f9816f8-f5e9-4f65-bee1-4b378133da81';
-      vendorId = targetVendorId || localStorage.getItem('tm_vendor_id') || defaultAman || d.vendors[0].id;
-      if (picker) picker.value = vendorId;
     }
   } catch (_) {}
 
-  if (!vendorId) {
-    vendorId = '2f9816f8-f5e9-4f65-bee1-4b378133da81'; // Default to Aman Vishwakarma Tours & Travels
+  const defaultAman = '2f9816f8-f5e9-4f65-bee1-4b378133da81';
+  vendorId = targetVendorId || localStorage.getItem('tm_vendor_id') || defaultAman || (listedVendors[0] && listedVendors[0].id);
+
+  const picker = document.getElementById('vendorPicker');
+  if (picker && vendorId) {
+    if (!Array.from(picker.options).some(opt => opt.value === vendorId)) {
+      const opt = document.createElement('option');
+      opt.value = vendorId;
+      opt.textContent = 'Authenticated Partner Desk';
+      picker.appendChild(opt);
+    }
+    picker.value = vendorId;
   }
 
   localStorage.setItem('tm_vendor_id', vendorId);
@@ -1070,7 +1116,7 @@ function switchVendor(newVendorId) {
 // ─── Vendor info ─────────────────────────────────────────────────────────────
 async function loadVendorInfo() {
   try {
-    const r = await fetch(`/api/vendor/info?vendorId=${vendorId}`);
+    const r = await fetch(`/api/vendor/info?vendorId=${encodeURIComponent(vendorId)}`, { headers: getPartnerAuthHeaders() });
     const d = await r.json();
     if (d.vendor) {
       currentVendorData = d.vendor;
@@ -1079,6 +1125,8 @@ async function loadVendorInfo() {
         `✓ ${d.properties.length} propert${d.properties.length === 1 ? 'y' : 'ies'} · ${d.vendor.verification_status}`;
       document.getElementById('vPhone').textContent = d.vendor.contact_phone || 'None';
       document.getElementById('vEmail').textContent = d.vendor.contact_email || 'None';
+      const pickerOpt = document.querySelector(`#vendorPicker option[value="${d.vendor.id}"]`);
+      if (pickerOpt) pickerOpt.textContent = `${d.vendor.business_name} (${d.vendor.contact_person || 'Partner'})`;
     }
   } catch (_) {}
 }
@@ -1133,6 +1181,10 @@ function logout() {
   localStorage.removeItem('tm_vendor_id');
   localStorage.removeItem('tm_session_token');
   localStorage.removeItem('tm_vendor_info');
+  localStorage.removeItem('tm_user_role');
+  document.cookie = 'tm_vendor_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = 'tm_session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = 'tm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
     window.location.href = '/partner/login';
   });
@@ -1142,7 +1194,8 @@ function logout() {
 async function loadDashboard(isAuto = false) {
   if (!vendorId) return;
   try {
-    const r = await fetch(`/api/vendor/requests?vendorId=${vendorId}`);
+    await syncRecentRequestTokens();
+    const r = await fetch(`/api/vendor/requests?vendorId=${encodeURIComponent(vendorId)}`, { headers: getPartnerAuthHeaders() });
     if (!r.ok) { const e = await r.json().catch(() => ({})); showError(`API Error: ${e.error || r.statusText}`); return; }
     const d = await r.json();
     const fetched = d.requests || [];

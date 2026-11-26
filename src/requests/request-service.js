@@ -234,6 +234,15 @@ class RequestService {
       // 2 hours expiry for vendor responses
       const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
 
+      // 7. BROADCAST TO ALL ACTIVE TOUR OPERATOR VENDORS SIMULTANEOUSLY
+      // Guarantees every active tour operator receives the customer's tour request in their dashboard.
+      try {
+        seedCoreTourOperators(tx);
+      } catch (_) {}
+
+      const activeVendors = tx.query("SELECT id, business_name, contact_phone, contact_email FROM vendor_accounts WHERE LOWER(TRIM(status)) = 'active'");
+      const maxRecipients = Math.max(activeVendors.length, 50);
+
       tx.execute(`
         INSERT INTO hotel_booking_requests (
           id, request_reference, customer_id, guest_name, guest_email, guest_phone,
@@ -242,23 +251,15 @@ class RequestService {
           total_budget_paise, property_type_preference, room_preference,
           required_facilities, communication_consent, terms_accepted,
           status, max_recipients, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 10, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         requestId, reference, finalCustomerId, guestName, guestEmail, guestPhone,
         destination, destinationLocality, checkInDate, checkOutDate,
         nights, numRooms, numAdults, numChildren, JSON.stringify(childrenAges),
         totalBudgetPaise, propertyTypePreference, roomPreference,
         JSON.stringify(requiredFacilities), communicationConsent ? 1 : 0, termsAccepted ? 1 : 0,
-        initialStatus, expiresAt
+        initialStatus, maxRecipients, expiresAt
       ]);
-
-      // 7. BROADCAST TO ALL ACTIVE TOUR OPERATOR VENDORS SIMULTANEOUSLY
-      // Guarantees every active tour operator receives the customer's tour request in their dashboard.
-      try {
-        seedCoreTourOperators(tx);
-      } catch (_) {}
-
-      const activeVendors = tx.query("SELECT id, business_name, contact_phone, contact_email FROM vendor_accounts WHERE status = 'active'");
 
       // Map any catalog properties matching the requested destination
       const matchedPropByVendor = new Map();
@@ -597,7 +598,7 @@ class RequestService {
               total_budget_paise, property_type_preference, room_preference,
               required_facilities, communication_consent, terms_accepted,
               status, max_recipients, expires_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', ?, ?, ?, ?, 1, 1, ?, 10, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', ?, ?, ?, ?, 1, 1, ?, 50, ?)
           `, [
             effectiveReqId, reqRef, custId, p.gnm || 'Verified Traveler',
             p.gem || 'traveler@tripmozy.com', p.gph || '+919876543210',
