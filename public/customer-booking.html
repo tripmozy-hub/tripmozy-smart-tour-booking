@@ -3915,9 +3915,10 @@ if (receiptModalEl) {
       item.innerHTML = `<span style="font-size:11px;color:var(--ochre-dark);font-weight:700;padding:6px 12px;border-radius:2px;background:var(--ochre-soft);border:1px solid rgba(158,107,48,0.35);">Admin (tripmozy@gmail.com)</span>`;
       return;
     }
-    const raw = localStorage.getItem('tm_user_info');
-    const role = localStorage.getItem('tm_user_role');
-    if (raw && role === 'customer') {
+    const authOk = sessionStorage.getItem('tm_customer_auth_ok') === '1' && !!sessionStorage.getItem('tm_customer_session_token');
+    const raw = sessionStorage.getItem('tm_customer_user');
+    const role = sessionStorage.getItem('tm_customer_role');
+    if (authOk && raw && role === 'customer') {
       const u = JSON.parse(raw);
       if (item) {
         item.innerHTML = `<span style="font-size:12px;color:var(--ink);font-weight:600;padding:6px 10px;border-radius:2px;background:var(--sand);border:1px solid var(--hairline);">${esc(u.displayName || 'Traveler')}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:var(--crimson);font-weight:600;text-decoration:none;margin-left:4px;">Sign Out</a>`;
@@ -3927,6 +3928,12 @@ if (receiptModalEl) {
 })();
 
 function signOutCustomer() {
+  try {
+    sessionStorage.removeItem('tm_customer_auth_ok');
+    sessionStorage.removeItem('tm_customer_session_token');
+    sessionStorage.removeItem('tm_customer_role');
+    sessionStorage.removeItem('tm_customer_user');
+  } catch (_) {}
   localStorage.removeItem('tm_session_token');
   localStorage.removeItem('tm_user_role');
   localStorage.removeItem('tm_user_info');

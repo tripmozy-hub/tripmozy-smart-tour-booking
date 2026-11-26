@@ -1197,7 +1197,7 @@
         <a href="/smart-tour-booking" class="nav-link nav-hide-mobile">Studio</a>
         <a href="/booking" class="nav-link">My Offers</a>
         <span id="authHeaderItem">
-          <a href="/login" class="nav-cta">Sign In</a>
+          <a href="/login?returnUrl=%2F" class="nav-cta">Sign In</a>
         </span>
       </nav>
     </div>
@@ -1651,18 +1651,22 @@
             <span>Lead Traveler Contact</span>
           </div>
 
+          <div id="guestContactNotice" style="margin-bottom:14px;padding:11px 14px;background:var(--accent-tint);border:1px solid var(--accent-border);border-radius:var(--radius-sharp);font-size:12.5px;color:var(--ink-secondary);line-height:1.5;display:none;">
+            <strong style="color:var(--accent-dark);">Account Sign-In Required:</strong> Sign in or create an account before requesting quotes. Your verified name, email, and mobile will auto-fill once signed in (<a href="/login?returnUrl=%2F" style="color:var(--accent-dark);font-weight:700;text-decoration:underline;">Sign in now</a> or click Request Tour Quotes Now below).
+          </div>
+
           <div class="grid-3">
             <div class="form-group">
               <label for="guestName">Lead Traveler Name *</label>
-              <input type="text" id="guestName" class="form-control" placeholder="Full Name" required>
+              <input type="text" id="guestName" class="form-control" placeholder="Full Name" autocomplete="off">
             </div>
             <div class="form-group">
               <label for="guestEmail">Email Address *</label>
-              <input type="email" id="guestEmail" class="form-control" placeholder="name@gmail.com" required>
+              <input type="email" id="guestEmail" class="form-control" placeholder="name@gmail.com" autocomplete="off">
             </div>
             <div class="form-group">
               <label for="guestPhone">Mobile Number (WhatsApp) *</label>
-              <input type="tel" id="guestPhone" class="form-control" placeholder="9876543210" required>
+              <input type="tel" id="guestPhone" class="form-control" placeholder="9876543210" autocomplete="off">
             </div>
           </div>
 
@@ -1681,8 +1685,8 @@
           <button type="submit" id="submitBtn" class="submit-btn">
             <span>Request Tour Quotes Now</span>
           </button>
-          <div id="authSubmitHint" style="display:none; text-align:center; margin-top:12px; font-size:12px; color:var(--ink-muted); line-height:1.5;">
-            <strong>Verification note:</strong> Customize freely above. Submitting dispatches your brief directly to verified local operators.
+          <div id="authSubmitHint" style="display:block; text-align:center; margin-top:12px; font-size:12px; color:var(--ink-muted); line-height:1.5;">
+            <strong>Sign-In Required:</strong> Customize freely above, then sign in or log in to dispatch your brief directly to verified local operators.
           </div>
 
           <!-- Trust Ribbon -->
@@ -1873,18 +1877,43 @@
       return null;
     }
 
+    function clearStaleGuestCustomerState() {
+      try {
+        const storedRole = localStorage.getItem('tm_user_role');
+        if (!storedRole || storedRole === 'customer') {
+          localStorage.removeItem('tm_session_token');
+          localStorage.removeItem('tm_user_role');
+          localStorage.removeItem('tm_user_info');
+          localStorage.removeItem('tm_registered_profile');
+        }
+        ['tm_user_name', 'tm_user_email', 'tm_user_phone'].forEach(k => {
+          document.cookie = `${k}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        });
+        if (!storedRole || storedRole === 'customer') {
+          document.cookie = 'tm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'tm_session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+      } catch (_) {}
+    }
+
     function isCustomerLoggedIn() {
-      const token = localStorage.getItem('tm_session_token') || getCookie('tm_session_token');
-      const role = localStorage.getItem('tm_user_role') || getCookie('tm_user_role');
-      if (token && role === 'customer') return true;
-      const rawUser = localStorage.getItem('tm_user_info');
-      if (rawUser) {
-        try {
-          const u = JSON.parse(rawUser);
-          if (u.id || u.email || u.phone) return true;
-        } catch (_) {}
+      try {
+        const active = sessionStorage.getItem('tm_customer_auth_ok') === '1';
+        const token = sessionStorage.getItem('tm_customer_session_token');
+        const role = sessionStorage.getItem('tm_customer_role');
+        return Boolean(active && token && role === 'customer');
+      } catch (_) {
+        return false;
       }
-      return false;
+    }
+
+    function syncGuestContactRequirements(loggedIn) {
+      ['guestName', 'guestEmail', 'guestPhone'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.required = Boolean(loggedIn);
+      });
+      const notice = document.getElementById('guestContactNotice');
+      if (notice) notice.style.display = loggedIn ? 'none' : 'block';
     }
 
     let latestSubmissionId = null;
@@ -1897,7 +1926,7 @@
       const facilities = Array.from(document.querySelectorAll('.facility-checkbox:checked')).map(cb => cb.value);
 
       const payload = {
-        destination: document.getElementById('destination').value,
+        destination: (document.getElementById('destination').value || '').trim(),
         propertyTypePreference: document.getElementById('propertyType').value,
         checkInDate: checkInInput.value,
         checkOutDate: checkOutInput.value,
@@ -1913,6 +1942,32 @@
         communicationConsent: document.getElementById('commConsent').checked,
         termsAccepted: document.getElementById('termsAccept').checked
       };
+
+      if (!payload.destination || payload.destination.length < 2) {
+        showToast('Please enter your destination city or circuit');
+        document.getElementById('destination').focus();
+        return;
+      }
+
+      if (!payload.termsAccepted) {
+        showToast('Please accept the TripMozy Booking Terms first');
+        document.getElementById('termsAccept').focus();
+        return;
+      }
+
+      if (!isCustomerLoggedIn()) {
+        try {
+          localStorage.setItem('tm_pending_tour_request', JSON.stringify({ ...payload, savedAt: Date.now() }));
+        } catch (_) {}
+        btn.disabled = true;
+        btn.innerHTML = '<span>Redirecting to Sign In...</span>';
+        showToast('Please sign in or log in first before requesting tour quotes.');
+        const returnTarget = encodeURIComponent('/?action=submit');
+        setTimeout(() => {
+          window.location.href = `/login?mode=login&returnUrl=${returnTarget}`;
+        }, 450);
+        return;
+      }
 
       if (!payload.guestName || payload.guestName.length < 2) {
         showToast('Please enter your full name');
@@ -1934,17 +1989,20 @@
       btn.innerHTML = '<span>Dispatching to Verified Tour Operators...</span>';
 
       try {
-        const rawUser = localStorage.getItem('tm_user_info');
+        const rawUser = sessionStorage.getItem('tm_customer_user');
         if (rawUser) {
           try {
             const u = JSON.parse(rawUser);
             if (u.id) payload.customerId = u.id;
           } catch (_) {}
         }
+        const sessionToken = sessionStorage.getItem('tm_customer_session_token') || '';
+        const headers = { 'Content-Type': 'application/json' };
+        if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
 
         const res = await fetch('/api/requests', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify(payload)
         });
 
@@ -1954,12 +2012,6 @@
           throw new Error(data.error || 'Failed to submit tour request');
         }
 
-        localStorage.setItem('tm_user_info', JSON.stringify({
-          displayName: payload.guestName,
-          email: payload.guestEmail,
-          phone: payload.guestPhone
-        }));
-        localStorage.setItem('tm_user_role', 'customer');
         if (data.reference) {
           localStorage.setItem('tm_latest_request_ref', data.reference);
           document.cookie = `tm_latest_request_ref=${encodeURIComponent(data.reference)}; path=/; max-age=604800; SameSite=Lax`;
@@ -1987,10 +2039,6 @@
           expiresAt: data.expiresAt,
           matchedCount: data.matchedCount
         }));
-        document.cookie = `tm_user_name=${encodeURIComponent(payload.guestName)}; path=/; max-age=2592000; SameSite=Lax`;
-        document.cookie = `tm_user_email=${encodeURIComponent(payload.guestEmail)}; path=/; max-age=2592000; SameSite=Lax`;
-        document.cookie = `tm_user_phone=${encodeURIComponent(payload.guestPhone)}; path=/; max-age=2592000; SameSite=Lax`;
-        document.cookie = `tm_user_role=customer; path=/; max-age=2592000; SameSite=Lax`;
 
         document.getElementById('formCard').style.display = 'none';
         const resultCard = document.getElementById('resultCard');
@@ -2044,24 +2092,39 @@
       }
     }
 
-    (function checkCustomerSession() {
+    (async function checkCustomerSession() {
       try {
-        const raw = localStorage.getItem('tm_user_info');
-        const isLoggedIn = isCustomerLoggedIn();
+        let isLoggedIn = isCustomerLoggedIn();
+        const token = sessionStorage.getItem('tm_customer_session_token') || '';
+
+        if (isLoggedIn && token) {
+          try {
+            const meRes = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (meRes.ok) {
+              const meData = await meRes.json();
+              if (!meData || !meData.authenticated || meData.role !== 'customer') {
+                isLoggedIn = false;
+                sessionStorage.removeItem('tm_customer_auth_ok');
+                sessionStorage.removeItem('tm_customer_session_token');
+                sessionStorage.removeItem('tm_customer_role');
+                sessionStorage.removeItem('tm_customer_user');
+              } else if (meData.user) {
+                sessionStorage.setItem('tm_customer_user', JSON.stringify(meData.user));
+              }
+            }
+          } catch (_) {}
+        }
 
         const btn = document.getElementById('submitBtn');
         const authHint = document.getElementById('authSubmitHint');
+        const item = document.getElementById('authHeaderItem');
+        syncGuestContactRequirements(isLoggedIn);
 
         if (isLoggedIn) {
           let u = {};
+          const raw = sessionStorage.getItem('tm_customer_user');
           if (raw) {
             try { u = JSON.parse(raw); } catch (_) {}
-          } else {
-            u = {
-              displayName: getCookie('tm_user_name') || 'Traveler',
-              email: getCookie('tm_user_email') || '',
-              phone: getCookie('tm_user_phone') || ''
-            };
           }
 
           const dispName = u.displayName || u.name || u.fullName || 'Traveler';
@@ -2072,9 +2135,8 @@
             document.getElementById('guestEmail').value = u.email;
           }
           if (u.phone && !document.getElementById('guestPhone').value) {
-            document.getElementById('guestPhone').value = u.phone.replace('+91', '').trim();
+            document.getElementById('guestPhone').value = String(u.phone).replace('+91', '').trim();
           }
-          const item = document.getElementById('authHeaderItem');
           if (item) {
             item.innerHTML = `<span style="font-size:12.5px;font-weight:600;color:var(--ink);">${dispName}</span> <a href="javascript:void(0)" onclick="signOutCustomer()" style="font-size:12px;color:var(--crimson);text-decoration:none;margin-left:6px;font-weight:600;">Sign Out</a>`;
           }
@@ -2108,17 +2170,35 @@
               document.getElementById('termsAccept').checked = true;
 
               localStorage.removeItem('tm_pending_tour_request');
-              showToast('Welcome back! Your tour details have been restored.');
 
               if (s.get('action') === 'submit') {
-                window.history.replaceState({}, '', '/smart-tour-booking');
-                setTimeout(() => {
-                  document.getElementById('tourRequestForm').requestSubmit();
-                }, 600);
+                window.history.replaceState({}, '', '/');
+                const gName = (document.getElementById('guestName').value || '').trim();
+                const gEmail = (document.getElementById('guestEmail').value || '').trim();
+                const gPhone = (document.getElementById('guestPhone').value || '').replace(/\D/g, '');
+                if (gName.length >= 2 && gEmail.includes('@') && gPhone.length >= 10) {
+                  showToast('Signed in! Dispatching your tour request now...');
+                  setTimeout(() => {
+                    document.getElementById('tourRequestForm').requestSubmit();
+                  }, 400);
+                } else {
+                  showToast('Signed in! Complete your contact details and click Request Tour Quotes Now.');
+                  const focusId = gName.length < 2 ? 'guestName' : (!gEmail.includes('@') ? 'guestEmail' : 'guestPhone');
+                  document.getElementById(focusId)?.focus();
+                }
+              } else {
+                showToast('Signed in! Your tour details have been restored.');
               }
             } catch (_) {}
           }
         } else {
+          clearStaleGuestCustomerState();
+          document.getElementById('guestName').value = '';
+          document.getElementById('guestEmail').value = '';
+          document.getElementById('guestPhone').value = '';
+          if (item) {
+            item.innerHTML = '<a href="/login?returnUrl=%2F" class="nav-cta">Sign In</a>';
+          }
           if (btn) btn.innerHTML = '<span>Request Tour Quotes Now</span>';
           if (authHint) authHint.style.display = 'block';
         }
@@ -2126,14 +2206,13 @@
     })();
 
     function signOutCustomer() {
-      localStorage.removeItem('tm_session_token');
-      localStorage.removeItem('tm_user_role');
-      localStorage.removeItem('tm_user_info');
-      document.cookie = 'tm_session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'tm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'tm_user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'tm_user_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'tm_user_phone=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      try {
+        sessionStorage.removeItem('tm_customer_auth_ok');
+        sessionStorage.removeItem('tm_customer_session_token');
+        sessionStorage.removeItem('tm_customer_role');
+        sessionStorage.removeItem('tm_customer_user');
+      } catch (_) {}
+      clearStaleGuestCustomerState();
       fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
         window.location.reload();
       });

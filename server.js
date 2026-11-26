@@ -645,7 +645,10 @@ const appHandler = async (req, res) => {
       try {
         const result = authService.verifyOtp(body);
         if (targetId) rateLimiter.reset(`verify_otp:${targetId}`);
-        res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+        const cookieAttrs = result.role === 'customer'
+          ? `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax`
+          : `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`;
+        res.setHeader('Set-Cookie', cookieAttrs);
         sendJson(200, result);
       } catch (e) {
         const statusCode = e.acceptedByOther ? 409 : 400;
@@ -717,7 +720,10 @@ const appHandler = async (req, res) => {
         const result = authService.passwordLogin(body);
         if (targetId) rateLimiter.reset(`login_user:${targetId}`);
         rateLimiter.reset(`login_ip:${clientIp}`);
-        res.setHeader('Set-Cookie', `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+        const cookieAttrs = result.role === 'customer'
+          ? `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax`
+          : `tm_session_token=${result.sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`;
+        res.setHeader('Set-Cookie', cookieAttrs);
         sendJson(200, result);
       } catch (e) {
         sendJson(401, { error: e.message || 'Invalid email or password' });

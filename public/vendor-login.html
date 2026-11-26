@@ -1054,21 +1054,49 @@
             if (loginRes.ok && (loginData.success || loginData.role)) {
               const resolvedRole = loginData.role || (loginData.user && loginData.user.role) || 'customer';
               const sessionToken = loginData.token || loginData.sessionToken;
-              if (sessionToken) {
-                localStorage.setItem('tm_session_token', sessionToken);
-                document.cookie = `tm_session_token=${sessionToken}; path=/; max-age=2592000; SameSite=Lax`;
+              if (resolvedRole === 'customer') {
+                try {
+                  sessionStorage.setItem('tm_customer_auth_ok', '1');
+                  if (sessionToken) sessionStorage.setItem('tm_customer_session_token', sessionToken);
+                  sessionStorage.setItem('tm_customer_role', 'customer');
+                  if (loginData.user) sessionStorage.setItem('tm_customer_user', JSON.stringify(loginData.user));
+                  localStorage.removeItem('tm_session_token');
+                  localStorage.removeItem('tm_user_role');
+                  localStorage.removeItem('tm_user_info');
+                  localStorage.removeItem('tm_registered_profile');
+                } catch (_) {}
+              } else {
+                if (sessionToken) {
+                  localStorage.setItem('tm_session_token', sessionToken);
+                  document.cookie = `tm_session_token=${sessionToken}; path=/; max-age=2592000; SameSite=Lax`;
+                }
+                localStorage.setItem('tm_user_role', resolvedRole);
+                document.cookie = `tm_user_role=${resolvedRole}; path=/; max-age=2592000; SameSite=Lax`;
+                if (loginData.user) localStorage.setItem('tm_user_info', JSON.stringify(loginData.user));
+                if (loginData.vendor) {
+                  localStorage.setItem('tm_vendor_info', JSON.stringify(loginData.vendor));
+                  if (loginData.vendor.id) localStorage.setItem('tm_vendor_id', loginData.vendor.id);
+                }
               }
-              localStorage.setItem('tm_user_role', resolvedRole);
-              document.cookie = `tm_user_role=${resolvedRole}; path=/; max-age=2592000; SameSite=Lax`;
-              if (loginData.user) localStorage.setItem('tm_user_info', JSON.stringify(loginData.user));
-              if (loginData.vendor) localStorage.setItem('tm_vendor_info', JSON.stringify(loginData.vendor));
               showAlert('Signed in successfully. Redirecting...', 'success');
               setTimeout(() => {
-                let targetUrl = loginData.redirectUrl;
-                if (!targetUrl) {
-                  targetUrl = resolvedRole === 'admin' ? '/admin' : (resolvedRole === 'vendor' ? '/partner/dashboard' : '/');
+                if (resolvedRole === 'admin') {
+                  window.location.href = loginData.redirectUrl || '/admin';
+                  return;
                 }
-                window.location.href = targetUrl;
+                if (resolvedRole === 'vendor') {
+                  window.location.href = loginData.redirectUrl || '/partner/dashboard';
+                  return;
+                }
+                const params = new URLSearchParams(window.location.search);
+                const rawReturn = params.get('returnUrl') || params.get('redirect') || '';
+                let decodedReturn = '';
+                try { decodedReturn = rawReturn ? decodeURIComponent(rawReturn) : ''; } catch (_) { decodedReturn = rawReturn; }
+                const safeReturn = (decodedReturn.startsWith('/') && !decodedReturn.startsWith('//')) ? decodedReturn : '';
+                const pendingDraft = localStorage.getItem('tm_pending_tour_request');
+                if (safeReturn) window.location.href = safeReturn;
+                else if (pendingDraft) window.location.href = '/smart-tour-booking?action=submit';
+                else window.location.href = '/smart-tour-booking';
               }, 400);
               return;
             } else {
@@ -1240,38 +1268,51 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Invalid or expired verification code');
 
-        if (data.token) {
-          localStorage.setItem('tm_session_token', data.token);
-          document.cookie = `tm_session_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
-        }
-        if (data.role) {
-          localStorage.setItem('tm_user_role', data.role);
-          document.cookie = `tm_user_role=${data.role}; path=/; max-age=2592000; SameSite=Lax`;
-        }
-        if (data.user) {
-          localStorage.setItem('tm_user_info', JSON.stringify(data.user));
-          const uName = data.user.displayName || data.user.name || data.user.fullName || '';
-          const uEmail = data.user.email || '';
-          const uPhone = data.user.phone || '';
-          document.cookie = `tm_user_name=${encodeURIComponent(uName)}; path=/; max-age=2592000; SameSite=Lax`;
-          document.cookie = `tm_user_email=${encodeURIComponent(uEmail)}; path=/; max-age=2592000; SameSite=Lax`;
-          document.cookie = `tm_user_phone=${encodeURIComponent(uPhone)}; path=/; max-age=2592000; SameSite=Lax`;
-        }
+        if (data.role === 'customer') {
+          try {
+            sessionStorage.setItem('tm_customer_auth_ok', '1');
+            if (data.token) sessionStorage.setItem('tm_customer_session_token', data.token);
+            sessionStorage.setItem('tm_customer_role', 'customer');
+            if (data.user) sessionStorage.setItem('tm_customer_user', JSON.stringify(data.user));
+            localStorage.removeItem('tm_session_token');
+            localStorage.removeItem('tm_user_role');
+            localStorage.removeItem('tm_user_info');
+            localStorage.removeItem('tm_registered_profile');
+          } catch (_) {}
+        } else {
+          if (data.token) {
+            localStorage.setItem('tm_session_token', data.token);
+            document.cookie = `tm_session_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
+          }
+          if (data.role) {
+            localStorage.setItem('tm_user_role', data.role);
+            document.cookie = `tm_user_role=${data.role}; path=/; max-age=2592000; SameSite=Lax`;
+          }
+          if (data.user) {
+            localStorage.setItem('tm_user_info', JSON.stringify(data.user));
+            const uName = data.user.displayName || data.user.name || data.user.fullName || '';
+            const uEmail = data.user.email || '';
+            const uPhone = data.user.phone || '';
+            document.cookie = `tm_user_name=${encodeURIComponent(uName)}; path=/; max-age=2592000; SameSite=Lax`;
+            document.cookie = `tm_user_email=${encodeURIComponent(uEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+            document.cookie = `tm_user_phone=${encodeURIComponent(uPhone)}; path=/; max-age=2592000; SameSite=Lax`;
+          }
 
-        if (data.role === 'vendor' && data.vendor && data.vendor.id) {
-          localStorage.setItem('tm_vendor_id', data.vendor.id);
-          document.cookie = `tm_vendor_id=${data.vendor.id}; path=/; max-age=2592000; SameSite=Lax`;
-        }
+          if (data.role === 'vendor' && data.vendor && data.vendor.id) {
+            localStorage.setItem('tm_vendor_id', data.vendor.id);
+            document.cookie = `tm_vendor_id=${data.vendor.id}; path=/; max-age=2592000; SameSite=Lax`;
+          }
 
-        const persistentProfile = {
-          role: data.role,
-          email: (data.user && data.user.email) || (data.vendor && data.vendor.contactEmail) || currentIdentifier,
-          phone: (data.user && data.user.phone) || (data.vendor && data.vendor.contactPhone) || (signinPhoneInput ? signinPhoneInput.value : ''),
-          name: (data.user && data.user.displayName) || (data.vendor && data.vendor.contactPerson) || '',
-          businessName: (data.vendor && data.vendor.businessName) || '',
-          vendorId: (data.vendor && data.vendor.id) || ''
-        };
-        try { localStorage.setItem('tm_registered_profile', JSON.stringify(persistentProfile)); } catch (_) {}
+          const persistentProfile = {
+            role: data.role,
+            email: (data.user && data.user.email) || (data.vendor && data.vendor.contactEmail) || currentIdentifier,
+            phone: (data.user && data.user.phone) || (data.vendor && data.vendor.contactPhone) || (signinPhoneInput ? signinPhoneInput.value : ''),
+            name: (data.user && data.user.displayName) || (data.vendor && data.vendor.contactPerson) || '',
+            businessName: (data.vendor && data.vendor.businessName) || '',
+            vendorId: (data.vendor && data.vendor.id) || ''
+          };
+          try { localStorage.setItem('tm_registered_profile', JSON.stringify(persistentProfile)); } catch (_) {}
+        }
 
         if (data.role === 'admin') {
           showAlert('Verification complete. Redirecting to Admin Console...', 'success');
@@ -1282,12 +1323,15 @@
         } else {
           showAlert('Verification complete. Redirecting...', 'success');
           const params = new URLSearchParams(window.location.search);
-          const returnUrl = params.get('returnUrl') || params.get('redirect');
+          const rawReturn = params.get('returnUrl') || params.get('redirect') || '';
+          let decodedReturn = '';
+          try { decodedReturn = rawReturn ? decodeURIComponent(rawReturn) : ''; } catch (_) { decodedReturn = rawReturn; }
+          const safeReturn = (decodedReturn.startsWith('/') && !decodedReturn.startsWith('//')) ? decodedReturn : '';
           const pendingDraft = localStorage.getItem('tm_pending_tour_request');
           setTimeout(() => {
-            if (returnUrl) window.location.href = decodeURIComponent(returnUrl);
+            if (safeReturn) window.location.href = safeReturn;
             else if (pendingDraft) window.location.href = '/smart-tour-booking?action=submit';
-            else window.location.href = data.redirectUrl || '/booking';
+            else window.location.href = '/smart-tour-booking';
           }, 600);
         }
       } catch (err) {
@@ -1351,17 +1395,17 @@
       }
 
       try {
-        let remembered = JSON.parse(localStorage.getItem('tm_registered_profile') || 'null');
-        if (!remembered) {
-          const uInfo = JSON.parse(localStorage.getItem('tm_user_info') || 'null');
-          if (uInfo) remembered = { email: uInfo.email, phone: uInfo.phone, name: uInfo.displayName };
-        }
-        if (remembered) {
-          if (signinEmailInput && !signinEmailInput.value && remembered.email && !remembered.email.includes('@tripmozy.local')) {
-            signinEmailInput.value = remembered.email;
-          }
-          if (signinPhoneInput && !signinPhoneInput.value && remembered.phone) {
-            signinPhoneInput.value = remembered.phone;
+        const pendingRaw = localStorage.getItem('tm_pending_tour_request');
+        if (pendingRaw) {
+          const p = JSON.parse(pendingRaw);
+          const isFreshDraft = p && p.savedAt && (Date.now() - p.savedAt < 30 * 60 * 1000);
+          if (isFreshDraft) {
+            if (p.guestEmail && signinEmailInput && !signinEmailInput.value) signinEmailInput.value = p.guestEmail;
+            if (p.guestEmail && signupEmailInput && !signupEmailInput.value) signupEmailInput.value = p.guestEmail;
+            if (p.guestName && signupNameInput && !signupNameInput.value) signupNameInput.value = p.guestName;
+            if (p.guestPhone && signinPhoneInput && !signinPhoneInput.value) signinPhoneInput.value = p.guestPhone;
+            if (p.guestPhone && signupPhoneInput && !signupPhoneInput.value) signupPhoneInput.value = p.guestPhone;
+            showAlert(`Sign in or create a TripMozy account to dispatch your ${p.destination || 'tour'} quote request.`, 'info');
           }
         }
       } catch (_) {}
