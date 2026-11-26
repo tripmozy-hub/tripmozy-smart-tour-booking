@@ -7,6 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="/images/circuit-kashmir.jpg">
+  <link rel="preload" as="image" href="/images/circuit-goa.jpg">
+  <link rel="preload" as="image" href="/images/circuit-rajasthan.jpg">
+  <link rel="preload" as="image" href="/images/circuit-kerala.jpg">
+  <link rel="preload" as="image" href="/images/hero-himalaya.jpg">
   <style>
     :root {
       --bg-paper: #F7F5F0;
@@ -1683,123 +1688,159 @@
 
     const defaultFallbackTours = [
       {
-        id: 'kashmir-seed',
-        title: 'Heavenly Kashmir & Ladakh Circuit',
-        destination: 'Srinagar, Jammu and Kashmir',
+        id: 'ftc_kashmir_01',
+        title: 'Kashmir Paradise & Dal Lake Shikara Circuit',
+        destination: 'Kashmir',
         duration: '6 Days / 5 Nights',
         nights: 5,
-        starting_price_inr: 28000,
-        badge: 'Trending 2026',
+        starting_price_inr: 45000,
+        badge: 'Best Seller',
         image_url: '/images/circuit-kashmir.jpg',
-        overview: 'Experience the magic of Dal Lake houseboats, Gulmarg snow slopes, and scenic Pahalgam valleys with private transport.',
+        overview: 'Experience the crown of India. Luxury Dal Lake houseboat stay in Srinagar, Gondola cable car ride in Gulmarg snow peaks, and Betaab Valley meadow walks in Pahalgam.',
         highlights: [
-          'Day 1: Srinagar arrival & sunset Shikara ride on Dal Lake',
-          'Day 2: Gulmarg snow gondola ride & Kongdoori peak view',
-          'Day 3: Pahalgam scenic Betaab Valley & Aru Valley excursion',
-          'Day 4: Sonamarg glacier drive & Thajiwas snow trail',
-          'Day 5: Mughal Gardens & local craft bazaar',
-          'Day 6: Houseboat breakfast & departure transfer'
+          'Dal Lake Shikara Sunset Ride',
+          'Gulmarg Gondola Stage 1 & 2',
+          'Pahalgam Betaab Valley & Aru Valley',
+          'Sonamarg Glacier Excursion',
+          'Traditional Kashmiri Wazwan Dinner'
         ],
         inclusions: [
-          'Deluxe 4-Star Resort & Houseboat Stays',
-          'Daily Breakfast & Dinner Included',
-          'Private Dedicated AC Sedan / SUV with Chauffeur',
-          'Shikara Ride & All Inner-Line Permits'
+          'Private Dedicated AC Vehicle',
+          '4-Star Luxury Resort & Heritage Houseboat',
+          'Daily Gourmet Breakfast & Dinner',
+          'Airport Pickup & Drop from Srinagar Airport',
+          '24x7 TripMozy Local Concierge'
         ]
       },
       {
-        id: 'rajasthan-seed',
-        title: 'Royal Rajasthan Heritage Circuit',
-        destination: 'Jaipur, Rajasthan',
-        duration: '7 Days / 6 Nights',
-        nights: 6,
-        starting_price_inr: 36000,
-        badge: 'Heritage Classic',
+        id: 'ftc_goa_02',
+        title: 'Goa Coastal Bliss & Luxury Catamaran Escape',
+        destination: 'Goa',
+        duration: '5 Days / 4 Nights',
+        nights: 4,
+        starting_price_inr: 38000,
+        badge: 'Trending',
+        image_url: '/images/circuit-goa.jpg',
+        overview: 'The ultimate beach getaway. Pristine South Goa heritage beaches, private sunset catamaran cruise on Mandovi river, North Goa cliff cafes, and luxury boutique resort stays.',
+        highlights: [
+          'Private Luxury Sunset Catamaran Cruise',
+          'Dudhsagar Waterfalls & Spice Plantation Safari',
+          'Old Goa Portuguese Churches & Fontainhas Latin Quarter',
+          'Anjuna & Vagator Cliffside Sunset Lounge Experience'
+        ],
+        inclusions: [
+          'Private AC Chauffeur Vehicle Throughout',
+          '5-Star Beach Resort with Pool & Spa',
+          'Daily Breakfast Buffet',
+          'Airport / Railway Transfers Included',
+          'Complimentary Water Sports Pass'
+        ]
+      },
+      {
+        id: 'ftc_rajasthan_03',
+        title: 'Royal Rajasthan Palaces & Thar Desert Safari',
+        destination: 'Rajasthan',
+        duration: '6 Days / 5 Nights',
+        nights: 5,
+        starting_price_inr: 42000,
+        badge: 'Royal Heritage',
         image_url: '/images/circuit-rajasthan.jpg',
-        overview: 'Walk the majestic palaces of Jaipur, the blue fortresses of Jodhpur, and the romantic lakes of Udaipur.',
+        overview: 'Journey through the land of Maharajas. Jaipur Amer Fort & City Palace, Jodhpur Blue City & Mehrangarh Fort, and luxury heritage palace stays with desert sunset dune experiences.',
         highlights: [
-          'Day 1-2: Jaipur Pink City, Amer Fort & Hawa Mahal',
-          'Day 3: Pushkar Brahma Temple & Desert sunset view',
-          'Day 4: Jodhpur Mehrangarh Fort & Jaswant Thada',
-          'Day 5-6: Udaipur Lake Pichola cruise & City Palace'
+          'Amber Fort Elephant / Jeep Royal Ride in Jaipur',
+          'Hawa Mahal, City Palace & Jantar Mantar Tour',
+          'Jodhpur Blue City Walk & Mehrangarh Fortress',
+          'Luxury Sam Sand Dunes Desert Camp with Folk Evening'
         ],
         inclusions: [
-          'Heritage Haveli & Boutique Palace Stays',
-          'Daily Royal Buffet Breakfast',
-          'Chauffeur Sedan with Fuel, Tolls & Parking',
-          'Guided Sightseeing with Local Historians'
+          'Dedicated Chauffeur-Driven Toyota Innova Crysta',
+          'Authentic Heritage Haveli & Royal Palace Hotels',
+          'Daily Royal Breakfast & Heritage Dinner',
+          'Dedicated Licensed Heritage City Guide'
         ]
       },
       {
-        id: 'kerala-seed',
-        title: 'Kerala Backwaters & Tea Hills',
-        destination: 'Munnar, Kerala',
+        id: 'ftc_kerala_04',
+        title: 'Kerala Backwaters, Houseboat & Munnar Tea Hills',
+        destination: 'Kerala',
         duration: '5 Days / 4 Nights',
         nights: 4,
-        starting_price_inr: 24000,
-        badge: 'Bestseller',
+        starting_price_inr: 36000,
+        badge: 'Eco Luxury',
         image_url: '/images/circuit-kerala.jpg',
-        overview: 'Rejuvenate in emerald Munnar tea hills, wildlife sanctuary trails of Thekkady, and a private Alleppey houseboat.',
+        overview: 'God\'s own country in style. Lush emerald tea estates in Munnar, spice plantations, and an unforgettable overnight cruise in a private AC luxury houseboat along Alleppey backwaters.',
         highlights: [
-          'Day 1-2: Munnar tea plantations & Mattupetty Dam',
-          'Day 3: Thekkady spice plantation & Periyar boating',
-          'Day 4: Alleppey private luxury houseboat cruise & backwaters',
-          'Day 5: Cochin cultural walk & departure'
+          'Private Alleppey Backwaters Houseboat Cruise',
+          'Munnar Eravikulam National Park & Tea Museum',
+          'Mattupetty Dam & Echo Point Boating',
+          'Traditional Kathakali & Kalaripayattu Cultural Show'
         ],
         inclusions: [
-          'Tea Valley Resort & Private Air-Conditioned Houseboat',
+          'Private AC Sedan with Experienced Chauffeur',
+          'Luxury Tea Garden Resort & Private AC Houseboat',
           'All Meals on Houseboat + Daily Breakfast at Resorts',
-          'Private Sedan Transfer with Sightseeing',
-          'Spice Plantation Guided Tour'
+          'Spice Plantation Guided Tour',
+          'Cochin Airport Pickup & Drop'
         ]
       },
       {
-        id: 'himachal-seed',
-        title: 'Himachal Snow & Valley Explorer',
-        destination: 'Manali, Himachal Pradesh',
+        id: 'ftc_manali_05',
+        title: 'Himachal Snow Trails & Manali Solang Adventure',
+        destination: 'Manali',
         duration: '5 Days / 4 Nights',
         nights: 4,
-        starting_price_inr: 22000,
-        badge: 'Snow Explorer',
+        starting_price_inr: 29500,
+        badge: 'Adventure',
         image_url: '/images/hero-himalaya.jpg',
-        overview: 'Discover the snow valleys of Solang and Atal Tunnel, Old Manali cafes, and peaceful cedar forests.',
+        overview: 'Crisp mountain air and snow adventure. Rohtang Pass / Atal Tunnel scenic drive, Solang Valley paragliding & snow activities, Old Manali cafes, and riverside mountain cottage stays.',
         highlights: [
-          'Day 1: Arrival Manali & Hadimba Temple walk',
-          'Day 2: Solang Valley adventure sports & snow views',
-          'Day 3: Atal Tunnel & Sissu Lahaul Valley excursion',
-          'Day 4: Naggar Castle heritage & art gallery visit',
-          'Day 5: Riverside nature walk & departure'
+          'Atal Tunnel & Sissu Lahaul Valley Snow Drive',
+          'Solang Valley Paragliding & Adventure Sports',
+          'Hadimba Temple & Vashisht Hot Springs',
+          'Jogini Waterfall Trek & Old Manali Vibe'
         ],
         inclusions: [
-          'Mountain View Boutique Cottages',
-          'Daily Breakfast & Chef Special Dinner',
-          'Private Dedicated Mountain Cab & Experienced Chauffeur',
-          'All State Taxes, Green Tax & Parking'
+          'Private AC Vehicle for all transfers & sightseeing',
+          'Riverside Mountain Resort with Valley Views',
+          'Daily Breakfast & Dinner',
+          'Rohtang Pass Permit Assistance',
+          '24x7 On-Ground Support'
         ]
       }
     ];
 
+    function getToursRenderSignature(tours) {
+      return JSON.stringify((tours || []).map(t => [
+        t.id || '',
+        t.title || '',
+        t.destination || '',
+        t.duration || '',
+        t.starting_price_inr || 0,
+        resolveTourImage(t)
+      ]));
+    }
+
     async function loadFeaturedTourCards() {
       const container = document.getElementById('featuredCircuitsGrid');
       if (!container) return;
+
+      loadedFeaturedTours = defaultFallbackTours;
+      renderFeaturedCircuits();
+      const initialSig = getToursRenderSignature(loadedFeaturedTours);
 
       try {
         const res = await fetch('/api/featured-tours');
         if (res.ok) {
           const data = await res.json();
           if (data && data.featuredTours && data.featuredTours.length > 0) {
+            const nextSig = getToursRenderSignature(data.featuredTours);
             loadedFeaturedTours = data.featuredTours;
-          } else {
-            loadedFeaturedTours = defaultFallbackTours;
+            if (nextSig !== initialSig) {
+              renderFeaturedCircuits();
+            }
           }
-        } else {
-          loadedFeaturedTours = defaultFallbackTours;
         }
-      } catch (_) {
-        loadedFeaturedTours = defaultFallbackTours;
-      }
-
-      renderFeaturedCircuits();
+      } catch (_) {}
     }
 
     function renderFeaturedCircuits() {
