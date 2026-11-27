@@ -98,12 +98,12 @@ class PropertyService {
 
       // Add facilities
       if (Array.isArray(facilities) && facilities.length > 0) {
-        const insertFacility = tx.db.prepare(`
+        const facilitySql = `
           INSERT OR IGNORE INTO property_facilities (id, property_id, facility_code, is_highlight)
           VALUES (?, ?, ?, ?)
-        `);
+        `;
         for (const code of facilities) {
-          insertFacility.run(tx.uuid(), propertyId, code.toLowerCase().trim(), 1);
+          tx.execute(facilitySql, [tx.uuid(), propertyId, code.toLowerCase().trim(), 1]);
         }
       }
 
@@ -224,19 +224,19 @@ class PropertyService {
     return this.db.transaction((tx) => {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      const upsert = tx.db.prepare(`
+      const upsertSql = `
         INSERT INTO room_inventory (id, room_type_id, stay_date, sellable_quantity, stop_sell, last_updated_at)
         VALUES (?, ?, ?, ?, ?, datetime('now'))
         ON CONFLICT(room_type_id, stay_date) DO UPDATE SET
           sellable_quantity = excluded.sellable_quantity,
           stop_sell = excluded.stop_sell,
           last_updated_at = datetime('now')
-      `);
+      `;
 
       let daysCount = 0;
       for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
         const dateStr = d.toISOString().split('T')[0];
-        upsert.run(tx.uuid(), roomTypeId, dateStr, quantity, stopSell ? 1 : 0);
+        tx.execute(upsertSql, [tx.uuid(), roomTypeId, dateStr, quantity, stopSell ? 1 : 0]);
         daysCount++;
       }
 

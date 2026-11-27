@@ -34,6 +34,7 @@ if (fs.existsSync(envPath)) {
 
 
 const { TripMozyDatabase } = require('./src/db/database');
+const { RemoteSyncManager } = require('./src/db/remote-sync');
 const { ROLES, SecurityContext } = require('./src/auth/roles');
 const { PropertyService } = require('./src/onboarding/property-service');
 const { loadCatalogIntoDb, seedCoreTourOperators } = require('./src/onboarding/catalog-loader');
@@ -68,8 +69,9 @@ if (process.env.VERCEL) {
   DB_PATH = tmpDb;
 }
 
-// Initialize database
+// Initialize database & shared remote serverless sync engine
 const db = new TripMozyDatabase(DB_PATH);
+const remoteSync = new RemoteSyncManager(db);
 
 // Initialize services
 const propService = new PropertyService(db);
@@ -92,29 +94,31 @@ const systemAdminContext = new SecurityContext({
   role: ROLES.ADMIN
 });
 
-// Load verified properties catalog on startup if empty
-const propCount = db.queryOne('SELECT COUNT(*) as count FROM properties').count;
-if (propCount === 0) {
-  const catalogCandidates = [
-    path.join(__dirname, 'tripmozy_hotels.json'),
-    'C:\\Users\\user\\Documents\\GitHub\\AI-TRIP-PLANNER\\tripmozy_hotels.json',
-    'C:\\Users\\user\\.gemini\\antigravity\\scratch\\ai-trip-planner\\tripmozy_hotels.json'
-  ];
-  for (const p of catalogCandidates) {
-    if (fs.existsSync(p)) {
-      console.log(`[TripMozy] Onboarding verified property network from: ${p}`);
-      loadCatalogIntoDb(db, p);
-      break;
+// Load verified properties catalog on startup if empty (never duplicate initial seed to remote oplog)
+db.withSuppressedTracking(() => {
+  const propCount = db.queryOne('SELECT COUNT(*) as count FROM properties').count;
+  if (propCount === 0) {
+    const catalogCandidates = [
+      path.join(__dirname, 'tripmozy_hotels.json'),
+      'C:\\Users\\user\\Documents\\GitHub\\AI-TRIP-PLANNER\\tripmozy_hotels.json',
+      'C:\\Users\\user\\.gemini\\antigravity\\scratch\\ai-trip-planner\\tripmozy_hotels.json'
+    ];
+    for (const p of catalogCandidates) {
+      if (fs.existsSync(p)) {
+        console.log(`[TripMozy] Onboarding verified property network from: ${p}`);
+        loadCatalogIntoDb(db, p);
+        break;
+      }
     }
   }
-}
 
-// Ensure all core tour operators and fleet profiles exist permanently
-try {
-  seedCoreTourOperators(db);
-} catch (err) {
-  console.error('[TripMozy] Error seeding core tour operators:', err.message);
-}
+  // Ensure all core tour operators and fleet profiles exist permanently
+  try {
+    seedCoreTourOperators(db);
+  } catch (err) {
+    console.error('[TripMozy] Error seeding core tour operators:', err.message);
+  }
+});
 
 // Background Cron: Release expired inventory holds every 60 seconds (disabled in serverless environments)
 if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
@@ -161,6 +165,49 @@ const appHandler = async (req, res) => {
     res.end();
     return;
   }
+
+  const needsRemoteDbSync = remoteSync.isEnabled() && (pathname.startsWith('/api/') || pathname === '/action' || pathname === '/health');
+  let responseDone = null;
+  if (needsRemoteDbSync) {
+    let resolveResponseDone;
+    responseDone = new Promise(resolve => { resolveResponseDone = resolve; });
+    const origEnd = res.end.bind(res);
+    let ended = false;
+    res.once('close', resolveResponseDone);
+    res.end = function (...endArgs) {
+      if (ended) return res;
+      ended = true;
+      if (db.hasPendingWrites()) {
+        remoteSync.flushWrites()
+          .catch(err => console.error('[TripMozy RemoteSync Flush Error]', err.message))
+          .finally(() => {
+            try { origEnd(...endArgs); } finally { resolveResponseDone(); }
+          });
+      } else {
+        try { origEnd(...endArgs); } finally { resolveResponseDone(); }
+      }
+      return res;
+    };
+    await remoteSync.pullLatest();
+  }
+
+  try {
+    await dispatchRequest(req, res, { reqHost, reqProto, baseUrl, reqUrl, pathname, method });
+  } catch (err) {
+    console.error('[TripMozy Request Error]', err.stack || err.message);
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message || 'Internal Server Error' }));
+    } else if (!res.writableEnded) {
+      res.end();
+    }
+  }
+  if (responseDone) {
+    await responseDone;
+  }
+};
+
+const dispatchRequest = async (req, res, { reqHost, reqProto, baseUrl, reqUrl, pathname, method }) => {
 
   // Helper for JSON responses
   const sendJson = (statusCode, data) => {
@@ -585,7 +632,7 @@ const appHandler = async (req, res) => {
   // --------------------------------------------------------------------------
   if (pathname === '/health' && method === 'GET') {
     const metrics = adminService.getOperationalMetrics(systemAdminContext);
-    sendJson(200, { status: 'healthy', version: '1.0.0', metrics });
+    sendJson(200, { status: 'healthy', version: '1.0.0', metrics, dbSync: remoteSync.getStatus() });
     return;
   }
 
@@ -1836,6 +1883,7 @@ if (require.main === module) {
 // Attach helpers to appHandler function so it can be called directly as a function OR accessed as an object
 appHandler.server = server;
 appHandler.db = db;
+appHandler.remoteSync = remoteSync;
 appHandler.appHandler = appHandler;
 
 module.exports = appHandler;

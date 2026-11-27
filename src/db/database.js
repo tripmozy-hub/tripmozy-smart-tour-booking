@@ -15,6 +15,11 @@ const { DDL_STATEMENTS } = require('./schema');
 
 class TripMozyDatabase {
   constructor(dbPath = ':memory:') {
+    this._inTransaction = false;
+    this._suppressTracking = false;
+    this._txWrites = [];
+    this._pendingWrites = [];
+
     if (DatabaseSync) {
       try {
         this.db = new DatabaseSync(dbPath);
@@ -26,7 +31,74 @@ class TripMozyDatabase {
       console.warn('[TripMozy DB] node:sqlite is unavailable. Using safe in-memory fallback.');
       this.db = this._createFallbackDb();
     }
-    this.init();
+    this.withSuppressedTracking(() => this.init());
+  }
+
+  withSuppressedTracking(fn) {
+    const prev = this._suppressTracking;
+    this._suppressTracking = true;
+    try {
+      return fn();
+    } finally {
+      this._suppressTracking = prev;
+    }
+  }
+
+  static isTrackableMutation(sql) {
+    if (!sql || typeof sql !== 'string') return false;
+    const trimmed = sql.trim().toUpperCase();
+    if (!trimmed) return false;
+    if (trimmed.includes('_TM_SYNC_META') || trimmed.includes('_TM_OPLOG')) return false;
+    return trimmed.startsWith('INSERT') || trimmed.startsWith('UPDATE') || trimmed.startsWith('DELETE') || trimmed.startsWith('REPLACE');
+  }
+
+  _recordMutation(sql, params) {
+    if (this._suppressTracking || !TripMozyDatabase.isTrackableMutation(sql)) return;
+    const entry = {
+      sql,
+      params: Array.isArray(params) ? params.map(v => (v === undefined ? null : v)) : []
+    };
+    if (this._inTransaction) {
+      this._txWrites.push(entry);
+    } else {
+      this._pendingWrites.push(entry);
+    }
+  }
+
+  hasPendingWrites() {
+    return this._pendingWrites.length > 0;
+  }
+
+  drainPendingWrites() {
+    if (this._pendingWrites.length === 0) return [];
+    const ops = this._pendingWrites.slice();
+    this._pendingWrites = [];
+    return ops;
+  }
+
+  requeuePendingWrites(ops) {
+    if (Array.isArray(ops) && ops.length > 0) {
+      this._pendingWrites = ops.concat(this._pendingWrites);
+    }
+  }
+
+  getSyncMeta(key, defaultValue = '0') {
+    try {
+      const row = this.db.prepare('SELECT value FROM _tm_sync_meta WHERE key = ?').get(key);
+      return row ? row.value : defaultValue;
+    } catch (_) {
+      return defaultValue;
+    }
+  }
+
+  setSyncMeta(key, value) {
+    try {
+      this.db.prepare(`
+        INSERT INTO _tm_sync_meta (key, value, updated_at)
+        VALUES (?, ?, datetime('now'))
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+      `).run(key, String(value));
+    } catch (_) {}
   }
 
   _createFallbackDb() {
@@ -193,6 +265,7 @@ class TripMozyDatabase {
       return fn(this);
     }
     this._inTransaction = true;
+    this._txWrites = [];
     try {
       this.db.exec('BEGIN IMMEDIATE TRANSACTION;');
     } catch (_) {}
@@ -203,6 +276,10 @@ class TripMozyDatabase {
         this.db.exec('COMMIT;');
       } catch (_) {}
       this._inTransaction = false;
+      if (this._txWrites.length > 0) {
+        this._pendingWrites.push(...this._txWrites);
+        this._txWrites = [];
+      }
       return result;
     } catch (err) {
       try {
@@ -210,6 +287,7 @@ class TripMozyDatabase {
       } catch (_) {
         // Transaction already aborted
       }
+      this._txWrites = [];
       this._inTransaction = false;
       throw err;
     }
@@ -233,12 +311,12 @@ class TripMozyDatabase {
       validActorId = '00000000-0000-0000-0000-000000000001';
     }
 
-    const stmt = this.db.prepare(`
+    const sql = `
       INSERT INTO audit_logs (id, actor_id, actor_role, action, entity_type, entity_id, correlation_id, before_state, after_state, ip_address)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    `;
     const id = this.uuid();
-    stmt.run(
+    this.execute(sql, [
       id,
       validActorId,
       actorRole || 'system',
@@ -249,7 +327,7 @@ class TripMozyDatabase {
       beforeState ? JSON.stringify(beforeState) : null,
       afterState ? JSON.stringify(afterState) : null,
       ipAddress
-    );
+    ]);
     return id;
   }
 
@@ -266,7 +344,9 @@ class TripMozyDatabase {
 
   execute(sql, params = []) {
     const stmt = this.db.prepare(sql);
-    return stmt.run(...params);
+    const res = stmt.run(...params);
+    this._recordMutation(sql, params);
+    return res;
   }
 
   close() {

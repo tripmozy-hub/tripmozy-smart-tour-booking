@@ -468,6 +468,13 @@ CREATE TABLE IF NOT EXISTS featured_tour_cards (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- 28. LOCAL REPLICATION SYNC CURSOR (Multi-Container Serverless Sync State)
+CREATE TABLE IF NOT EXISTS _tm_sync_meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 module.exports = { DDL_STATEMENTS };

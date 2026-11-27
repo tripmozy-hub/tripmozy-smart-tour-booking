@@ -5,8 +5,14 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { PropertyService } = require('./property-service');
 const { SecurityContext, ROLES } = require('../auth/roles');
+
+function deterministicUuid(seed) {
+  const hex = crypto.createHash('sha256').update(String(seed)).digest('hex');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
 
 // Verified coordinates mapping for primary TripMozy destinations
 const DESTINATION_COORDS = {
@@ -243,95 +249,101 @@ const CORE_TOUR_OPERATORS = [
 ];
 
 function seedCoreTourOperators(db) {
-  for (const op of CORE_TOUR_OPERATORS) {
-    // 1. Ensure user_profile exists
-    let user = db.queryOne(
-      'SELECT id FROM user_profiles WHERE id = ? OR LOWER(email) = LOWER(?) LIMIT 1',
-      [op.id, op.contactEmail]
-    );
-    let userId = user ? user.id : op.id;
-    if (!user) {
-      db.execute(`
-        INSERT INTO user_profiles (
-          id, email, phone, role, display_name, status, is_phone_verified, is_email_verified
-        ) VALUES (?, ?, ?, 'vendor', ?, 'active', 1, 1)
-      `, [userId, op.contactEmail, op.contactPhone, op.contactPerson]);
-    } else {
-      db.execute(`
-        UPDATE user_profiles
-        SET role = 'vendor', status = 'active', display_name = ?
-        WHERE id = ?
-      `, [op.contactPerson, userId]);
-    }
+  const runSeed = () => {
+    for (const op of CORE_TOUR_OPERATORS) {
+      // 1. Ensure user_profile exists
+      let user = db.queryOne(
+        'SELECT id FROM user_profiles WHERE id = ? OR LOWER(email) = LOWER(?) LIMIT 1',
+        [op.id, op.contactEmail]
+      );
+      let userId = user ? user.id : op.id;
+      if (!user) {
+        db.execute(`
+          INSERT INTO user_profiles (
+            id, email, phone, role, display_name, status, is_phone_verified, is_email_verified
+          ) VALUES (?, ?, ?, 'vendor', ?, 'active', 1, 1)
+        `, [userId, op.contactEmail, op.contactPhone, op.contactPerson]);
+      } else {
+        db.execute(`
+          UPDATE user_profiles
+          SET role = 'vendor', status = 'active', display_name = ?
+          WHERE id = ?
+        `, [op.contactPerson, userId]);
+      }
 
-    // 2. Ensure vendor_account exists
-    let vendor = db.queryOne(
-      'SELECT id FROM vendor_accounts WHERE id = ? OR LOWER(contact_email) = LOWER(?) LIMIT 1',
-      [op.id, op.contactEmail]
-    );
-    let vendorId = vendor ? vendor.id : op.id;
-    if (!vendor) {
-      db.execute(`
-        INSERT INTO vendor_accounts (
-          id, user_id, business_name, contact_email, contact_phone, contact_person,
-          verification_status, commission_rate_basis_points, status
-        ) VALUES (?, ?, ?, ?, ?, ?, 'verified', 1500, 'active')
-      `, [vendorId, userId, op.businessName, op.contactEmail, op.contactPhone, op.contactPerson]);
-    } else {
-      db.execute(`
-        UPDATE vendor_accounts
-        SET business_name = ?, contact_phone = ?, contact_person = ?, verification_status = 'verified', status = 'active'
-        WHERE id = ?
-      `, [op.businessName, op.contactPhone, op.contactPerson, vendorId]);
-    }
+      // 2. Ensure vendor_account exists
+      let vendor = db.queryOne(
+        'SELECT id FROM vendor_accounts WHERE id = ? OR LOWER(contact_email) = LOWER(?) LIMIT 1',
+        [op.id, op.contactEmail]
+      );
+      let vendorId = vendor ? vendor.id : op.id;
+      if (!vendor) {
+        db.execute(`
+          INSERT INTO vendor_accounts (
+            id, user_id, business_name, contact_email, contact_phone, contact_person,
+            verification_status, commission_rate_basis_points, status
+          ) VALUES (?, ?, ?, ?, ?, ?, 'verified', 1500, 'active')
+        `, [vendorId, userId, op.businessName, op.contactEmail, op.contactPhone, op.contactPerson]);
+      } else {
+        db.execute(`
+          UPDATE vendor_accounts
+          SET business_name = ?, contact_phone = ?, contact_person = ?, verification_status = 'verified', status = 'active'
+          WHERE id = ?
+        `, [op.businessName, op.contactPhone, op.contactPerson, vendorId]);
+      }
 
-    // 3. Ensure property exists
-    let prop = db.queryOne(
-      "SELECT id FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1",
-      [vendorId]
-    );
-    let propId = prop ? prop.id : null;
-    if (!prop) {
-      propId = db.uuid();
-      const slug = op.propertyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + vendorId.slice(0, 8);
-      db.execute(`
-        INSERT INTO properties (
-          id, vendor_id, name, slug, property_type, star_rating,
-          description, address_line, city, state, pincode, country,
-          latitude, longitude, timezone, check_in_time, check_out_time,
-          status, inventory_mode
-        ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, ?, ?, ?, '110001', 'India', ?, ?, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
-      `, [
-        propId, vendorId, op.propertyName, slug, op.description,
-        `${op.propertyName}, ${op.city}`, op.city, op.state,
-        op.lat || 28.6139, op.lng || 77.2090
-      ]);
-    }
+      // 3. Ensure property exists
+      let prop = db.queryOne(
+        "SELECT id FROM properties WHERE vendor_id = ? AND status = 'active' LIMIT 1",
+        [vendorId]
+      );
+      let propId = prop ? prop.id : null;
+      if (!prop) {
+        propId = deterministicUuid(`core-prop:${vendorId}`);
+        const slug = op.propertyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + vendorId.slice(0, 8);
+        db.execute(`
+          INSERT OR IGNORE INTO properties (
+            id, vendor_id, name, slug, property_type, star_rating,
+            description, address_line, city, state, pincode, country,
+            latitude, longitude, timezone, check_in_time, check_out_time,
+            status, inventory_mode
+          ) VALUES (?, ?, ?, ?, 'hotel', 4.8, ?, ?, ?, ?, '110001', 'India', ?, ?, 'Asia/Kolkata', '12:00', '11:00', 'active', 'vendor_confirmed')
+        `, [
+          propId, vendorId, op.propertyName, slug, op.description,
+          `${op.propertyName}, ${op.city}`, op.city, op.state,
+          op.lat || 28.6139, op.lng || 77.2090
+        ]);
+      }
 
-    // 4. Ensure room type and rate exist
-    let room = db.queryOne(
-      'SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1',
-      [propId]
-    );
-    let roomTypeId = room ? room.id : null;
-    if (!room) {
-      roomTypeId = db.uuid();
-      db.execute(`
-        INSERT INTO room_types (
-          id, property_id, name, bed_type, max_adults, max_children, total_inventory,
-          is_ac, is_accessible, is_active
-        ) VALUES (?, ?, 'Deluxe Tour Package', 'King', 4, 2, 20, 1, 1, 1)
-      `, [roomTypeId, propId]);
+      // 4. Ensure room type and rate exist
+      let room = db.queryOne(
+        'SELECT id FROM room_types WHERE property_id = ? AND is_active = 1 LIMIT 1',
+        [propId]
+      );
+      let roomTypeId = room ? room.id : null;
+      if (!room) {
+        roomTypeId = deterministicUuid(`core-room:${propId}`);
+        db.execute(`
+          INSERT OR IGNORE INTO room_types (
+            id, property_id, name, bed_type, max_adults, max_children, total_inventory,
+            is_ac, is_accessible, is_active
+          ) VALUES (?, ?, 'Deluxe Tour Package', 'King', 4, 2, 20, 1, 1, 1)
+        `, [roomTypeId, propId]);
 
-      const rateId = db.uuid();
-      db.execute(`
-        INSERT INTO room_rates (
-          id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points,
-          meal_plan, cancellation_rule, is_active
-        ) VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 'moderate', 1)
-      `, [rateId, roomTypeId]);
+        const rateId = deterministicUuid(`core-rate:${roomTypeId}`);
+        db.execute(`
+          INSERT OR IGNORE INTO room_rates (
+            id, room_type_id, rate_plan_name, base_nightly_rate_paise, tax_rate_basis_points,
+            meal_plan, cancellation_rule, is_active
+          ) VALUES (?, ?, 'Standard Package', 350000, 500, 'Breakfast Included', 'moderate', 1)
+        `, [rateId, roomTypeId]);
+      }
     }
-  }
+  };
+
+  return typeof db.withSuppressedTracking === 'function'
+    ? db.withSuppressedTracking(runSeed)
+    : runSeed();
 }
 
 module.exports = { loadCatalogIntoDb, seedCoreTourOperators, CORE_TOUR_OPERATORS };
