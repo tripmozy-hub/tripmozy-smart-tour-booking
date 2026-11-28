@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="TripMozy Logo">
+  <rect width="64" height="64" rx="10" fill="#14171C"/>
+  <rect x="4" y="4" width="56" height="56" rx="7" fill="none" stroke="#9E6B30" stroke-width="1.75"/>
+  <!-- Editorial Ivory T -->
+  <path fill="#F7F5F0" d="M10.5 17H29.5V22.5H27.2V21.2H22.2V44.2H25.2V47H14.8V44.2H17.8V21.2H12.8V22.5H10.5V17Z"/>
+  <!-- Antique Brass M -->
+  <path fill="#D4A962" d="M31.5 47V17H36.6L42.5 31.2L48.4 17H53.5V47H49.1V25.8L43.6 38.6H41.4L35.9 25.8V47H31.5Z"/>
+</svg>
